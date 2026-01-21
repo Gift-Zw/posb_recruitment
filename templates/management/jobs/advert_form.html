@@ -1,0 +1,138 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Edit Job Advert{% else %}Create Job Advert{% endif %} | POSB HR Management{% endblock %}
+
+{% block page_title %}{% if object %}Edit Job Advert{% else %}Create Job Advert{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Title -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.title.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Job Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Category and Status -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.category.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Category *</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}<p class="text-xs text-red-500 mt-1">{{ form.category.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.status.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Status *</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<p class="text-xs text-red-500 mt-1">{{ form.status.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.description.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Job Description *</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="text-xs text-red-500 mt-1">{{ form.description.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Responsibilities -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.responsibilities.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Key Responsibilities *</label>
+                {{ form.responsibilities }}
+                {% if form.responsibilities.errors %}<p class="text-xs text-red-500 mt-1">{{ form.responsibilities.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Location -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.location_type.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Location Type *</label>
+                    {{ form.location_type }}
+                    {% if form.location_type.errors %}<p class="text-xs text-red-500 mt-1">{{ form.location_type.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.location.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Location</label>
+                    {{ form.location }}
+                    {% if form.location.errors %}<p class="text-xs text-red-500 mt-1">{{ form.location.errors.0 }}</p>{% endif %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">e.g., Harare Branch, Bulawayo, Remote</p>
+                </div>
+            </div>
+
+            <!-- Contract Type and Education -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.contract_type.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Contract Type *</label>
+                    {{ form.contract_type }}
+                    {% if form.contract_type.errors %}<p class="text-xs text-red-500 mt-1">{{ form.contract_type.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.education_level.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Education Level</label>
+                    {{ form.education_level }}
+                    {% if form.education_level.errors %}<p class="text-xs text-red-500 mt-1">{{ form.education_level.errors.0 }}</p>{% endif %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum education requirement</p>
+                </div>
+            </div>
+
+            <!-- Experience Required -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.experience_required.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Experience Required</label>
+                {{ form.experience_required }}
+                {% if form.experience_required.errors %}<p class="text-xs text-red-500 mt-1">{{ form.experience_required.errors.0 }}</p>{% endif %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">e.g., "2 years in banking", "5 years customer service experience"</p>
+            </div>
+
+            <!-- Required Skills -->
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Required Skills</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                    {% for checkbox in form.required_skills %}
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        {{ checkbox.tag }}
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% empty %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 col-span-full">No skills available. <a href="{% url 'management:jobs_management:skill-create' %}" class="text-primary hover:underline">Create skills first</a>.</p>
+                    {% endfor %}
+                </div>
+                {% if form.required_skills.errors %}<p class="text-xs text-red-500 mt-1">{{ form.required_skills.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Deadline and Shortlist Count -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.application_deadline.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Application Deadline *</label>
+                    {{ form.application_deadline }}
+                    {% if form.application_deadline.errors %}<p class="text-xs text-red-500 mt-1">{{ form.application_deadline.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="{{ form.shortlist_count.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Shortlist Count *</label>
+                    {{ form.shortlist_count }}
+                    {% if form.shortlist_count.errors %}<p class="text-xs text-red-500 mt-1">{{ form.shortlist_count.errors.0 }}</p>{% endif %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of candidates to shortlist</p>
+                </div>
+            </div>
+
+            <!-- AI Shortlisting Instructions -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.ai_shortlisting_instructions.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">AI Shortlisting Instructions</label>
+                {{ form.ai_shortlisting_instructions }}
+                {% if form.ai_shortlisting_instructions.errors %}<p class="text-xs text-red-500 mt-1">{{ form.ai_shortlisting_instructions.errors.0 }}</p>{% endif %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Custom instructions for AI shortlisting algorithm</p>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <a href="{% url 'management:jobs_management:list' %}" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20">
+                    {% if object %}Update Job Advert{% else %}Create Job Advert{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

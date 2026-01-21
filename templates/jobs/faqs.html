@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}FAQs | POSB Careers{% endblock %}
+
+{% block content %}
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-4 sm:px-6 lg:px-10 py-3">
+    <div class="flex items-center gap-2 sm:gap-4">
+        <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <a href="{% url 'home' %}" class="flex items-center">
+            <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-7 sm:h-8 w-auto"/>
+        </a>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-6 lg:gap-9">
+            {% if user.is_authenticated %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'applicant-profile' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applicant-profile' %}">My Profile</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:list' %}">Jobs</a>
+            {% if user.is_applicant %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-gray-700 dark:text-gray-300" href="{% url 'applications:list' %}">My Applications</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'faqs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:faqs' %}">FAQs</a>
+        </div>
+        <!-- User Actions -->
+        {% if user.is_authenticated %}
+        <div class="hidden sm:flex bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 sm:size-10 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 items-center justify-center">
+            <span class="text-primary font-bold text-xs sm:text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg h-9 sm:h-10 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white px-3 sm:px-4 text-xs sm:text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined text-base sm:text-lg">logout</span>
+            <span class="hidden lg:inline">Logout</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="hidden sm:flex items-center justify-center rounded-lg h-9 sm:h-10 bg-primary text-white px-3 sm:px-4 text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors">
+            Sign In
+        </a>
+        {% endif %}
+    </div>
+</header>
+
+{% include 'includes/mobile_menu.html' %}
+
+<main class="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-20 py-6 sm:py-8 overflow-x-hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
+        <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" href="{% url 'home' %}">
+            <span class="material-symbols-outlined text-base">home</span>
+            <span>Home</span>
+        </a>
+        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#181411] dark:text-white text-sm font-semibold">FAQs</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="mb-6 sm:mb-8 text-center">
+        <h1 class="text-2xl font-bold text-[#181411] dark:text-white mb-2">Frequently Asked Questions</h1>
+        <p class="text-sm text-[#8a7360] dark:text-gray-400">Find answers to common questions about applying for jobs at POSB Bank</p>
+    </div>
+
+    <!-- FAQs Section - Accordion -->
+    <div class="space-y-3 mb-6 sm:mb-8">
+        <!-- General Questions -->
+        <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] overflow-hidden">
+            <button class="faq-header w-full flex items-center justify-between p-3 sm:p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2d241d] transition-colors min-h-[44px]" onclick="toggleFaq('general')">
+                <h2 class="text-base font-bold text-[#181411] dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">help</span>
+                    General Questions
+                </h2>
+                <span class="material-symbols-outlined text-[#8a7360] dark:text-gray-400 faq-icon text-base" id="icon-general">expand_more</span>
+            </button>
+            <div class="faq-content hidden px-3 sm:px-4 pb-3 sm:pb-4" id="content-general">
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">How do I apply for a job at POSB?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            To apply for a job, first create an account by clicking "Register Profile" on our homepage. Once registered and verified, you can browse available positions, select a job that interests you, and click "Apply Now" to submit your application with your profile and documents.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">Do I need to create an account to view job listings?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            No, you can browse all open job positions without creating an account. However, you will need to register and verify your email address to submit applications.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">What documents do I need to apply?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            You'll need to upload your CV/resume. Additional documents such as certificates, cover letters, or portfolios are optional but recommended. Make sure all documents are in PDF format and clearly labeled.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">Can I apply for multiple positions?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Yes, you can apply for multiple positions. Each application is independent, and you can reuse your profile information for faster application submission.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account & Profile Questions -->
+        <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] overflow-hidden">
+            <button class="faq-header w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2d241d] transition-colors" onclick="toggleFaq('account')">
+                <h2 class="text-base font-bold text-[#181411] dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">account_circle</span>
+                    Account & Profile
+                </h2>
+                <span class="material-symbols-outlined text-[#8a7360] dark:text-gray-400 faq-icon text-base" id="icon-account">expand_more</span>
+            </button>
+            <div class="faq-content hidden px-4 pb-4" id="content-account">
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">How do I verify my email address?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            After registering, you'll receive a 6-digit verification code via email. Enter this code on the verification page to activate your account. If you don't receive the code, check your spam folder or request a new one.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">I forgot my password. How do I reset it?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Click "Forgot Password?" on the login page, enter your email address, and we'll send you a secure link to reset your password. The link expires after 24 hours for security reasons.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">Can I update my profile after submitting an application?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Yes, you can update your profile at any time. However, changes to your profile will not affect applications you've already submitted. New applications will use your updated profile information.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">Can I reuse my application data?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Yes! When applying for a new position, you can choose to reuse data from your last submitted application, making it faster to apply for multiple jobs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Process Questions -->
+        <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] overflow-hidden">
+            <button class="faq-header w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2d241d] transition-colors" onclick="toggleFaq('process')">
+                <h2 class="text-base font-bold text-[#181411] dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">work</span>
+                    Application Process
+                </h2>
+                <span class="material-symbols-outlined text-[#8a7360] dark:text-gray-400 faq-icon text-base" id="icon-process">expand_more</span>
+            </button>
+            <div class="faq-content hidden px-4 pb-4" id="content-process">
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">How long does the application process take?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            The application process varies by position. After submitting your application, our HR team will review it. Shortlisted candidates will be contacted via email. You can check the status of your applications in your profile dashboard.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">What happens after I submit my application?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            After submission, you'll receive a confirmation email. Your application will be reviewed by our HR team. If you're shortlisted, you'll be contacted for the next steps in the recruitment process.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">Can I withdraw my application?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Yes, you can view and manage all your applications in your profile dashboard. If you need to withdraw an application, please contact our HR team.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">How do I know if I've been shortlisted?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Shortlisted candidates will receive an email notification. You can also check the status of your applications in your profile dashboard, which will show whether you've been shortlisted, rejected, or if your application is still under review.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Questions -->
+        <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] overflow-hidden">
+            <button class="faq-header w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-[#2d241d] transition-colors" onclick="toggleFaq('technical')">
+                <h2 class="text-base font-bold text-[#181411] dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">settings</span>
+                    Technical Support
+                </h2>
+                <span class="material-symbols-outlined text-[#8a7360] dark:text-gray-400 faq-icon text-base" id="icon-technical">expand_more</span>
+            </button>
+            <div class="faq-content hidden px-4 pb-4" id="content-technical">
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">I'm having trouble uploading documents. What should I do?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Ensure your documents are in PDF format and under 10MB in size. If you continue to experience issues, try using a different browser or clearing your browser cache. Contact support if the problem persists.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">I didn't receive my verification code. What should I do?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            First, check your spam or junk folder. If you still don't see it, you can request a new verification code. Make sure you've entered the correct email address during registration.
+                        </p>
+                    </div>
+                    <div class="border-t border-[#e6e0db] dark:border-[#3d2e24] pt-3">
+                        <h3 class="text-sm font-bold text-[#181411] dark:text-white mb-1.5">The website isn't loading properly. What can I do?</h3>
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 leading-relaxed">
+                            Try clearing your browser cache and cookies, or use a different browser. We recommend using the latest version of Chrome, Firefox, Safari, or Edge for the best experience.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form Section -->
+    <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-4 sm:p-6">
+        <div class="text-center mb-6">
+            <h2 class="text-lg font-bold text-[#181411] dark:text-white mb-2">Still Have Questions?</h2>
+            <p class="text-xs text-[#8a7360] dark:text-gray-400">
+                Can't find what you're looking for? Fill out the form below and our HR team will get back to you.
+            </p>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    {% for error in form.non_field_errors %}
+                        <p class="text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.name.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Your Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <p class="text-xs text-red-500">{{ form.name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.email.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-xs text-red-500">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label for="{{ form.subject.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Subject</label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                    <p class="text-xs text-red-500">{{ form.subject.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label for="{{ form.message.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Your Message</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <p class="text-xs text-red-500">{{ form.message.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="text-center pt-2">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all text-sm">
+                    <span>Send Message</span>
+                    <span class="material-symbols-outlined text-base">send</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-[#e6e0db] dark:border-[#3d2e24] bg-white dark:bg-[#1c140d] py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-[#8a7360] dark:text-gray-400">
+            <p>© 2026 POSB Bank. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+{% block extra_js %}
+<script>
+    function toggleFaq(section) {
+        const content = document.getElementById(`content-${section}`);
+        const icon = document.getElementById(`icon-${section}`);
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.textContent = 'expand_less';
+        } else {
+            content.classList.add('hidden');
+            icon.textContent = 'expand_more';
+        }
+    }
+</script>
+
+<style>
+/* Form Field Styling */
+form input[type="text"],
+form input[type="email"],
+form textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e6e0db;
+    border-radius: 0.5rem;
+    background-color: #f8f7f5;
+    color: #181411;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.dark form input[type="text"],
+.dark form input[type="email"],
+.dark form textarea {
+    background-color: #2d241d;
+    border-color: #3d2e24;
+    color: white;
+}
+
+form input:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #8B4513);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+}
+
+.dark form input:focus,
+.dark form textarea:focus {
+    background-color: #1c140d;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.2);
+}
+
+form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+    form input[type="text"],
+    form input[type="email"],
+    form textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.75rem 0.875rem;
+    }
+    
+    .faq-header {
+        min-height: 44px; /* Touch-friendly */
+    }
+}
+</style>
+
+<script>
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+        openMobileMenu();
+    });
+</script>
+{% endblock %}
+{% endblock %}

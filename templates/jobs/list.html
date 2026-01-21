@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Job Search & Listings | POSB Careers{% endblock %}
+
+{% block content %}
+<div class="flex flex-col min-h-screen">
+    <!-- Top Nav Bar -->
+    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-4 sm:px-6 lg:px-10 py-3">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+                <span class="material-symbols-outlined text-2xl">menu</span>
+            </button>
+            <a href="{% url 'home' %}" class="flex items-center">
+                <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-7 sm:h-8 w-auto"/>
+            </a>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-6 lg:gap-9">
+                {% if user.is_authenticated %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'applicant-profile' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applicant-profile' %}">My Profile</a>
+                {% endif %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:list' %}">Jobs</a>
+                {% if user.is_applicant %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-gray-700 dark:text-gray-300" href="{% url 'applications:list' %}">My Applications</a>
+                {% endif %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'faqs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:faqs' %}">FAQs</a>
+            </div>
+            <!-- User Actions -->
+            {% if user.is_authenticated %}
+            <div class="hidden sm:flex bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 sm:size-10 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 items-center justify-center">
+                <span class="text-primary font-bold text-xs sm:text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+            </div>
+            <a href="{% url 'logout' %}" class="hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg h-9 sm:h-10 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white px-3 sm:px-4 text-xs sm:text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <span class="material-symbols-outlined text-base sm:text-lg">logout</span>
+                <span class="hidden lg:inline">Logout</span>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="hidden sm:flex items-center justify-center rounded-lg h-9 sm:h-10 bg-primary text-white px-3 sm:px-4 text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors">
+                Sign In
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="closeMobileMenu()"></div>
+    
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-background-dark z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl md:hidden">
+        <div class="flex flex-col h-full">
+            <!-- Mobile Menu Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+                <a href="{% url 'home' %}" class="flex items-center">
+                    <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-8 w-auto"/>
+                </a>
+                <button onclick="closeMobileMenu()" class="p-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Close menu">
+                    <span class="material-symbols-outlined text-2xl">close</span>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu Content -->
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+                {% if user.is_authenticated %}
+                <div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-800">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                            <span class="text-primary font-bold text-base">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-[#181411] dark:text-white">{{ user.get_full_name|default:user.email }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'applicant-profile' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'applicant-profile' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-xl">person</span>
+                    <span class="font-medium">My Profile</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'jobs:list' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'list' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-xl">work</span>
+                    <span class="font-medium">Jobs</span>
+                </a>
+                {% if user.is_applicant %}
+                <a href="{% url 'applications:list' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'applications' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-xl">assignment</span>
+                    <span class="font-medium">My Applications</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'jobs:faqs' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'faqs' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-xl">help</span>
+                    <span class="font-medium">FAQs</span>
+                </a>
+            </nav>
+            
+            <!-- Mobile Menu Footer -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" onclick="closeMobileMenu()" class="flex items-center justify-center gap-2 w-full py-3 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-symbols-outlined text-xl">logout</span>
+                    <span>Logout</span>
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" onclick="closeMobileMenu()" class="flex items-center justify-center gap-2 w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors">
+                    <span>Sign In</span>
+                </a>
+                <a href="{% url 'register' %}" onclick="closeMobileMenu()" class="flex items-center justify-center gap-2 w-full py-3 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <span>Register Profile</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 border-b border-[#e6e0db] dark:border-[#3d2e24] py-4 sm:py-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
+            <div class="text-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-[#181411] dark:text-white leading-tight">
+                    Discover Your Next
+                    <span class="text-primary">Career Opportunity</span>
+                </h1>
+            </div>
+        </div>
+    </section>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-20 py-6 sm:py-8 overflow-x-hidden">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            <!-- Sidebar Filters -->
+            <aside class="w-full lg:w-64 shrink-0">
+                <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm p-4 sm:p-5 sticky top-20 lg:top-24">
+                    <!-- Filter Header - Clickable on Mobile -->
+                    <button type="button" id="filter-toggle" class="w-full flex items-center justify-between mb-0 lg:mb-5 pb-3 lg:pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24] lg:cursor-default" onclick="toggleFilters()">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">tune</span>
+                            <div class="text-left">
+                                <h2 class="text-[#181411] dark:text-white text-base font-bold">Filters</h2>
+                                <p class="text-[#8a7360] dark:text-gray-400 text-xs mt-0.5 hidden sm:block">Refine your job search</p>
+                            </div>
+                        </div>
+                        <span id="filter-toggle-icon" class="material-symbols-outlined text-gray-400 text-xl lg:hidden transition-transform duration-200">expand_more</span>
+                    </button>
+                    
+                    <!-- Collapsible Filter Content -->
+                    <div id="filter-content" class="hidden lg:block mt-5 lg:mt-0">
+                        <!-- Category Filter -->
+                        <div class="mb-5">
+                            <div class="flex items-center gap-2 mb-3 text-primary">
+                                <span class="material-symbols-outlined text-lg">category</span>
+                                <span class="text-xs font-bold uppercase tracking-wider">Job Category</span>
+                            </div>
+                            <div class="space-y-1.5 max-h-60 overflow-y-auto pr-2">
+                                {% for category in categories %}
+                                <label class="flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                                    <input name="category" value="{{ category.id }}" class="h-3.5 w-3.5 rounded border-2 border-[#e6e0db] dark:border-[#3d2e24] bg-transparent text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all" type="checkbox" {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}/>
+                                    <span class="flex-1 text-[#181411] dark:text-gray-200 text-xs font-medium group-hover:text-primary transition-colors">{{ category.name }}</span>
+                                    <span class="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{{ category.job_count }}</span>
+                                </label>
+                                {% empty %}
+                                <p class="text-xs text-[#8a7360] dark:text-gray-400 py-3 text-center">No categories with open jobs</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Location Filter -->
+                        <div class="mb-5 pt-5 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+                            <div class="flex items-center gap-2 mb-3 text-primary">
+                                <span class="material-symbols-outlined text-lg">location_on</span>
+                                <span class="text-xs font-bold uppercase tracking-wider">Location</span>
+                            </div>
+                            <div class="space-y-1.5 max-h-60 overflow-y-auto pr-2">
+                                {% for loc in locations %}
+                                <label class="flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                                    <input name="location" value="{{ loc.location }}" class="h-3.5 w-3.5 rounded border-2 border-[#e6e0db] dark:border-[#3d2e24] bg-transparent text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all" type="checkbox" {% if loc.location in selected_locations %}checked{% endif %}/>
+                                    <span class="flex-1 text-[#181411] dark:text-gray-200 text-xs font-medium group-hover:text-primary transition-colors">{{ loc.location }}</span>
+                                    <span class="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{{ loc.job_count }}</span>
+                                </label>
+                                {% empty %}
+                                <p class="text-xs text-[#8a7360] dark:text-gray-400 py-3 text-center">No locations with open jobs</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="resetFilters()" class="w-full mt-5 py-2.5 bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 text-primary font-semibold text-xs rounded-lg transition-all flex items-center justify-center gap-2 border border-primary/20">
+                            <span class="material-symbols-outlined text-base">refresh</span>
+                            Reset All Filters
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col gap-6">
+                <!-- Search Bar -->
+                <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm p-4">
+                    <form method="get" class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1 w-full">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg">search</span>
+                            <input name="search" value="{{ request.GET.search }}" class="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-[#f8f7f5] dark:bg-[#2d241d] border border-[#e6e0db] dark:border-[#3d2e24] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:text-white transition-all text-sm" placeholder="Search by job title, department, or keywords..." type="text"/>
+                        </div>
+                        <button type="submit" class="flex items-center justify-center gap-2 px-6 py-3 sm:py-2.5 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all text-sm min-h-[44px]">
+                            <span class="material-symbols-outlined text-base">search</span>
+                            <span>Search</span>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Results Header -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-[#181411] dark:text-white text-base font-bold mb-1">
+                            {% if page_obj %}
+                                <span class="text-primary">{{ paginator.count }}</span> Job{{ paginator.count|pluralize }} Found
+                            {% else %}
+                                <span class="text-primary">{{ jobs|length }}</span> Job{{ jobs|length|pluralize }} Found
+                            {% endif %}
+                        </h3>
+                        {% if page_obj %}
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400">
+                            Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }} results
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] rounded-lg">
+                        <span class="material-symbols-outlined text-gray-400 text-base">sort</span>
+                        <span class="text-xs text-[#8a7360] dark:text-gray-400 font-medium">Sort by:</span>
+                        <select class="bg-transparent border-none font-semibold text-[#181411] dark:text-white focus:ring-0 cursor-pointer text-xs">
+                            <option>Newest first</option>
+                            <option>Oldest first</option>
+                            <option>Deadline (Soonest)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Job Listing Cards -->
+                <div class="grid grid-cols-1 gap-4">
+                    {% for job in jobs %}
+                    <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 group">
+                        <div class="flex flex-col lg:flex-row justify-between lg:items-start gap-4">
+                            <div class="flex-1 space-y-3">
+                                <!-- Badges -->
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-semibold uppercase rounded-md border border-primary/20">{{ job.category.name }}</span>
+                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.get_contract_type_display }}</span>
+                                    {% if job.education_level %}
+                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">{{ job.get_education_level_display }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Job Title -->
+                                <div>
+                                    <h2 class="text-[#181411] dark:text-white text-lg font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight mb-1.5">
+                                        <a href="{% url 'jobs:detail' job.pk %}" class="hover:underline">{{ job.title }}</a>
+                                    </h2>
+                                </div>
+                                
+                                <!-- Job Details -->
+                                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+                                    {% if job.location %}
+                                    <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                                        <span>{{ job.location }}</span>
+                                    </div>
+                                    {% elif job.get_location_type_display %}
+                                    <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                                        <span>{{ job.get_location_type_display }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if job.education_level %}
+                                    <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-primary text-base">school</span>
+                                        <span>{{ job.get_education_level_display }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex items-center gap-1.5 text-red-500 dark:text-red-400 font-semibold">
+                                        <span class="material-symbols-outlined text-base">schedule</span>
+                                        <span>Deadline: {{ job.application_deadline|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="flex items-center gap-3 lg:flex-col lg:items-end">
+                                <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap text-sm w-full sm:w-auto">
+                                    <span>View Details</span>
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-12 text-center">
+                        <span class="material-symbols-outlined text-5xl text-gray-300 dark:text-gray-600 mb-3">work_off</span>
+                        <h3 class="text-[#181411] dark:text-white text-base font-bold mb-1.5">No job listings available</h3>
+                        <p class="text-[#8a7360] dark:text-gray-400 text-sm">Check back later for new opportunities</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+                    <div class="text-xs text-[#8a7360] dark:text-gray-400">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white hover:border-primary transition-all font-medium text-sm">
+                                <span class="material-symbols-outlined text-base">chevron_left</span>
+                                <span>Previous</span>
+                            </a>
+                        {% endif %}
+                        
+                        <div class="flex items-center gap-1">
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="size-9 flex items-center justify-center rounded-lg bg-gradient-to-r from-primary to-primary/90 text-white font-bold shadow-md shadow-primary/20 text-sm">{{ num }}</span>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="size-9 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] hover:border-primary hover:text-primary font-bold transition-all text-sm">{{ num }}</a>
+                                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                                    <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="size-9 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] hover:border-primary hover:text-primary font-bold transition-all text-sm">{{ num }}</a>
+                                {% elif num == page_obj.number|add:'-4' or num == page_obj.number|add:'4' %}
+                                    <span class="px-1.5 text-gray-400 text-sm">...</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white hover:border-primary transition-all font-medium text-sm">
+                                <span>Next</span>
+                                <span class="material-symbols-outlined text-base">chevron_right</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[#e6e0db] dark:border-[#3d2e24] bg-white dark:bg-[#1c140d] py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-[#8a7360] dark:text-gray-400">
+                <p>© 2026 POSB Bank. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+{% block extra_js %}
+<script>
+    function openMobileMenu() {
+        document.getElementById('mobile-menu').classList.remove('-translate-x-full');
+        document.getElementById('mobile-menu-overlay').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMobileMenu() {
+        document.getElementById('mobile-menu').classList.add('-translate-x-full');
+        document.getElementById('mobile-menu-overlay').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', openMobileMenu);
+    
+    // Close menu on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMobileMenu();
+        }
+    });
+    
+    // Filter toggle for mobile
+    function toggleFilters() {
+        // Only toggle on mobile (lg breakpoint is 1024px)
+        if (window.innerWidth >= 1024) return;
+        
+        const filterContent = document.getElementById('filter-content');
+        const toggleIcon = document.getElementById('filter-toggle-icon');
+        
+        if (filterContent.classList.contains('hidden')) {
+            filterContent.classList.remove('hidden');
+            toggleIcon.style.transform = 'rotate(180deg)';
+        } else {
+            filterContent.classList.add('hidden');
+            toggleIcon.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    // Show filters by default on desktop
+    function handleResize() {
+        const filterContent = document.getElementById('filter-content');
+        const toggleIcon = document.getElementById('filter-toggle-icon');
+        
+        if (window.innerWidth >= 1024) {
+            filterContent.classList.remove('hidden');
+            toggleIcon.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Reset all filters
+    function resetFilters() {
+        // Uncheck all checkboxes
+        document.querySelectorAll('#filter-content input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        // Redirect to base URL without filters
+        window.location.href = window.location.pathname;
+    }
+    
+    // Auto-submit filters when checkbox changes
+    document.querySelectorAll('#filter-content input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Build URL with current filter selections
+            const params = new URLSearchParams();
+            
+            // Get search value if exists
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput && searchInput.value) {
+                params.append('search', searchInput.value);
+            }
+            
+            // Get all checked categories
+            document.querySelectorAll('input[name="category"]:checked').forEach(cb => {
+                params.append('category', cb.value);
+            });
+            
+            // Get all checked locations
+            document.querySelectorAll('input[name="location"]:checked').forEach(cb => {
+                params.append('location', cb.value);
+            });
+            
+            // Redirect with filters
+            const url = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+            window.location.href = url;
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

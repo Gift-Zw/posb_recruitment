@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Shortlisting Tool - POSB Bank</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f68223",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221810",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#181411] dark:text-white">
+<div class="flex min-h-screen">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-[#e6e0db] dark:border-[#3d2e24] bg-white dark:bg-background-dark fixed h-full z-10">
+<div class="flex flex-col h-full justify-between p-6">
+<div class="flex flex-col gap-8">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<div class="size-6 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold tracking-tight">POSB HR</h1>
+</div>
+<p class="text-[#8a7360] dark:text-[#a68e7c] text-xs font-medium uppercase tracking-widest">Enterprise Portal</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#8a7360] hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#8a7360] hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors" href="#">
+<span class="material-symbols-outlined">work</span>
+<span class="text-sm font-semibold">Jobs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#8a7360] hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-semibold">Candidates</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined filled-icon">auto_awesome</span>
+<span class="text-sm font-semibold">AI Shortlisting</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#8a7360] hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-semibold">Settings</span>
+</a>
+</nav>
+</div>
+<div class="flex items-center gap-3 pt-6 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+<div class="size-10 rounded-full bg-cover bg-center border-2 border-primary/20" data-alt="Profile picture of HR Manager" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB8SylxX3k-wPRqoNp36AGx6wjgqm9B_nbR0Aw6BubFqImYslvL1qV9Utdn2FjfqiH3nXrSRKbiBwnL9BiUaTGFqgQ8YLapetKMosUleWGKBz7l42Jq-RgCkiMUYL5QTSbsjZxhANRDPWP05U0uOQ-7qZDoD2pH6-L4g5wyFAkPSgL_Q7m_W71hjunkGD6tlz1lff2Fdiu0qPp9akQ2BXqN5mrf7hv8CS2dik2Mv-s3MP3Vf7gR0BOyoXvrBauNXjRFOvHOBf0f-jLO')"></div>
+<div class="flex flex-col">
+<p class="text-sm font-bold truncate">Sarah Tan</p>
+<p class="text-xs text-[#8a7360]">HR Lead</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-64 min-h-screen">
+<!-- Top Nav -->
+<header class="h-16 border-b border-[#e6e0db] dark:border-[#3d2e24] bg-white dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-20 flex items-center justify-between px-8">
+<div class="flex items-center gap-4 w-1/3">
+<div class="relative w-full max-w-sm">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#8a7360] text-sm">search</span>
+<input class="w-full bg-[#f5f2f0] dark:bg-[#3d2e24] border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all outline-none" placeholder="Search candidates..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-lg bg-[#f5f2f0] dark:bg-[#3d2e24] text-[#181411] dark:text-white hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-[#f5f2f0] dark:bg-[#3d2e24] text-[#181411] dark:text-white hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 mb-4">
+<a class="text-[#8a7360] text-sm font-medium hover:text-primary transition-colors" href="#">Jobs</a>
+<span class="text-[#8a7360] material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-[#181411] dark:text-white text-sm font-bold">AI Shortlisting</span>
+</div>
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div class="flex flex-col gap-2">
+<h2 class="text-4xl font-black tracking-tight leading-none">Senior Relationship Manager</h2>
+<div class="flex items-center gap-3">
+<span class="bg-[#f5f2f0] dark:bg-[#3d2e24] text-[#8a7360] px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider">Job ID: POSB-2023-004</span>
+<span class="text-[#8a7360]">•</span>
+<span class="text-[#8a7360] text-sm">Retail Banking</span>
+</div>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-lg shadow-primary/20 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-xl">bolt</span>
+                        Trigger AI Shortlisting
+                    </button>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+<p class="text-[#8a7360] text-sm font-semibold mb-1">Total Applicants</p>
+<p class="text-3xl font-black">128</p>
+<div class="mt-2 text-xs text-green-600 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12% from last week
+                        </div>
+</div>
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+<p class="text-[#8a7360] text-sm font-semibold mb-1">Avg. AI Score</p>
+<p class="text-3xl font-black">74%</p>
+<div class="w-full bg-[#f5f2f0] dark:bg-[#3d2e24] h-1.5 rounded-full mt-4">
+<div class="bg-primary h-full rounded-full" style="width: 74%"></div>
+</div>
+</div>
+<div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+<p class="text-[#8a7360] text-sm font-semibold mb-1">Shortlisted Count</p>
+<p class="text-3xl font-black">32</p>
+<p class="mt-2 text-xs text-[#8a7360]">Target: 40 candidates</p>
+</div>
+</div>
+<!-- Candidate Table -->
+<div class="bg-white dark:bg-background-dark rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm overflow-hidden">
+<div class="p-6 border-b border-[#e6e0db] dark:border-[#3d2e24] flex items-center justify-between">
+<h3 class="text-lg font-bold">Candidate Pool</h3>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-xs font-bold hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+                            </button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-xs font-bold hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24] transition-colors">
+<span class="material-symbols-outlined text-sm">sort</span> Sort
+                            </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#fcfbf9] dark:bg-[#2c1f15] text-[#8a7360] text-xs font-bold uppercase tracking-wider">
+<th class="px-6 py-4">Candidate</th>
+<th class="px-6 py-4">Experience</th>
+<th class="px-6 py-4 w-64">AI Match Score</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e6e0db] dark:divide-[#3d2e24]">
+<!-- Row 1 -->
+<tr class="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-cover bg-center" data-alt="Candidate profile headshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCib74OSMavmWq1QmAydsSQ75YQLHxMHsYr68Xv0jW6wLsi-eFSvuiWd5v60Dd9nXigQbmN-zx9Llp2JAh7a21W3x82no2Aw_mgvKyw9d34I0DpcuE9Z7mVT62QxyMUFVUAz20dCjNK1RMhbJEtvkHt9LonskBoFcROx3KsH5fLSCbYnGT5CxFFM8DkphQZIxqoLXQMci2QrJMPSp1Roe8qaFzhhFCFNxm3aYlJXoP51WXmbz11MzWZlTE-lvwp-E7y87vb0TwbyaZZ')"></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold">Jonathan Lee</span>
+<span class="text-xs text-[#8a7360]">Singapore, SG</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">8 Years</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex-1 bg-[#f5f2f0] dark:bg-[#3d2e24] h-2 rounded-full overflow-hidden">
+<div class="bg-green-500 h-full rounded-full" style="width: 98%"></div>
+</div>
+<span class="text-sm font-black text-green-600">98%</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-bold text-[#8a7360]">Shortlisted</span>
+</label>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">mail</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-cover bg-center" data-alt="Candidate profile headshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKvlVympJO3fChRQyOnMAcTmJKrxtd9YyFV_azsQds7lybNB5rH-WJlmVxW9BUtI44Bu3kBV9P5YK5e9qUH0nHbEM45pYlqFDSZh_Hr7mCoKwGAoKI8nogGx0jLiK0E_JJyVyXgOfZjPC9EODn2f7OSb7lF7SnkKNM4wEu158uWIDiT7sToRB-J6v6M4m4r1xYTQB3WYF-pu02A_bwj_xAX9evVyA-kRReMPVWJQkMiBKas693g8PFsISjovSeVibHN6NMzBQ28iJD')"></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold">Aditi Sharma</span>
+<span class="text-xs text-[#8a7360]">Mumbai, IN</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">5 Years</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex-1 bg-[#f5f2f0] dark:bg-[#3d2e24] h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 82%"></div>
+</div>
+<span class="text-sm font-black text-primary">82%</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-bold text-[#8a7360]">Reviewing</span>
+</label>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">mail</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-cover bg-center" data-alt="Candidate profile headshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNoWQ0sjfyt7DnX_6Beu9-lONjPkxy3YPdr2CJJJ0ds_5-toJbM2kHbG2tWN2ZqQrG7z6La9A3QL7kNMdru76glKIddqBtoN3Dq05EfyzkCBrIdO7paHTeULVxxGxEQjawn5tghxdo3EnCOZbeJfNQsdFvbcIw8HwThXZTX4Xc_zySXDV09YERYeqxrNNU34z1aDt2pbPBT1bgj8AMQBg2c6DfYkFbfEErMhuRZddRiYilpmBklg0FgLDhjtl738K16QcW3CyIzY3e')"></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold">Marcus Tan</span>
+<span class="text-xs text-[#8a7360]">Singapore, SG</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">12 Years</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex-1 bg-[#f5f2f0] dark:bg-[#3d2e24] h-2 rounded-full overflow-hidden">
+<div class="bg-gray-400 h-full rounded-full" style="width: 45%"></div>
+</div>
+<span class="text-sm font-black text-gray-500">45%</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-bold text-[#8a7360]">Rejected</span>
+</label>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">mail</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-cover bg-center" data-alt="Candidate profile headshot" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiMAP4uvCN6A9r0d19tx3thCL7Ws1C_L4t9R-xwdqXZUxa6hM01_6suA9mswj3iXlBVaeAH6zT9syuQIRiraQXAa4WYkl9qvr5sXSjmiLIovbgG7rFx31lPIH4ZkgBv6W7wa3eztT7xg1lN_Uc8MsS8UtkSAP4CduVYyk8wchhQZi5YD4DH7mQVmNQSoPHiZdHz0142mtua5wOXl-PblyIVPf4zpPPJSB4dkzN8lI1G8oZwNCgfUoOp-7lLXdFS4Vr2weVFNnUdft_')"></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold">Sophia Chen</span>
+<span class="text-xs text-[#8a7360]">Hong Kong, HK</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium">6 Years</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex-1 bg-[#f5f2f0] dark:bg-[#3d2e24] h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 76%"></div>
+</div>
+<span class="text-sm font-black text-primary">76%</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+<span class="ms-3 text-xs font-bold text-[#8a7360]">Shortlisted</span>
+</label>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-[#8a7360] hover:bg-white hover:text-primary dark:hover:bg-[#3d2e24] transition-all">
+<span class="material-symbols-outlined">mail</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-[#e6e0db] dark:border-[#3d2e24] bg-[#fcfbf9] dark:bg-[#2c1f15] flex items-center justify-between">
+<p class="text-xs text-[#8a7360] font-medium">Showing 1-4 of 128 applicants</p>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded border border-[#e6e0db] dark:border-[#3d2e24] text-xs font-bold disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 rounded border border-[#e6e0db] dark:border-[#3d2e24] text-xs font-bold hover:bg-white dark:hover:bg-[#3d2e24]">Next</button>
+</div>
+</div>
+</div>
+<!-- AI Insights Footer -->
+<div class="mt-8 p-6 bg-primary/5 rounded-xl border border-primary/20 flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-2xl filled-icon">info</span>
+<div>
+<h4 class="text-sm font-bold text-primary mb-1">AI Matching Insights</h4>
+<p class="text-xs text-[#8a7360] leading-relaxed max-w-3xl">
+                            Scores are calculated based on resume relevancy to the "Senior Relationship Manager" job description, years of specialized banking experience, and proximity to regional hubs. Triggering a new scan will refresh all scores based on updated keyword weights.
+                        </p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

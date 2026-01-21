@@ -1,0 +1,137 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Edit User{% else %}Create Employee{% endif %} | POSB HR Management{% endblock %}
+
+{% block page_title %}{% if object %}Edit User{% else %}Create Employee{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- User Information -->
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">User Information</h3>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <label for="{{ form.email.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.first_name.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.last_name.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Password Fields -->
+                    {% if not object %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.password.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Password *</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+                            {% if form.password.help_text %}<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ form.password.help_text }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.password2.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Confirm Password *</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.password.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">New Password (optional)</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+                            {% if form.password.help_text %}<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ form.password.help_text }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label for="{{ form.password_confirm.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Confirm New Password</label>
+                            {{ form.password_confirm }}
+                            {% if form.password_confirm.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password_confirm.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Status Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3">
+                            {{ form.is_active }}
+                            <label for="{{ form.is_active.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">Active Account</label>
+                        </div>
+                        {% if object %}
+                        <div class="flex items-center gap-3">
+                            {{ form.is_verified }}
+                            <label for="{{ form.is_verified.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">Verified</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Profile Information (if employee) -->
+            {% if not object or object.user_type == 'EMPLOYEE' %}
+            <div class="border-t border-gray-200 dark:border-gray-800 pt-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Employee Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label for="{{ form.ec_number.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">EC Number</label>
+                        {{ form.ec_number }}
+                        {% if form.ec_number.errors %}<p class="text-xs text-red-500 mt-1">{{ form.ec_number.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="{{ form.phone_number.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Phone Number</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}<p class="text-xs text-red-500 mt-1">{{ form.phone_number.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="{{ form.department.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Department</label>
+                        {{ form.department }}
+                        {% if form.department.errors %}<p class="text-xs text-red-500 mt-1">{{ form.department.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="{{ form.job_title.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Job Title</label>
+                        {{ form.job_title }}
+                        {% if form.job_title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.job_title.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+                {% if object %}
+                    {% if object.user_type == 'EMPLOYEE' %}
+                    <a href="{% url 'management:users_management:employees' %}" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                        Cancel
+                    </a>
+                    {% else %}
+                    <a href="{% url 'management:users_management:applicants' %}" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                        Cancel
+                    </a>
+                    {% endif %}
+                {% else %}
+                <a href="{% url 'management:users_management:employees' %}" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                    Cancel
+                </a>
+                {% endif %}
+                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20">
+                    {% if object %}Update User{% else %}Create Employee{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

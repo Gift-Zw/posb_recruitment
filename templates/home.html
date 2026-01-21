@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}POSB Zimbabwe Careers | People's Own Savings Bank{% endblock %}
+
+{% block content %}
+<div class="relative flex min-h-screen flex-col overflow-x-hidden">
+    <header class="sticky top-0 z-50 w-full bg-white/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10">
+        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+                    <span class="material-symbols-outlined text-2xl">menu</span>
+                </button>
+                <a href="{% url 'home' %}" class="flex items-center">
+                    <div class="h-10 sm:h-12 w-auto flex items-center gap-2">
+                        <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-10 sm:h-12 w-auto"/>
+                    </div>
+                </a>
+            </div>
+            <div class="hidden sm:flex items-center gap-3 sm:gap-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'applicant-profile' %}" class="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all">Profile</a>
+                    <a href="{% url 'logout' %}" class="px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold bg-primary text-white hover:bg-[#d96e14] rounded-lg shadow-md transition-all min-h-[44px] flex items-center">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all">Sign In</a>
+                    <a href="{% url 'register' %}" class="px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold bg-primary text-white hover:bg-[#d96e14] rounded-lg shadow-md transition-all min-h-[44px] flex items-center">Register Profile</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    
+    {% include 'includes/mobile_menu.html' %}
+
+    <main class="flex-1">
+        <section class="relative overflow-hidden bg-white dark:bg-background-dark pt-6 sm:pt-8 pb-10 sm:pb-12 lg:pt-12 lg:pb-16">
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-[#004a99]/5 -skew-x-12 transform translate-x-20 hidden lg:block"></div>
+            <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
+                <div class="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+                    <div class="flex flex-col gap-6">
+                        <div class="flex flex-col gap-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full w-fit">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                </span>
+                                <span class="text-primary font-bold text-xs uppercase tracking-widest">Growing the Nation Since 1904</span>
+                            </div>
+                            <h1 class="text-[#1a1a1a] dark:text-white text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight">
+                                Build Your Future With <span class="text-primary tracking-tighter italic">People's Own Savings Bank.</span>
+                            </h1>
+                            <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-[560px] leading-relaxed">
+                                Join Zimbabwe's leading savings bank. We are looking for passionate professionals to help us drive financial inclusion across our 32+ branches nationwide.
+                            </p>
+                        </div>
+                        <div class="bg-white dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl max-w-[640px]">
+                            <form method="get" action="{% url 'jobs:list' %}" class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex flex-[1.5] items-center px-3 sm:px-4 gap-2 sm:gap-3 bg-gray-50 dark:bg-white/5 rounded-lg sm:rounded-xl min-h-[44px] sm:h-16 border border-transparent focus-within:border-primary transition-all">
+                                    <span class="material-symbols-outlined text-gray-400 text-lg sm:text-xl">search</span>
+                                    <input name="search" class="bg-transparent border-none focus:ring-0 text-sm sm:text-base w-full placeholder:text-gray-400" placeholder="Role (e.g. Branch Manager, Teller)" type="text"/>
+                                </div>
+                                <button type="submit" class="bg-primary text-white font-bold min-h-[44px] sm:h-16 px-6 sm:px-10 rounded-lg sm:rounded-xl hover:bg-[#d96e14] shadow-lg shadow-primary/25 transition-all active:scale-95 text-sm sm:text-base">
+                                    Find Jobs
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="hidden lg:block relative">
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                            <img src="{% static 'images/home.webp' %}" alt="People's Own Savings Bank Careers" class="w-full h-auto object-cover"/>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4 sm:gap-6">
+                <div class="max-w-2xl">
+                    <h2 class="text-primary font-bold uppercase tracking-[0.2em] text-xs sm:text-sm mb-2 sm:mb-3">Your Journey Starts Here</h2>
+                    <h3 class="text-2xl sm:text-3xl font-black tracking-tight mb-3 sm:mb-4">Explore Career Paths</h3>
+                    <p class="text-gray-500 text-sm sm:text-base lg:text-lg">Whether you're an experienced banker or a fresh graduate, we have a place for your talents in our growing organization.</p>
+                </div>
+                <a href="{% url 'jobs:list' %}" class="group inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-xs sm:text-sm hover:bg-primary hover:text-white transition-all min-h-[44px]">
+                    All Openings <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform text-base sm:text-lg">east</span>
+                </a>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

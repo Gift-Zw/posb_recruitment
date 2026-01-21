@@ -1,0 +1,157 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}Applicant Management | POSB HR Management{% endblock %}
+
+{% block page_title %}Applicants{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Applicants</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_applicants }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Active</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ active_applicants }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Verified</p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ verified_applicants }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Unverified</p>
+            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ unverified_applicants }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name or email..." class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
+            </div>
+            <div class="md:w-48">
+                <select name="status" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                    <option value="unverified" {% if status_filter == 'unverified' %}selected{% endif %}>Unverified</option>
+                </select>
+            </div>
+            <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined align-middle">search</span>
+                Filter
+            </button>
+            {% if search_query or status_filter %}
+            <a href="{% url 'management:users_management:applicants' %}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Applicants Table -->
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applicant</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Verified</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    {% for applicant in applicants %}
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ applicant.get_full_name|default:applicant.email }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ applicant.email }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if applicant.is_active %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                Active
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                Inactive
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if applicant.is_verified %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                Verified
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                                Unverified
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ applicant.date_joined|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'management:users_management:applicant-edit' pk=applicant.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="Edit">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </a>
+                                <form method="post" action="{% url 'management:users_management:applicant-toggle-status' pk=applicant.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="{% if applicant.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        {% if applicant.is_active %}
+                                        <span class="material-symbols-outlined text-lg">block</span>
+                                        {% else %}
+                                        <span class="material-symbols-outlined text-lg">check_circle</span>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
+                            <p>No applicants found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+            </div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                    Previous
+                </a>
+                {% endif %}
+                <span class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

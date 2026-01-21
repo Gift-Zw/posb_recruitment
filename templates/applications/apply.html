@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Apply to {{ job.title }} | POSB Careers{% endblock %}
+
+{% block content %}
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-4 sm:px-6 lg:px-10 py-3">
+    <div class="flex items-center gap-2 sm:gap-4">
+        <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <a href="{% url 'home' %}" class="flex items-center">
+            <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-7 sm:h-8 w-auto"/>
+        </a>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-6 lg:gap-9">
+            {% if user.is_authenticated %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'applicant-profile' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applicant-profile' %}">My Profile</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:list' %}">Jobs</a>
+            {% if user.is_applicant %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-gray-700 dark:text-gray-300" href="{% url 'applications:list' %}">My Applications</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'faqs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:faqs' %}">FAQs</a>
+        </div>
+        <!-- User Actions -->
+        {% if user.is_authenticated %}
+        <div class="hidden sm:flex bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 sm:size-10 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 items-center justify-center">
+            <span class="text-primary font-bold text-xs sm:text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg h-9 sm:h-10 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white px-3 sm:px-4 text-xs sm:text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined text-base sm:text-lg">logout</span>
+            <span class="hidden lg:inline">Logout</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="hidden sm:flex items-center justify-center rounded-lg h-9 sm:h-10 bg-primary text-white px-3 sm:px-4 text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors">
+            Sign In
+        </a>
+        {% endif %}
+    </div>
+</header>
+
+{% include 'includes/mobile_menu.html' %}
+
+<main class="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-20 py-6 sm:py-8 overflow-x-hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
+        <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" href="{% url 'home' %}">
+            <span class="material-symbols-outlined text-base">home</span>
+            <span>Home</span>
+        </a>
+        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
+        <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors" href="{% url 'jobs:list' %}">Jobs</a>
+        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
+        <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors" href="{% url 'jobs:detail' job.pk %}">{{ job.title|truncatewords:5 }}</a>
+        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#181411] dark:text-white text-sm font-semibold">Apply</span>
+    </nav>
+
+    <!-- Job Summary Card -->
+    <div class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 p-5 rounded-xl border border-primary/20 mb-6">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+                <h1 class="text-xl font-bold text-[#181411] dark:text-white mb-2">Apply for: {{ job.title }}</h1>
+                <div class="flex flex-wrap gap-3 text-xs text-[#8a7360] dark:text-gray-400">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-base">corporate_fare</span>
+                        {{ job.category.name }}
+                    </span>
+                    {% if job.location %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                        {{ job.location }}
+                    </span>
+                    {% endif %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-base">work</span>
+                        {{ job.get_contract_type_display }}
+                    </span>
+                </div>
+            </div>
+            <a href="{% url 'jobs:detail' job.pk %}" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1">
+                <span>View Job Details</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-6 p-4 {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800{% elif message.tags == 'success' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800{% elif message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800{% else %}bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800{% endif %} rounded-lg">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                        <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-sm flex-shrink-0">error</span>
+                    {% elif message.tags == 'success' %}
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-sm flex-shrink-0">check_circle</span>
+                    {% elif message.tags == 'warning' %}
+                        <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-sm flex-shrink-0">warning</span>
+                    {% else %}
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm flex-shrink-0">info</span>
+                    {% endif %}
+                    <p class="text-sm flex-1 {% if message.tags == 'error' %}text-red-800 dark:text-red-200{% elif message.tags == 'success' %}text-green-800 dark:text-green-200{% elif message.tags == 'warning' %}text-yellow-800 dark:text-yellow-200{% else %}text-blue-800 dark:text-blue-200{% endif %}">{{ message }}</p>
+                    <button type="button" onclick="this.closest('div').remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
+        {% csrf_token %}
+
+        <!-- Personal Information Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-4 sm:mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">person</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Personal Information</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.phone_number.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Phone Number *</label>
+                    {{ profile_form.phone_number }}
+                    {% if profile_form.phone_number.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.phone_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.alternate_phone.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Alternate Phone</label>
+                    {{ profile_form.alternate_phone }}
+                    {% if profile_form.alternate_phone.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.alternate_phone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.email.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Email *</label>
+                    {{ profile_form.email }}
+                    {% if profile_form.email.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.date_of_birth.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Date of Birth *</label>
+                    {{ profile_form.date_of_birth }}
+                    {% if profile_form.date_of_birth.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.date_of_birth.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.gender.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Gender *</label>
+                    {{ profile_form.gender }}
+                    {% if profile_form.gender.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.gender.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.nationality.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Nationality *</label>
+                    {{ profile_form.nationality }}
+                    {% if profile_form.nationality.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.nationality.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.id_number.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">ID Number *</label>
+                    {{ profile_form.id_number }}
+                    {% if profile_form.id_number.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.id_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.marital_status.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Marital Status</label>
+                    {{ profile_form.marital_status }}
+                    {% if profile_form.marital_status.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.marital_status.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Information Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">home</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Address Information</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div class="md:col-span-2 flex flex-col gap-1.5">
+                    <label for="{{ profile_form.address_line_1.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Address Line 1 *</label>
+                    {{ profile_form.address_line_1 }}
+                    {% if profile_form.address_line_1.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.address_line_1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="md:col-span-2 flex flex-col gap-1.5">
+                    <label for="{{ profile_form.address_line_2.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Address Line 2</label>
+                    {{ profile_form.address_line_2 }}
+                    {% if profile_form.address_line_2.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.address_line_2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.city.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">City *</label>
+                    {{ profile_form.city }}
+                    {% if profile_form.city.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.city.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.state_province.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">State/Province</label>
+                    {{ profile_form.state_province }}
+                    {% if profile_form.state_province.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.state_province.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.postal_code.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Postal Code</label>
+                    {{ profile_form.postal_code }}
+                    {% if profile_form.postal_code.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.postal_code.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.country.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Country *</label>
+                    {{ profile_form.country }}
+                    {% if profile_form.country.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.country.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Summary Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">description</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Professional Summary</h2>
+            </div>
+            
+            <div class="flex flex-col gap-1.5">
+                <label for="{{ profile_form.professional_summary.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">About Yourself</label>
+                {{ profile_form.professional_summary }}
+                {% if profile_form.professional_summary.errors %}
+                    <p class="text-xs text-red-500">{{ profile_form.professional_summary.errors.0 }}</p>
+                {% endif %}
+                <p class="text-xs text-[#8a7360] dark:text-gray-400">Tell us about your professional background, achievements, and career goals.</p>
+            </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">psychology</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Skills</h2>
+            </div>
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-[#181411] dark:text-white mb-2">Select Your Skills</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-3 border border-[#e6e0db] dark:border-[#3d2e24] rounded-lg bg-gray-50 dark:bg-[#2d241d]">
+                    {% for checkbox in profile_form.skills %}
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-[#1c140d] p-2 rounded transition-colors">
+                        {{ checkbox.tag }}
+                        <span class="text-xs text-[#181411] dark:text-white">{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% empty %}
+                    <p class="text-xs text-[#8a7360] dark:text-gray-400 col-span-full">No skills available</p>
+                    {% endfor %}
+                </div>
+                {% if profile_form.skills.errors %}
+                    <p class="text-xs text-red-500">{{ profile_form.skills.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Application Documents Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">attach_file</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Application Documents</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ application_form.cv_file.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">CV/Resume *</label>
+                    <div class="relative">
+                        {{ application_form.cv_file }}
+                        <p class="text-xs text-[#8a7360] dark:text-gray-400 mt-1">Accepted formats: PDF, DOC, DOCX (Max 10MB)</p>
+                    </div>
+                    {% if application_form.cv_file.errors %}
+                        <p class="text-xs text-red-500">{{ application_form.cv_file.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ application_form.cover_letter.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Cover Letter</label>
+                    {{ application_form.cover_letter }}
+                    {% if application_form.cover_letter.errors %}
+                        <p class="text-xs text-red-500">{{ application_form.cover_letter.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-xs text-[#8a7360] dark:text-gray-400">Write a cover letter explaining why you're interested in this position.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">info</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Additional Information</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.availability_date.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Availability Date</label>
+                    {{ profile_form.availability_date }}
+                    {% if profile_form.availability_date.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.availability_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.current_salary.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Current Salary</label>
+                    {{ profile_form.current_salary }}
+                    {% if profile_form.current_salary.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.current_salary.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.expected_salary.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Expected Salary</label>
+                    {{ profile_form.expected_salary }}
+                    {% if profile_form.expected_salary.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.expected_salary.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.notice_period.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Notice Period</label>
+                    {{ profile_form.notice_period }}
+                    {% if profile_form.notice_period.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.notice_period.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                <span class="material-symbols-outlined text-primary text-xl">emergency</span>
+                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Emergency Contact</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.emergency_contact_name.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Contact Name</label>
+                    {{ profile_form.emergency_contact_name }}
+                    {% if profile_form.emergency_contact_name.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.emergency_contact_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.emergency_contact_relationship.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Relationship</label>
+                    {{ profile_form.emergency_contact_relationship }}
+                    {% if profile_form.emergency_contact_relationship.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.emergency_contact_relationship.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.emergency_contact_phone.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Phone Number</label>
+                    {{ profile_form.emergency_contact_phone }}
+                    {% if profile_form.emergency_contact_phone.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.emergency_contact_phone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.emergency_contact_email.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Email</label>
+                    {{ profile_form.emergency_contact_email }}
+                    {% if profile_form.emergency_contact_email.errors %}
+                        <p class="text-xs text-red-500">{{ profile_form.emergency_contact_email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+            <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <span>Cancel</span>
+            </a>
+            <button type="submit" class="flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-lg font-semibold text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                <span>Submit Application</span>
+                <span class="material-symbols-outlined text-lg">send</span>
+            </button>
+        </div>
+    </form>
+</main>
+
+<style>
+/* Form Field Styling */
+form input[type="text"],
+form input[type="email"],
+form input[type="tel"],
+form input[type="date"],
+form input[type="number"],
+form input[type="url"],
+form select,
+form textarea,
+form input[type="file"] {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e6e0db;
+    border-radius: 0.5rem;
+    background-color: #f8f7f5;
+    color: #181411;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.dark form input[type="text"],
+.dark form input[type="email"],
+.dark form input[type="tel"],
+.dark form input[type="date"],
+.dark form input[type="number"],
+.dark form input[type="url"],
+.dark form select,
+.dark form textarea,
+.dark form input[type="file"] {
+    background-color: #2d241d;
+    border-color: #3d2e24;
+    color: white;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #8B4513);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+}
+
+.dark form input:focus,
+.dark form select:focus,
+.dark form textarea:focus {
+    background-color: #1c140d;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.2);
+}
+
+form input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--primary-color, #8B4513);
+    cursor: pointer;
+}
+
+form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+form input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+form input[type="file"]::file-selector-button {
+    padding: 0.5rem 1rem;
+    margin-right: 0.75rem;
+    border: none;
+    border-radius: 0.375rem;
+    background-color: var(--primary-color, #8B4513);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+form input[type="file"]::file-selector-button:hover {
+    background-color: rgba(139, 69, 19, 0.9);
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="tel"],
+    form input[type="date"],
+    form input[type="number"],
+    form input[type="url"],
+    form select,
+    form textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.75rem 0.875rem;
+    }
+    
+    .bg-white.dark\:bg-\[#1c140d\] {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script>
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+        openMobileMenu();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}ERP Exports | POSB Careers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>ERP Exports</h2>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Exported</th>
+            <th>Failed</th>
+            <th>Batch ID</th>
+            <th>Started</th>
+            <th>Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for export in exports %}
+            <tr>
+                <td>{{ export.job_advert.title }}</td>
+                <td>{{ export.status }}</td>
+                <td>{{ export.exported_count }}</td>
+                <td>{{ export.failed_count }}</td>
+                <td>{{ export.erp_batch_id|default:"-" }}</td>
+                <td>{{ export.started_at|default:"-" }}</td>
+                <td>{{ export.completed_at|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="7">No exports yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

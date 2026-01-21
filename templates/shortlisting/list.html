@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Shortlisting Runs | POSB Careers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Shortlisting Runs</h2>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Shortlisted</th>
+            <th>Total Apps</th>
+            <th>Triggered By</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for run in runs %}
+            <tr>
+                <td>{{ run.job_advert.title }}</td>
+                <td>{{ run.status }}</td>
+                <td>{{ run.shortlisted_count }}</td>
+                <td>{{ run.total_applications }}</td>
+                <td>{{ run.triggered_by|default:"System" }}</td>
+                <td>{{ run.created_at }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6">No runs yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

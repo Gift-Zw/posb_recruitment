@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>POSB HR Admin Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f68223",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221810",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#181411] dark:text-white font-display">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-white dark:bg-[#2d221a] border-r border-[#e6e0db] dark:border-[#3d3128] flex flex-col justify-between py-6">
+<div class="flex flex-col gap-8 px-6">
+<!-- Brand Identity -->
+<div class="flex items-center gap-3">
+<div class="bg-primary size-10 rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-base font-bold leading-tight">POSB Bank</h1>
+<p class="text-[#8a7360] dark:text-[#a18e7e] text-xs font-normal">HR Admin Portal</p>
+</div>
+</div>
+<!-- Navigation Menu -->
+<nav class="flex flex-col gap-2">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-semibold">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">work</span>
+<p class="text-sm font-medium">Job Listings</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">group</span>
+<p class="text-sm font-medium">Applicants</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">event</span>
+<p class="text-sm font-medium">Interviews</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium">Settings</p>
+</div>
+</nav>
+</div>
+<div class="px-6">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-lg h-11 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+<span class="text-sm font-bold">Post New Job</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-10 flex items-center justify-between bg-white/80 dark:bg-[#2d221a]/80 backdrop-blur-md border-b border-[#e6e0db] dark:border-[#3d3128] px-8 py-3">
+<div class="flex items-center gap-8">
+<h2 class="text-lg font-bold tracking-tight">Recruitment Overview</h2>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#8a7360] text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-background-light dark:bg-[#3d3128] border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-[#8a7360]" placeholder="Search candidates..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+<span class="material-symbols-outlined">mail</span>
+</button>
+<div class="h-8 w-[1px] bg-[#e6e0db] dark:bg-[#3d3128] mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold">Sarah Chen</p>
+<p class="text-xs text-[#8a7360] dark:text-[#a18e7e]">Senior HR Admin</p>
+</div>
+<div class="size-10 rounded-full border-2 border-primary/20 bg-cover bg-center" data-alt="Profile picture of a smiling professional woman" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiHn5lUyGixX5A57w91BuX_VjWHlKGoG2NNF6VHwJjJUlt9Nuz7nKxU9dVDqmHMkcNtr5jnNiWymuQKLWevqGGWo_8fzlfkZ8cP_Xzx67PDt171JjtzUNlTJB9X6FidH_mDvj20L41BLES1-jJ8RnzzzQH6jbzXykhsGlSUzHdWUfKqrIvQJo98HYWQ9guUtP_MQQ7hN5IpT-oeKsgctOuzXS3-Wg33jQMDG53rfDJyUlZsuw7MoFFgzzK1C-B7gyjTA75ZlZdXV6E');"></div>
+</div>
+</div>
+</header>
+<!-- Dashboard Body -->
+<div class="p-8 flex flex-col gap-8">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-sm text-[#8a7360]">
+<span>Dashboard</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-[#181411] dark:text-white font-medium">Recruitment Dashboard</span>
+</div>
+<!-- Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-[#2d221a] p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-[#8a7360] dark:text-[#a18e7e]">Total Jobs</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">work</span>
+</div>
+<p class="text-3xl font-bold leading-tight">42</p>
+<p class="text-sm font-medium text-green-600 flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                            +5% <span class="text-[#8a7360] dark:text-[#a18e7e] font-normal text-xs ml-1">vs last month</span>
+</p>
+</div>
+<div class="bg-white dark:bg-[#2d221a] p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-[#8a7360] dark:text-[#a18e7e]">New Applications</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">description</span>
+</div>
+<p class="text-3xl font-bold leading-tight">128</p>
+<p class="text-sm font-medium text-green-600 flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                            +12% <span class="text-[#8a7360] dark:text-[#a18e7e] font-normal text-xs ml-1">last 7 days</span>
+</p>
+</div>
+<div class="bg-white dark:bg-[#2d221a] p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<p class="text-sm font-medium text-[#8a7360] dark:text-[#a18e7e]">Shortlisted Candidates</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">how_to_reg</span>
+</div>
+<p class="text-3xl font-bold leading-tight">15</p>
+<p class="text-sm font-medium text-red-600 flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-xs">trending_down</span>
+                            -2% <span class="text-[#8a7360] dark:text-[#a18e7e] font-normal text-xs ml-1">vs target</span>
+</p>
+</div>
+</div>
+<!-- Visuals & Feed Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Bar Chart Section (Applications per Category) -->
+<div class="lg:col-span-2 bg-white dark:bg-[#2d221a] p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-base font-bold">Applications by Category</h3>
+<select class="bg-background-light dark:bg-[#3d3128] border-none rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary py-1.5 pl-3 pr-8">
+<option>Last 30 Days</option>
+<option>Last 6 Months</option>
+</select>
+</div>
+<!-- Simulated Bar Chart -->
+<div class="flex items-end justify-between gap-4 h-64 pt-4">
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[40%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">45</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">Retail Banking</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[85%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">92</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">IT &amp; Digital</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[60%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">65</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">Management</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[30%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">28</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">Compliance</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[75%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">80</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">Operations</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-3">
+<div class="w-full bg-primary/20 rounded-t-lg relative group h-[45%] transition-all hover:bg-primary">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#181411] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">50</div>
+</div>
+<span class="text-[10px] text-[#8a7360] font-medium text-center">Wealth Mgmt</span>
+</div>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="bg-white dark:bg-[#2d221a] p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold">Recent Activity</h3>
+<button class="text-xs font-bold text-primary hover:underline">View All</button>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Activity Item 1 -->
+<div class="flex gap-4">
+<div class="size-10 shrink-0 rounded-full bg-[#f5f2f0] dark:bg-[#3d3128] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">person_add</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm"><span class="font-bold">John Doe</span> applied for <span class="font-medium">Teller (East Branch)</span></p>
+<p class="text-xs text-[#8a7360]">2 minutes ago</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="flex gap-4">
+<div class="size-10 shrink-0 rounded-full bg-[#f5f2f0] dark:bg-[#3d3128] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">calendar_month</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm">Interview scheduled with <span class="font-bold">Jane Smith</span></p>
+<p class="text-xs text-[#8a7360]">45 minutes ago</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="flex gap-4">
+<div class="size-10 shrink-0 rounded-full bg-[#f5f2f0] dark:bg-[#3d3128] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">assignment_turned_in</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm"><span class="font-bold">Robert Wong</span> passed tech assessment</p>
+<p class="text-xs text-[#8a7360]">2 hours ago</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="flex gap-4">
+<div class="size-10 shrink-0 rounded-full bg-[#f5f2f0] dark:bg-[#3d3128] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">new_releases</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm">New job post: <span class="font-bold">Senior Cloud Architect</span></p>
+<p class="text-xs text-[#8a7360]">Yesterday</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Status Info -->
+<div class="flex items-center justify-between py-4 text-xs text-[#8a7360] dark:text-[#a18e7e] border-t border-[#e6e0db] dark:border-[#3d3128]">
+<p>© 2024 POSB Bank - HR Administration System</p>
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1"><span class="size-2 bg-green-500 rounded-full"></span> System Online</span>
+<span>v2.4.0-stable</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,71 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}Shortlisting Runs | POSB HR Management{% endblock %}
+
+{% block page_title %}Shortlisting Runs{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Title</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Shortlisted</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Apps</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Triggered By</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                {% for run in runs %}
+                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-900 dark:text-white">{{ run.job_advert.title }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ run.job_advert.category.name }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if run.status == 'COMPLETED' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                            Completed
+                        </span>
+                        {% elif run.status == 'IN_PROGRESS' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                            In Progress
+                        </span>
+                        {% elif run.status == 'FAILED' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                            Failed
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                            Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{{ run.shortlisted_count }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ run.total_applications }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {% if run.triggered_by %}
+                            {{ run.triggered_by.get_full_name|default:run.triggered_by.email }}
+                        {% else %}
+                            <span class="text-gray-400">System</span>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ run.get_trigger_type_display }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ run.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        No shortlisting runs yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

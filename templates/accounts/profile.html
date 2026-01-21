@@ -1,0 +1,1106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile | POSB Careers{% endblock %}
+
+{% block messages %}
+{# Hide base template messages - we show them inside the card instead #}
+{% endblock %}
+
+{% block content %}
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden max-w-full">
+    <!-- Top Nav Bar -->
+    <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-4 sm:px-6 lg:px-10 py-3">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+                <span class="material-symbols-outlined text-2xl">menu</span>
+            </button>
+            <a href="{% url 'home' %}" class="flex items-center">
+                <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-7 sm:h-8 w-auto"/>
+            </a>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-6 lg:gap-9">
+                {% if user.is_authenticated %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'applicant-profile' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applicant-profile' %}">My Profile</a>
+                {% endif %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:list' %}">Jobs</a>
+                {% if user.is_applicant %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-gray-700 dark:text-gray-300" href="{% url 'applications:list' %}">My Applications</a>
+                {% endif %}
+                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'faqs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:faqs' %}">FAQs</a>
+            </div>
+            <!-- User Actions -->
+            {% if user.is_authenticated %}
+            <div class="hidden sm:flex bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 sm:size-10 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 items-center justify-center">
+                <span class="text-primary font-bold text-xs sm:text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+            </div>
+            <a href="{% url 'logout' %}" class="hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg h-9 sm:h-10 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white px-3 sm:px-4 text-xs sm:text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <span class="material-symbols-outlined text-base sm:text-lg">logout</span>
+                <span class="hidden lg:inline">Logout</span>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="hidden sm:flex items-center justify-center rounded-lg h-9 sm:h-10 bg-primary text-white px-3 sm:px-4 text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors">
+                Sign In
+            </a>
+            {% endif %}
+        </div>
+    </header>
+    
+    {% include 'includes/mobile_menu.html' %}
+
+    <div class="mx-auto flex w-full max-w-[1280px] grow gap-6 lg:gap-8 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pt-16 sm:pt-20 overflow-x-hidden">
+        <!-- Sidebar Navigation (Desktop Only) -->
+        <aside id="profile-sidebar" class="hidden lg:flex w-64 flex-col gap-6 shrink-0">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+                <div class="flex flex-col mb-4">
+                    <h1 class="text-[#181411] dark:text-white text-base font-bold leading-normal">Applicant Portal</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs font-normal">People's Own Savings Bank</p>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'personal' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=personal">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                        <p class="text-sm {% if active_tab == 'personal' %}font-semibold{% else %}font-medium{% endif %}">Personal Info</p>
+                    </a>
+                    {% if user.is_applicant %}
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'education' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=education">
+                        <span class="material-symbols-outlined text-[20px]">school</span>
+                        <p class="text-sm {% if active_tab == 'education' %}font-semibold{% else %}font-medium{% endif %}">Education</p>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'experience' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=experience">
+                        <span class="material-symbols-outlined text-[20px]">work</span>
+                        <p class="text-sm {% if active_tab == 'experience' %}font-semibold{% else %}font-medium{% endif %}">Work Experience</p>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'projects' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=projects">
+                        <span class="material-symbols-outlined text-[20px]">code</span>
+                        <p class="text-sm {% if active_tab == 'projects' %}font-semibold{% else %}font-medium{% endif %}">Projects</p>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'social' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=social">
+                        <span class="material-symbols-outlined text-[20px]">public</span>
+                        <p class="text-sm {% if active_tab == 'social' %}font-semibold{% else %}font-medium{% endif %}">Social Media</p>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'documents' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=documents">
+                        <span class="material-symbols-outlined text-[20px]">description</span>
+                        <p class="text-sm {% if active_tab == 'documents' %}font-semibold{% else %}font-medium{% endif %}">Documents</p>
+                    </a>
+                    <div class="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" href="{% url 'applications:list' %}">
+                        <span class="material-symbols-outlined text-[20px]">assignment</span>
+                        <p class="text-sm font-medium">My Applications</p>
+                    </a>
+                    {% endif %}
+                    <div class="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'password' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=password">
+                        <span class="material-symbols-outlined text-[20px]">lock</span>
+                        <p class="text-sm {% if active_tab == 'password' %}font-semibold{% else %}font-medium{% endif %}">Change Password</p>
+                    </a>
+                </nav>
+                </div>
+                <!-- Progress Card -->
+                {% if user.is_applicant and applicant_profile %}
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-6 justify-between items-center">
+                            <p class="text-[#181411] dark:text-white text-sm font-bold">Profile Completion</p>
+                            <p class="text-primary text-sm font-bold leading-normal">{{ applicant_profile.completion_percentage|default:0 }}%</p>
+                        </div>
+                        <div class="rounded-full bg-gray-200 dark:bg-gray-800 h-2">
+                            <div class="h-2 rounded-full bg-primary" style="width: {{ applicant_profile.completion_percentage|default:0 }}%;"></div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs font-normal">Complete your profile to reach 100%</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col gap-6 lg:gap-8 min-w-0">
+            <!-- Mobile Profile Sections Navigation -->
+            <div class="lg:hidden bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-3 sm:p-4">
+                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'personal' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=personal">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span class="text-xs font-medium">Personal</span>
+                    </a>
+                    {% if user.is_applicant %}
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'education' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=education">
+                        <span class="material-symbols-outlined text-lg">school</span>
+                        <span class="text-xs font-medium">Education</span>
+                    </a>
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'experience' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=experience">
+                        <span class="material-symbols-outlined text-lg">work</span>
+                        <span class="text-xs font-medium">Experience</span>
+                    </a>
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'projects' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=projects">
+                        <span class="material-symbols-outlined text-lg">code</span>
+                        <span class="text-xs font-medium">Projects</span>
+                    </a>
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'social' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=social">
+                        <span class="material-symbols-outlined text-lg">public</span>
+                        <span class="text-xs font-medium">Social</span>
+                    </a>
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'documents' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=documents">
+                        <span class="material-symbols-outlined text-lg">description</span>
+                        <span class="text-xs font-medium">Documents</span>
+                    </a>
+                    {% endif %}
+                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'password' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=password">
+                        <span class="material-symbols-outlined text-lg">lock</span>
+                        <span class="text-xs font-medium">Password</span>
+                    </a>
+                </div>
+            </div>
+            <!-- Form Container -->
+            <form id="profile-form" method="post" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 w-full min-w-0 max-w-full flex flex-col max-h-[calc(100vh-180px)] overflow-y-auto overflow-x-hidden">
+                {% csrf_token %}
+                <input type="hidden" name="active_tab" value="{{ active_tab }}">
+
+                <!-- Messages -->
+                {% if messages %}
+                <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-800">
+                    {% for message in messages %}
+                    <div class="message-notification flex items-center gap-2.5 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200{% elif message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200{% elif message.tags == 'success' %}bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200{% else %}bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200{% endif %}">
+                        {% if message.tags == 'error' %}
+                        <span class="material-symbols-outlined flex-shrink-0 text-base">error</span>
+                        {% elif message.tags == 'warning' %}
+                        <span class="material-symbols-outlined flex-shrink-0 text-base">warning</span>
+                        {% elif message.tags == 'success' %}
+                        <span class="material-symbols-outlined flex-shrink-0 text-base">check_circle</span>
+                        {% else %}
+                        <span class="material-symbols-outlined flex-shrink-0 text-base">info</span>
+                        {% endif %}
+                        <p class="text-xs font-medium flex-1">{{ message }}</p>
+                        <button type="button" onclick="this.closest('.message-notification').remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0" aria-label="Close">
+                            <span class="material-symbols-outlined text-base">close</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Personal Information Section -->
+                {% if active_tab == 'personal' %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="personal">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <span class="material-symbols-outlined text-primary text-xl">person</span>
+                        <h3 class="text-lg font-bold dark:text-white">Personal Information</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Full Name</label>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                                <input type="text" name="user-first_name" value="{{ user.first_name|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="First Name">
+                                <input type="text" name="user-last_name" value="{{ user.last_name|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="Last Name">
+                            </div>
+                            {% if user_form.first_name.errors or user_form.last_name.errors %}
+                            <p class="text-xs text-red-500 mt-0.5">{{ user_form.first_name.errors.0|default:user_form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Email Address</label>
+                            <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400" type="email" value="{{ user.email }}" disabled>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Email cannot be changed</p>
+                        </div>
+                        {% if applicant_profile %}
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Phone Number</label>
+                            <input type="text" name="applicant-phone_number" value="{{ applicant_profile.phone_number|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="+263 77 123 4567">
+                            {% if applicant_form.phone_number.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.phone_number.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Date of Birth</label>
+                            <input type="date" name="applicant-date_of_birth" value="{{ applicant_profile.date_of_birth|default:''|date:'Y-m-d' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm">
+                            {% if applicant_form.date_of_birth.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.date_of_birth.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Gender</label>
+                            <select name="applicant-gender" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm">
+                                <option value="">Select Gender</option>
+                                <option value="MALE" {% if applicant_profile.gender == 'MALE' %}selected{% endif %}>Male</option>
+                                <option value="FEMALE" {% if applicant_profile.gender == 'FEMALE' %}selected{% endif %}>Female</option>
+                                <option value="OTHER" {% if applicant_profile.gender == 'OTHER' %}selected{% endif %}>Other</option>
+                                <option value="PREFER_NOT_TO_SAY" {% if applicant_profile.gender == 'PREFER_NOT_TO_SAY' %}selected{% endif %}>Prefer not to say</option>
+                            </select>
+                            {% if applicant_form.gender.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.gender.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Nationality</label>
+                            <input type="text" name="applicant-nationality" value="{{ applicant_profile.nationality|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="e.g., Zimbabwean">
+                            {% if applicant_form.nationality.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.nationality.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Location</label>
+                            <input type="text" name="applicant-city" value="{{ applicant_profile.city|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="City">
+                            {% if applicant_form.city.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.city.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Address</label>
+                            <input type="text" name="applicant-address_line_1" value="{{ applicant_profile.address_line_1|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="Street address">
+                            {% if applicant_form.address_line_1.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.address_line_1.errors.0 }}</p>{% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <input type="hidden" name="user_submit" value="1">
+                    {% if applicant_profile %}
+                    <input type="hidden" name="applicant_submit" value="1">
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Professional Summary Section -->
+                {% if active_tab == 'summary' and user.is_applicant %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="summary">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
+                        <h3 class="text-lg font-bold dark:text-white">Professional Summary</h3>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">About Yourself</label>
+                        <textarea name="applicant-professional_summary" rows="6" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary p-3 text-sm resize-y" placeholder="Write a brief professional summary about yourself, your skills, career goals, and what makes you a great candidate. This will be visible to employers.">{{ applicant_profile.professional_summary|default:'' }}</textarea>
+                        {% if applicant_form.professional_summary.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.professional_summary.errors.0 }}</p>{% endif %}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tip: Keep it concise (2-3 paragraphs) and highlight your key strengths and career objectives.</p>
+                    </div>
+                    <input type="hidden" name="applicant_submit" value="1">
+                </div>
+                {% endif %}
+
+                <!-- Education Section -->
+                {% if active_tab == 'education' and user.is_applicant %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="education">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-primary text-xl">school</span>
+                            <h3 class="text-lg font-bold dark:text-white">Education</h3>
+                        </div>
+                        <button type="button" id="add-education-btn" class="text-primary text-xs font-semibold hover:underline">+ Add Education</button>
+                    </div>
+                    <div class="flex flex-col gap-4" id="education-container">
+                        <!-- Education entries will be added here via JavaScript -->
+                    </div>
+                    <input type="hidden" name="education_json" id="education_json" value="{{ education_json|safe }}">
+                    <input type="hidden" name="education_submit" value="1">
+                </div>
+                {% endif %}
+
+                <!-- Work Experience Section -->
+                {% if active_tab == 'experience' and user.is_applicant %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="experience">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-primary text-xl">work</span>
+                            <h3 class="text-lg font-bold dark:text-white">Work Experience</h3>
+                        </div>
+                        <button type="button" id="add-experience-btn" class="text-primary text-xs font-semibold hover:underline">+ Add Experience</button>
+                    </div>
+                    <div class="flex flex-col gap-4" id="experience-container">
+                        <!-- Experience entries will be added here via JavaScript -->
+                    </div>
+                    <input type="hidden" name="experience_json" id="experience_json" value="{{ experience_json|safe }}">
+                    <input type="hidden" name="experience_submit" value="1">
+                </div>
+                {% endif %}
+
+                <!-- Projects Section -->
+                {% if active_tab == 'projects' and user.is_applicant %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="projects">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-primary text-xl">code</span>
+                            <h3 class="text-lg font-bold dark:text-white">Projects</h3>
+                        </div>
+                        <button type="button" id="add-project-btn" class="text-primary text-xs font-semibold hover:underline">+ Add Project</button>
+                    </div>
+                    <div class="flex flex-col gap-4" id="projects-container">
+                        <!-- Project entries will be added here via JavaScript -->
+                    </div>
+                    <input type="hidden" name="projects_json" id="projects_json" value="{{ projects_json|safe }}">
+                    <input type="hidden" name="projects_submit" value="1">
+                </div>
+                {% endif %}
+
+                <!-- Social Media Section -->
+                {% if active_tab == 'social' and user.is_applicant %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="social">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <span class="material-symbols-outlined text-primary text-xl">public</span>
+                        <h3 class="text-lg font-bold dark:text-white">Social Media & Online Presence</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">LinkedIn</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">work</span>
+                                <input type="url" name="applicant-linkedin_url" value="{{ applicant_profile.linkedin_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://linkedin.com/in/yourprofile">
+                            </div>
+                            {% if applicant_form.linkedin_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.linkedin_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">GitHub</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">code</span>
+                                <input type="url" name="applicant-github_url" value="{{ applicant_profile.github_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://github.com/yourusername">
+                            </div>
+                            {% if applicant_form.github_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.github_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Twitter/X</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">chat</span>
+                                <input type="url" name="applicant-twitter_url" value="{{ applicant_profile.twitter_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://twitter.com/yourusername">
+                            </div>
+                            {% if applicant_form.twitter_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.twitter_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Facebook</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">group</span>
+                                <input type="url" name="applicant-facebook_url" value="{{ applicant_profile.facebook_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://facebook.com/yourprofile">
+                            </div>
+                            {% if applicant_form.facebook_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.facebook_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Instagram</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">photo_camera</span>
+                                <input type="url" name="applicant-instagram_url" value="{{ applicant_profile.instagram_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://instagram.com/yourusername">
+                            </div>
+                            {% if applicant_form.instagram_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.instagram_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">YouTube</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">play_circle</span>
+                                <input type="url" name="applicant-youtube_url" value="{{ applicant_profile.youtube_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://youtube.com/@yourchannel">
+                            </div>
+                            {% if applicant_form.youtube_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.youtube_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Behance</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">palette</span>
+                                <input type="url" name="applicant-behance_url" value="{{ applicant_profile.behance_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://behance.net/yourprofile">
+                            </div>
+                            {% if applicant_form.behance_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.behance_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Dribbble</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">brush</span>
+                                <input type="url" name="applicant-dribbble_url" value="{{ applicant_profile.dribbble_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://dribbble.com/yourusername">
+                            </div>
+                            {% if applicant_form.dribbble_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.dribbble_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Medium</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">article</span>
+                                <input type="url" name="applicant-medium_url" value="{{ applicant_profile.medium_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://medium.com/@yourusername">
+                            </div>
+                            {% if applicant_form.medium_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.medium_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Stack Overflow</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">help</span>
+                                <input type="url" name="applicant-stackoverflow_url" value="{{ applicant_profile.stackoverflow_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://stackoverflow.com/users/yourid">
+                            </div>
+                            {% if applicant_form.stackoverflow_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.stackoverflow_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 md:col-span-2">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Portfolio / Personal Website</label>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-400 text-base">language</span>
+                                <input type="url" name="applicant-portfolio_url" value="{{ applicant_profile.portfolio_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://yourportfolio.com">
+                            </div>
+                            {% if applicant_form.portfolio_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.portfolio_url.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    <input type="hidden" name="applicant_submit" value="1">
+                </div>
+                {% endif %}
+
+                <!-- Documents Section -->
+                {% if active_tab == 'documents' and user.is_applicant %}
+                <div class="p-4 sm:p-6" id="documents">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <span class="material-symbols-outlined text-primary text-xl">description</span>
+                        <h3 class="text-lg font-bold dark:text-white">Documents</h3>
+                    </div>
+                    
+                    <!-- Upload Form -->
+                    <div class="mb-6 bg-gray-50 dark:bg-gray-800/50 p-5 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24]">
+                        <h4 class="text-xs font-semibold text-[#181411] dark:text-white mb-4">Upload New Document</h4>
+                        <form method="post" enctype="multipart/form-data" class="space-y-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="document_upload" value="1">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="flex flex-col gap-1.5 min-w-0">
+                                    <label class="text-xs font-semibold text-[#181411] dark:text-white">Document Type *</label>
+                                    <select name="document_type" required class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm">
+                                        <option value="">Select Type</option>
+                                        <option value="CV">Curriculum Vitae / Resume</option>
+                                        <option value="BACHELORS_DEGREE">Bachelor's Degree Certificate</option>
+                                        <option value="MASTERS_DEGREE">Master's Degree Certificate</option>
+                                        <option value="DOCTORATE_DEGREE">Doctorate Degree Certificate</option>
+                                        <option value="DIPLOMA">Diploma Certificate</option>
+                                        <option value="TRANSCRIPT">Academic Transcript</option>
+                                        <option value="CERTIFICATE">Professional Certificate</option>
+                                        <option value="COVER_LETTER">Cover Letter</option>
+                                        <option value="ID_COPY">ID Copy / Passport</option>
+                                        <option value="REFERENCE_LETTER">Reference Letter</option>
+                                        <option value="PORTFOLIO">Portfolio</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                    {% if document_form.document_type.errors %}<p class="text-xs text-red-500 mt-1">{{ document_form.document_type.errors.0 }}</p>{% endif %}
+                                </div>
+                                <div class="flex flex-col gap-1.5 min-w-0">
+                                    <label class="text-xs font-semibold text-[#181411] dark:text-white">File *</label>
+                                    <input type="file" name="file" accept=".pdf,.doc,.docx" required class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90">
+                                    {% if document_form.file.errors %}<p class="text-xs text-red-500 mt-0.5">{{ document_form.file.errors.0 }}</p>{% endif %}
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">PDF, DOC, DOCX (Max 10MB)</p>
+                                </div>
+                                <div class="flex flex-col gap-1.5 min-w-0">
+                                    <label class="text-xs font-semibold text-[#181411] dark:text-white">Description (Optional)</label>
+                                    <input type="text" name="description" placeholder="e.g., Updated CV 2024" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm">
+                                    {% if document_form.description.errors %}<p class="text-xs text-red-500 mt-0.5">{{ document_form.description.errors.0 }}</p>{% endif %}
+                                </div>
+                            </div>
+                            <button type="submit" class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-xs font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                                <span class="material-symbols-outlined text-base">upload</span>
+                                <span>Upload Document</span>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Uploaded Documents List -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-[#181411] dark:text-white mb-4">Uploaded Documents</h4>
+                        {% if uploaded_documents %}
+                        <div class="space-y-3">
+                            {% for doc in uploaded_documents %}
+                            <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="bg-primary/10 p-3 rounded-lg">
+                                        <span class="material-symbols-outlined text-primary">description</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ doc.get_document_type_display }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ doc.file_name }}</p>
+                                        {% if doc.description %}
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ doc.description }}</p>
+                                        {% endif %}
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Uploaded {{ doc.uploaded_at|date:"M d, Y" }} • {{ doc.get_file_size_display }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ doc.file.url }}" target="_blank" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="View">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </a>
+                                    <form method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this document?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="document_delete" value="1">
+                                        <input type="hidden" name="document_id" value="{{ doc.id }}">
+                                        <button type="submit" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete">
+                                            <span class="material-symbols-outlined text-lg">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <span class="material-symbols-outlined text-gray-400 text-4xl mb-2">folder_open</span>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">No documents uploaded yet</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Upload your documents above to get started</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Password Section -->
+                {% if active_tab == 'password' %}
+                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="password">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
+                        <span class="material-symbols-outlined text-primary text-xl">lock</span>
+                        <h3 class="text-lg font-bold dark:text-white">Change Password</h3>
+                    </div>
+
+                    {% if password_form.non_field_errors %}
+                    <div class="mb-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                        {% for error in password_form.non_field_errors %}
+                        <p class="text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <div class="flex flex-col gap-1.5 md:col-span-2">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Current Password</label>
+                            <div class="relative">
+                                <input type="password" id="current-password-input" name="password-current_password" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 pr-10 text-sm" placeholder="Enter current password" required>
+                                <button type="button" id="toggle-current-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+                                    <span class="material-symbols-outlined text-base" id="current-password-icon">visibility</span>
+                                </button>
+                            </div>
+                            {% if password_form.current_password.errors %}<p class="text-xs text-red-500 mt-0.5">{{ password_form.current_password.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">New Password</label>
+                            <div class="relative">
+                                <input type="password" id="new-password-input" name="password-new_password1" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 pr-10 text-sm" placeholder="Minimum 8 characters" required>
+                                <button type="button" id="toggle-new-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+                                    <span class="material-symbols-outlined text-base" id="new-password-icon">visibility</span>
+                                </button>
+                            </div>
+                            {% if password_form.new_password1.errors %}<p class="text-xs text-red-500 mt-0.5">{{ password_form.new_password1.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex flex-col gap-1.5 min-w-0">
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Confirm New Password</label>
+                            <div class="relative">
+                                <input type="password" id="confirm-password-input" name="password-new_password2" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 pr-10 text-sm" placeholder="Re-enter new password" required>
+                                <button type="button" id="toggle-confirm-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10">
+                                    <span class="material-symbols-outlined text-base" id="confirm-password-icon">visibility</span>
+                                </button>
+                            </div>
+                            {% if password_form.new_password2.errors %}<p class="text-xs text-red-500 mt-0.5">{{ password_form.new_password2.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="password_submit" value="1">
+                </div>
+                {% endif %}
+            </form>
+
+            <!-- Sticky Footer Form Actions -->
+            {% if active_tab != 'documents' %}
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 border-t border-gray-100 dark:border-gray-700 rounded-xl">
+                <p class="hidden sm:block self-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">Last saved: <span id="last-saved">Just now</span></p>
+                <button type="submit" form="profile-form" class="flex items-center justify-center gap-2 rounded-lg min-h-[44px] w-full sm:w-auto px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-xs font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark py-4">
+        <div class="max-w-7xl mx-auto px-6 lg:px-10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <p>© 2026 POSB Bank. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="size-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-xl">warning</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Confirm Action</h3>
+        </div>
+        <p id="confirm-modal-message" class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to proceed?</p>
+        <div class="flex gap-3 justify-end">
+            <button type="button" id="confirm-modal-cancel" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                Cancel
+            </button>
+            <button type="button" id="confirm-modal-confirm" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Custom Confirmation Modal
+    let confirmCallback = null;
+    
+    function showConfirmModal(message, callback) {
+        document.getElementById('confirm-modal-message').textContent = message;
+        confirmCallback = callback;
+        document.getElementById('confirm-modal').classList.remove('hidden');
+        document.getElementById('confirm-modal').classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function hideConfirmModal() {
+        document.getElementById('confirm-modal').classList.add('hidden');
+        document.getElementById('confirm-modal').classList.remove('flex');
+        document.body.style.overflow = '';
+        confirmCallback = null;
+    }
+    
+    document.getElementById('confirm-modal-cancel')?.addEventListener('click', hideConfirmModal);
+    document.getElementById('confirm-modal-confirm')?.addEventListener('click', () => {
+        if (confirmCallback) {
+            const callback = confirmCallback;
+            hideConfirmModal(); // Hide modal first
+            callback(); // Then execute callback
+        } else {
+            hideConfirmModal();
+        }
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('confirm-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'confirm-modal') {
+            hideConfirmModal();
+        }
+    });
+    
+    // Update last saved time
+    function updateLastSaved() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('last-saved').textContent = timeString;
+    }
+
+    // Education Management
+    {% if active_tab == 'education' and user.is_applicant %}
+    let educationData = {{ education_json|safe }};
+    
+    function renderEducation() {
+        const container = document.getElementById('education-container');
+        container.innerHTML = '';
+        
+        educationData.forEach((edu, index) => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-dashed border-[#e6e0db] dark:border-[#3d2e24]';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5 md:col-span-2">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Institution</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm education-field" 
+                               type="text" placeholder="University Name" value="${edu.institution || ''}" data-index="${index}" data-field="institution">
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Degree</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm education-field" 
+                               type="text" placeholder="Degree Name" value="${edu.degree || ''}" data-index="${index}" data-field="degree">
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Graduation Year</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm education-field" 
+                               type="text" placeholder="2020" value="${edu.end_year || ''}" data-index="${index}" data-field="end_year">
+                    </div>
+                    <div class="flex items-center justify-end md:col-span-2">
+                        <button type="button" class="remove-education text-red-500 hover:text-red-700 text-xs font-medium" data-index="${index}">Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        updateEducationJSON();
+    }
+    
+    function addEducation() {
+        educationData.push({ institution: '', degree: '', end_year: '' });
+        renderEducation();
+    }
+    
+    function removeEducation(index) {
+        if (index < 0 || index >= educationData.length) return;
+        showConfirmModal('Are you sure you want to remove this education entry?', () => {
+            educationData.splice(index, 1);
+            updateEducationJSON();
+            renderEducation();
+            // Auto-submit form to save changes
+            document.getElementById('profile-form').submit();
+        });
+    }
+    
+    function updateEducationJSON() {
+        document.getElementById('education_json').value = JSON.stringify(educationData);
+    }
+    
+    document.getElementById('add-education-btn')?.addEventListener('click', addEducation);
+    document.getElementById('education-container')?.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-education')) {
+            const index = parseInt(e.target.closest('.remove-education').dataset.index);
+            removeEducation(index);
+        }
+    });
+    document.getElementById('education-container')?.addEventListener('input', (e) => {
+        if (e.target.classList.contains('education-field')) {
+            const index = parseInt(e.target.dataset.index);
+            const field = e.target.dataset.field;
+            educationData[index][field] = e.target.value;
+            updateEducationJSON();
+        }
+    });
+    
+    renderEducation();
+    {% endif %}
+    
+    // Experience Management
+    {% if active_tab == 'experience' and user.is_applicant %}
+    let experienceData = {{ experience_json|safe }};
+    
+    function renderExperience() {
+        const container = document.getElementById('experience-container');
+        container.innerHTML = '';
+        
+        experienceData.forEach((exp, index) => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-dashed border-[#e6e0db] dark:border-[#3d2e24]';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Job Title *</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm experience-field" 
+                               type="text" placeholder="Job Title" value="${exp.position || ''}" data-index="${index}" data-field="position" required>
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Company *</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm experience-field" 
+                               type="text" placeholder="Company Name" value="${exp.company || ''}" data-index="${index}" data-field="company" required>
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Start Date *</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm experience-field" 
+                               type="date" value="${exp.start_date || ''}" data-index="${index}" data-field="start_date" required>
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">End Date</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm experience-field" 
+                               type="date" value="${exp.end_date || ''}" data-index="${index}" data-field="end_date">
+                    </div>
+                    <div class="flex flex-col gap-1.5 md:col-span-2 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Job Description & Key Achievements</label>
+                        <textarea class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary p-3 text-sm resize-y experience-field" 
+                                  placeholder="Describe your responsibilities, key achievements, and impact in this role..." rows="4" data-index="${index}" data-field="responsibilities">${exp.responsibilities || ''}</textarea>
+                    </div>
+                    <div class="flex items-center justify-end md:col-span-2">
+                        <button type="button" class="remove-experience text-red-500 hover:text-red-700 text-xs font-medium" data-index="${index}">Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        updateExperienceJSON();
+    }
+    
+    function addExperience() {
+        experienceData.push({ 
+            company: '', 
+            position: '', 
+            start_date: '', 
+            end_date: '', 
+            responsibilities: '' 
+        });
+        renderExperience();
+    }
+    
+    function removeExperience(index) {
+        if (index < 0 || index >= experienceData.length) return;
+        showConfirmModal('Are you sure you want to remove this work experience entry?', () => {
+            experienceData.splice(index, 1);
+            updateExperienceJSON();
+            renderExperience();
+            // Auto-submit form to save changes
+            document.getElementById('profile-form').submit();
+        });
+    }
+    
+    function updateExperienceJSON() {
+        document.getElementById('experience_json').value = JSON.stringify(experienceData);
+    }
+    
+    document.getElementById('add-experience-btn')?.addEventListener('click', addExperience);
+    document.getElementById('experience-container')?.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-experience')) {
+            const index = parseInt(e.target.closest('.remove-experience').dataset.index);
+            removeExperience(index);
+        }
+    });
+    document.getElementById('experience-container')?.addEventListener('input', (e) => {
+        if (e.target.classList.contains('experience-field')) {
+            const index = parseInt(e.target.dataset.index);
+            const field = e.target.dataset.field;
+            experienceData[index][field] = e.target.value;
+            updateExperienceJSON();
+        }
+    });
+    
+    
+    renderExperience();
+    {% endif %}
+    
+    // Projects Management
+    {% if active_tab == 'projects' and user.is_applicant %}
+    let projectsData = {{ projects_json|safe }};
+    
+    function renderProjects() {
+        const container = document.getElementById('projects-container');
+        container.innerHTML = '';
+        
+        projectsData.forEach((project, index) => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-dashed border-[#e6e0db] dark:border-[#3d2e24]';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="flex flex-col gap-1.5 md:col-span-2 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Project Name *</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
+                               type="text" placeholder="Project Name" value="${project.name || ''}" data-index="${index}" data-field="name" required>
+                    </div>
+                    <div class="flex flex-col gap-1.5 md:col-span-2 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Description *</label>
+                        <textarea class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary p-3 text-sm resize-y project-field" 
+                                  placeholder="Describe your project, its purpose, and key features..." rows="3" data-index="${index}" data-field="description" required>${project.description || ''}</textarea>
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Technologies Used</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
+                               type="text" placeholder="React, Node.js, MongoDB" value="${project.technologies || ''}" data-index="${index}" data-field="technologies">
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Project URL</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
+                               type="url" placeholder="https://project-demo.com" value="${project.url || ''}" data-index="${index}" data-field="url">
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Start Date</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
+                               type="date" value="${project.start_date || ''}" data-index="${index}" data-field="start_date">
+                    </div>
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <label class="text-xs font-semibold text-[#181411] dark:text-white">End Date</label>
+                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
+                               type="date" value="${project.end_date || ''}" data-index="${index}" data-field="end_date" ${project.current ? 'disabled' : ''}>
+                    </div>
+                    <div class="flex items-center gap-2 md:col-span-2">
+                        <input type="checkbox" class="project-current-checkbox rounded border-gray-300 text-primary focus:ring-primary" 
+                               data-index="${index}" ${project.current ? 'checked' : ''} id="proj-current-${index}">
+                        <label for="proj-current-${index}" class="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">Ongoing project</label>
+                    </div>
+                    <div class="flex items-center justify-end md:col-span-2">
+                        <button type="button" class="remove-project text-red-500 hover:text-red-700 text-xs font-medium" data-index="${index}">Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        updateProjectsJSON();
+    }
+    
+    function addProject() {
+        projectsData.push({ 
+            name: '', 
+            description: '', 
+            technologies: '',
+            url: '',
+            start_date: '', 
+            end_date: '', 
+            current: false
+        });
+        renderProjects();
+    }
+    
+    function removeProject(index) {
+        if (index < 0 || index >= projectsData.length) return;
+        showConfirmModal('Are you sure you want to remove this project?', () => {
+            projectsData.splice(index, 1);
+            updateProjectsJSON();
+            renderProjects();
+            // Auto-submit form to save changes
+            document.getElementById('profile-form').submit();
+        });
+    }
+    
+    function updateProjectsJSON() {
+        document.getElementById('projects_json').value = JSON.stringify(projectsData);
+    }
+    
+    document.getElementById('add-project-btn')?.addEventListener('click', addProject);
+    document.getElementById('projects-container')?.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-project')) {
+            const index = parseInt(e.target.closest('.remove-project').dataset.index);
+            removeProject(index);
+        }
+    });
+    document.getElementById('projects-container')?.addEventListener('input', (e) => {
+        if (e.target.classList.contains('project-field')) {
+            const index = parseInt(e.target.dataset.index);
+            const field = e.target.dataset.field;
+            projectsData[index][field] = e.target.value;
+            updateProjectsJSON();
+        }
+    });
+    
+    // Handle "current" checkbox for projects
+    document.getElementById('projects-container')?.addEventListener('change', (e) => {
+        if (e.target.classList.contains('project-current-checkbox')) {
+            const index = parseInt(e.target.dataset.index);
+            const isCurrent = e.target.checked;
+            projectsData[index].current = isCurrent;
+            
+            // Disable/enable end date field
+            const endDateInput = document.querySelector(`input[data-index="${index}"][data-field="end_date"]`);
+            if (endDateInput) {
+                if (isCurrent) {
+                    endDateInput.disabled = true;
+                    endDateInput.value = '';
+                    projectsData[index].end_date = '';
+                } else {
+                    endDateInput.disabled = false;
+                }
+            }
+            updateProjectsJSON();
+        }
+    });
+    
+    renderProjects();
+    {% endif %}
+
+    // Handle form field styling
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+        if (!input.classList.contains('education-field') && !input.classList.contains('experience-field') && !input.classList.contains('project-field') && input.type !== 'hidden' && !input.disabled) {
+            input.className = 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4';
+            if (input.tagName === 'TEXTAREA') {
+                input.className = input.className.replace('h-11', 'p-3');
+            }
+        }
+    });
+
+    // File input styling
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            const label = this.nextElementSibling;
+            if (label && label.tagName === 'LABEL') {
+                label.textContent = fileName;
+            }
+        });
+    });
+    
+    // Password visibility toggles
+    {% if active_tab == 'password' %}
+    const currentPasswordInput = document.getElementById('current-password-input');
+    const currentPasswordToggle = document.getElementById('toggle-current-password');
+    const currentPasswordIcon = document.getElementById('current-password-icon');
+    
+    const newPasswordInput = document.getElementById('new-password-input');
+    const newPasswordToggle = document.getElementById('toggle-new-password');
+    const newPasswordIcon = document.getElementById('new-password-icon');
+    
+    const confirmPasswordInput = document.getElementById('confirm-password-input');
+    const confirmPasswordToggle = document.getElementById('toggle-confirm-password');
+    const confirmPasswordIcon = document.getElementById('confirm-password-icon');
+    
+    // Current password toggle
+    if (currentPasswordToggle && currentPasswordInput && currentPasswordIcon) {
+        currentPasswordToggle.addEventListener('click', () => {
+            const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            currentPasswordInput.setAttribute('type', type);
+            currentPasswordIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
+    
+    // New password toggle
+    if (newPasswordToggle && newPasswordInput && newPasswordIcon) {
+        newPasswordToggle.addEventListener('click', () => {
+            const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            newPasswordInput.setAttribute('type', type);
+            newPasswordIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
+    
+    // Confirm password toggle
+    if (confirmPasswordToggle && confirmPasswordInput && confirmPasswordIcon) {
+        confirmPasswordToggle.addEventListener('click', () => {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            confirmPasswordIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
+    {% endif %}
+    
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+        openMobileMenu();
+    });
+    
+    // Close mobile menu on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMobileMenu();
+        }
+    });
+</script>
+
+<style>
+/* Prevent width overflow on all form elements */
+input, select, textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure grid items don't overflow */
+.grid > * {
+    min-width: 0;
+}
+
+/* Make form card scrollable */
+#profile-form {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure smooth scrolling on mobile */
+@media (max-width: 1024px) {
+    #profile-form {
+        max-height: calc(100vh - 200px);
+    }
+}
+
+/* Mobile tabs horizontal scroll styling */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure all form containers respect width */
+form, .bg-white, .bg-gray-900 {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Fix for grid columns on mobile */
+@media (max-width: 768px) {
+    .grid.grid-cols-1.md\:grid-cols-2 > * {
+        grid-column: span 1;
+    }
+}
+</style>
+{% endblock %}

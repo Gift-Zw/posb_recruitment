@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}POSB Recruitment | People's Own Savings Bank{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f68322",
+                        "posb-blue": "#004a99",
+                        "background-light": "#fcfcfc",
+                        "background-dark": "#1a1a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .posb-gradient {
+            background: linear-gradient(135deg, #f68322 0%, #d96e14 100%);
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 640px) {
+            /* Prevent zoom on iOS when focusing inputs */
+            input[type="text"],
+            input[type="email"],
+            input[type="tel"],
+            input[type="date"],
+            input[type="number"],
+            input[type="url"],
+            input[type="password"],
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+            
+            /* Ensure touch-friendly buttons */
+            button,
+            a[role="button"],
+            .btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Better spacing on mobile */
+            .space-y-6 > * + * {
+                margin-top: 1rem;
+            }
+            
+            .space-y-4 > * + * {
+                margin-top: 0.75rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#1a1a1a] dark:text-white transition-colors duration-200">
+    {% block messages %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+                {% for message in messages %}
+                    <div class="message-notification bg-white dark:bg-stone-900 border border-gray-200 dark:border-stone-700 rounded-lg shadow-lg p-4 animate-in fade-in slide-in-from-top">
+                        <div class="flex items-start gap-3">
+                            {% if message.tags == 'error' %}
+                                <span class="material-symbols-outlined text-red-500 flex-shrink-0">error</span>
+                            {% elif message.tags == 'success' %}
+                                <span class="material-symbols-outlined text-green-500 flex-shrink-0">check_circle</span>
+                            {% elif message.tags == 'warning' %}
+                                <span class="material-symbols-outlined text-yellow-500 flex-shrink-0">warning</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-blue-500 flex-shrink-0">info</span>
+                            {% endif %}
+                            <p class="text-sm font-medium text-stone-900 dark:text-white flex-1">{{ message }}</p>
+                            <button type="button" onclick="this.closest('.message-notification').remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0" aria-label="Close">
+                                <span class="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endblock %}
+    
+    {% block content %}{% endblock %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

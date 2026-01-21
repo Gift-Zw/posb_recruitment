@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Applications | POSB Careers{% endblock %}
+
+{% block content %}
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-4 sm:px-6 lg:px-10 py-3">
+    <div class="flex items-center gap-2 sm:gap-4">
+        <button id="mobile-menu-btn" class="md:hidden p-2 -ml-2 text-gray-700 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Toggle menu">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <a href="{% url 'home' %}" class="flex items-center">
+            <img src="{% static 'images/logo.png' %}" alt="POSB Zimbabwe" class="h-7 sm:h-8 w-auto"/>
+        </a>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-6 lg:gap-9">
+            {% if user.is_authenticated %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'applicant-profile' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applicant-profile' %}">My Profile</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'jobs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:list' %}">Jobs</a>
+            {% if user.is_applicant %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'applications' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'applications:list' %}">My Applications</a>
+            {% endif %}
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors {% if request.resolver_match.url_name == 'faqs' %}text-primary font-bold{% else %}text-gray-700 dark:text-gray-300{% endif %}" href="{% url 'jobs:faqs' %}">FAQs</a>
+        </div>
+        <!-- User Actions -->
+        {% if user.is_authenticated %}
+        <div class="hidden sm:flex bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 sm:size-10 border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/40 items-center justify-center">
+            <span class="text-primary font-bold text-xs sm:text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg h-9 sm:h-10 bg-gray-100 dark:bg-gray-800 text-[#181411] dark:text-white px-3 sm:px-4 text-xs sm:text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <span class="material-symbols-outlined text-base sm:text-lg">logout</span>
+            <span class="hidden lg:inline">Logout</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="hidden sm:flex items-center justify-center rounded-lg h-9 sm:h-10 bg-primary text-white px-3 sm:px-4 text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors">
+            Sign In
+        </a>
+        {% endif %}
+    </div>
+</header>
+
+{% include 'includes/mobile_menu.html' %}
+
+<main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-20 py-6 sm:py-8 overflow-x-hidden">
+    <!-- Breadcrumbs -->
+    <nav class="flex flex-wrap items-center gap-2 mb-6">
+        <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1" href="{% url 'home' %}">
+            <span class="material-symbols-outlined text-base">home</span>
+            <span>Home</span>
+        </a>
+        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#181411] dark:text-white text-sm font-semibold">My Applications</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-bold text-[#181411] dark:text-white">My Applications</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Track the status of your job applications</p>
+        </div>
+        <a href="{% url 'jobs:list' %}" class="flex items-center justify-center gap-2 rounded-lg min-h-[44px] w-full sm:w-auto px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-sm font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+            <span class="material-symbols-outlined text-base">search</span>
+            <span>Browse Jobs</span>
+        </a>
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="size-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base">assignment</span>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ total_applications }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="size-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-base">visibility</span>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ under_review }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Under Review</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="size-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-base">check_circle</span>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ shortlisted }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Shortlisted</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="size-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-base">cancel</span>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ rejected }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Rejected</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    {% if applications %}
+    <div class="bg-white dark:bg-[#1c140d] rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24] overflow-hidden">
+        <div class="divide-y divide-[#e6e0db] dark:divide-[#3d2e24]">
+            {% for application in applications %}
+            <div class="p-5 hover:bg-gray-50/50 dark:hover:bg-[#2d241d] transition-colors">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <h3 class="text-base font-bold text-[#181411] dark:text-white">
+                                <a href="{% url 'applications:detail' application.pk %}" class="hover:text-primary transition-colors">
+                                    {{ application.job_advert.title }}
+                                </a>
+                            </h3>
+                            {% if application.status == 'SHORTLISTED' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                <span class="material-symbols-outlined text-xs mr-1">check_circle</span>
+                                Shortlisted
+                            </span>
+                            {% elif application.status == 'UNDER_REVIEW' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-xs mr-1">visibility</span>
+                                Under Review
+                            </span>
+                            {% elif application.status == 'REJECTED' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                <span class="material-symbols-outlined text-xs mr-1">cancel</span>
+                                Rejected
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
+                                <span class="material-symbols-outlined text-xs mr-1">schedule</span>
+                                Submitted
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-2">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">business</span>
+                                <span>{{ application.job_advert.category.name }}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">event</span>
+                                <span>Applied {{ application.submitted_at|date:"M d, Y" }}</span>
+                            </div>
+                            {% if application.ai_score %}
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">psychology</span>
+                                <span>AI Score: {{ application.ai_score|floatformat:1 }}/100</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if application.ai_explanation %}
+                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ application.ai_explanation|truncatewords:30 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'applications:detail' application.pk %}" class="flex items-center justify-center rounded-lg min-h-[44px] flex-1 sm:flex-none px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            View Details
+                        </a>
+                        <a href="{% url 'jobs:detail' pk=application.job_advert.pk %}" class="flex items-center justify-center rounded-lg min-h-[44px] flex-1 sm:flex-none px-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-xs font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                            View Job
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white dark:bg-[#1c140d] rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24] p-12 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="size-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-3xl">assignment</span>
+            </div>
+            <h3 class="text-lg font-bold text-[#181411] dark:text-white mb-2">No Applications Yet</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">You haven't submitted any job applications yet. Start browsing available positions and apply today!</p>
+            <a href="{% url 'jobs:list' %}" class="inline-flex items-center justify-center gap-2 rounded-lg min-h-[44px] w-full sm:w-auto px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-sm font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+                <span class="material-symbols-outlined text-base">search</span>
+                <span>Browse Jobs</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <p>© 2026 POSB Bank. All rights reserved.</p>
+        </div>
+    </div>
+    </footer>
+</div>
+
+{% block extra_js %}
+<script>
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+        openMobileMenu();
+    });
+</script>
+{% endblock %}
+{% endblock %}

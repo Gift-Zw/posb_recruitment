@@ -1,0 +1,207 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}{{ profile.user.get_full_name|default:profile.user.email }} Profile | POSB HR Management{% endblock %}
+
+{% block page_title %}Applicant Profile{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-3">
+    <a href="{% url 'management:applications_management:list' %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        <span>Back to Applications</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Profile Header -->
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ profile.user.get_full_name|default:profile.user.email }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ profile.user.email }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Profile Completion: {{ profile.completion_percentage }}%</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Updated</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ profile.updated_at|date:"M d, Y" }}</p>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        {% if profile.phone_number or profile.email %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+            {% if profile.phone_number %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phone</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile.phone_number }}</p></div>{% endif %}
+            {% if profile.email %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile.email }}</p></div>{% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Professional Summary -->
+        {% if profile.professional_summary %}
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Professional Summary</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ profile.professional_summary }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Education -->
+    {% if profile.education %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Education</h2>
+        <div class="space-y-4">
+            {% for edu in profile.education %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ edu.degree }}{% if edu.field %} in {{ edu.field }}{% endif %}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ edu.institution }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ edu.start_year }} - {{ edu.end_year|default:"Present" }}</p>
+                {% if edu.gpa %}<p class="text-xs text-gray-500 dark:text-gray-400">GPA: {{ edu.gpa }}</p>{% endif %}
+                {% if edu.honors %}<p class="text-xs text-gray-500 dark:text-gray-400">Honors: {{ edu.honors }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Work Experience -->
+    {% if profile.experience %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Work Experience</h2>
+        <div class="space-y-4">
+            {% for exp in profile.experience %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ exp.position }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ exp.company }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ exp.start_date }} - {{ exp.end_date|default:"Present" }}</p>
+                {% if exp.responsibilities %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">{{ exp.responsibilities }}</p>{% endif %}
+                {% if exp.achievements %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">Achievements: {{ exp.achievements }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Skills -->
+    {% if profile.skills.exists %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Skills</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for skill in profile.skills.all %}
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{{ skill.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Languages -->
+    {% if profile.languages %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Languages</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for lang in profile.languages %}
+            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm">{{ lang.language }} ({{ lang.proficiency }})</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Certifications -->
+    {% if profile.certifications %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Certifications</h2>
+        <div class="space-y-4">
+            {% for cert in profile.certifications %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ cert.name }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ cert.issuing_organization }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Issued: {{ cert.issue_date }}</p>
+                {% if cert.expiry_date %}<p class="text-xs text-gray-500 dark:text-gray-400">Expires: {{ cert.expiry_date }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Projects -->
+    {% if profile.projects %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Projects</h2>
+        <div class="space-y-4">
+            {% for project in profile.projects %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ project.name }}</h4>
+                {% if project.description %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ project.description }}</p>{% endif %}
+                {% if project.technologies %}<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Technologies: {{ project.technologies }}</p>{% endif %}
+                {% if project.url %}<a href="{{ project.url }}" target="_blank" class="text-primary hover:underline text-xs mt-1 inline-block">View Project →</a>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Social Media Links -->
+    {% if profile.linkedin_url or profile.github_url or profile.portfolio_url %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Online Presence</h2>
+        <div class="flex flex-wrap gap-3">
+            {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm">LinkedIn</a>{% endif %}
+            {% if profile.github_url %}<a href="{{ profile.github_url }}" target="_blank" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">GitHub</a>{% endif %}
+            {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" target="_blank" class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm">Portfolio</a>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Documents -->
+    {% if profile.documents.exists %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Documents</h2>
+        <div class="space-y-3">
+            {% for doc in profile.documents.all %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">description</span>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ doc.file_name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ doc.get_document_type_display }} • {{ doc.get_file_size_display }} • {{ doc.uploaded_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <a href="{{ doc.file.url }}" target="_blank" class="text-primary hover:text-primary/80 transition-colors">
+                    <span class="material-symbols-outlined">open_in_new</span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Application History -->
+    {% if applications %}
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Application History</h2>
+        <div class="space-y-3">
+            {% for app in applications %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div>
+                    <a href="{% url 'management:applications_management:detail' pk=app.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors">{{ app.job_advert.title }}</a>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ app.job_advert.category.name }} • Applied {{ app.submitted_at|date:"M d, Y" }}</p>
+                </div>
+                <div>
+                    {% if app.status == 'SHORTLISTED' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Shortlisted</span>
+                    {% elif app.status == 'UNDER_REVIEW' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Under Review</span>
+                    {% elif app.status == 'REJECTED' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Rejected</span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">Submitted</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

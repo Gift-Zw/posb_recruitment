@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Search &amp; Listings | POSB Careers</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f68223",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221810",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom checkbox tick for the specific checklist component */
+        .custom-checkbox {
+            --checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27white%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#181411] dark:text-white min-h-screen">
+<div class="flex flex-col min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-white dark:bg-[#1c140d] border-b border-[#e6e0db] dark:border-[#3d2e24] px-6 lg:px-20 py-3">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_319)">
+<path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+</g>
+<defs>
+<clippath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clippath>
+</defs>
+</svg>
+</div>
+<h2 class="text-[#181411] dark:text-white text-xl font-bold leading-tight tracking-tight">POSB Jobs</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-center gap-10">
+<a class="text-[#181411] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors" href="#">Explore Jobs</a>
+<a class="text-[#181411] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors" href="#">About POSB</a>
+<a class="text-[#181411] dark:text-gray-200 text-sm font-medium hover:text-primary transition-colors" href="#">Help Center</a>
+</div>
+<div class="flex gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold tracking-wide hover:bg-opacity-90 transition-all">
+<span>Sign In</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#f5f2f0] dark:bg-[#3d2e24] text-[#181411] dark:text-white text-sm font-bold hover:bg-opacity-80 transition-all">
+<span>Register</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-7xl mx-auto w-full px-6 lg:px-20 py-8">
+<div class="flex flex-col md:flex-row gap-8">
+<!-- Sidebar Filters -->
+<aside class="w-full md:w-64 shrink-0">
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-5 sticky top-24">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h1 class="text-[#181411] dark:text-white text-lg font-bold">Filters</h1>
+<p class="text-[#8a7360] dark:text-gray-400 text-xs">Refine your job search</p>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-xl cursor-pointer hover:text-primary">tune</span>
+</div>
+<!-- Category Filter -->
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-3 text-primary">
+<span class="material-symbols-outlined text-xl">work</span>
+<span class="text-sm font-bold uppercase tracking-wider">Category</span>
+</div>
+<div class="space-y-1">
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input checked="" class="h-5 w-5 rounded border-[#e6e0db] border-2 bg-transparent text-primary focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary" type="checkbox"/>
+<span class="text-[#181411] dark:text-gray-200 text-sm group-hover:text-primary">Technology</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="h-5 w-5 rounded border-[#e6e0db] border-2 bg-transparent text-primary focus:ring-primary focus:ring-offset-0" type="checkbox"/>
+<span class="text-[#181411] dark:text-gray-200 text-sm group-hover:text-primary">Banking &amp; Finance</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="h-5 w-5 rounded border-[#e6e0db] border-2 bg-transparent text-primary focus:ring-primary focus:ring-offset-0" type="checkbox"/>
+<span class="text-[#181411] dark:text-gray-200 text-sm group-hover:text-primary">Customer Service</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="h-5 w-5 rounded border-[#e6e0db] border-2 bg-transparent text-primary focus:ring-primary focus:ring-offset-0" type="checkbox"/>
+<span class="text-[#181411] dark:text-gray-200 text-sm group-hover:text-primary">Operations</span>
+</label>
+</div>
+</div>
+<!-- Location Filter -->
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-3 text-primary">
+<span class="material-symbols-outlined text-xl">location_on</span>
+<span class="text-sm font-bold uppercase tracking-wider">Location</span>
+</div>
+<div class="grid grid-cols-1 gap-2">
+<label class="text-xs font-semibold flex items-center px-3 h-9 rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-gray-300 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary relative cursor-pointer transition-all">
+                                    Singapore - Central
+                                    <input checked="" class="invisible absolute" name="location" type="radio"/>
+</label>
+<label class="text-xs font-semibold flex items-center px-3 h-9 rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-gray-300 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary relative cursor-pointer transition-all">
+                                    Singapore - West
+                                    <input class="invisible absolute" name="location" type="radio"/>
+</label>
+<label class="text-xs font-semibold flex items-center px-3 h-9 rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-gray-300 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary relative cursor-pointer transition-all">
+                                    Remote
+                                    <input class="invisible absolute" name="location" type="radio"/>
+</label>
+</div>
+</div>
+<!-- Date Posted Filter -->
+<div>
+<div class="flex items-center gap-2 mb-3 text-primary">
+<span class="material-symbols-outlined text-xl">calendar_today</span>
+<span class="text-sm font-bold uppercase tracking-wider">Date Posted</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#f5f2f0] dark:bg-[#3d2e24] px-4 cursor-pointer hover:bg-primary/10 transition-colors">
+<p class="text-[#181411] dark:text-white text-xs font-medium">Last 24 hours</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-primary/20 px-4 cursor-pointer ring-1 ring-primary">
+<p class="text-primary text-xs font-bold">Last 7 days</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-[#f5f2f0] dark:bg-[#3d2e24] px-4 cursor-pointer hover:bg-primary/10 transition-colors">
+<p class="text-[#181411] dark:text-white text-xs font-medium">Last 30 days</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 bg-primary/10 text-primary font-bold text-sm rounded-lg hover:bg-primary/20 transition-all">
+                            Reset All Filters
+                        </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col gap-6">
+<!-- Search and Results Count -->
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-4 flex flex-col sm:flex-row gap-4 items-center">
+<div class="relative flex-1 w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-[#f8f7f5] dark:bg-[#2d241d] border-none rounded-lg focus:ring-2 focus:ring-primary dark:text-white" placeholder="Search by job title, department, or keywords..." type="text"/>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-lg cursor-pointer">
+<span>Search</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<h3 class="text-[#181411] dark:text-white text-lg font-bold">Showing 1-8 of 124 jobs</h3>
+<div class="flex items-center gap-2 text-sm text-[#8a7360] dark:text-gray-400">
+<span>Sort by:</span>
+<select class="bg-transparent border-none font-bold text-[#181411] dark:text-white focus:ring-0 cursor-pointer">
+<option>Newest first</option>
+<option>Oldest first</option>
+<option>Salary: High to Low</option>
+</select>
+</div>
+</div>
+<!-- Job Listing Cards -->
+<div class="grid grid-cols-1 gap-4">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-6 hover:shadow-md transition-shadow group">
+<div class="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+<div class="space-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded-md">Technology</span>
+<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-md">Full-time</span>
+</div>
+<h2 class="text-[#181411] dark:text-white text-xl font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight">Senior Full-Stack Developer (Digital Banking)</h2>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8a7360] dark:text-gray-400">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>Singapore - Central</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span class="font-medium">$8,500 - $12,000 /mo</span>
+</div>
+<div class="flex items-center gap-1.5 text-red-500 dark:text-red-400 font-medium">
+<span class="material-symbols-outlined text-lg">timer</span>
+<span>Deadline: Oct 15, 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex-1 lg:flex-none h-11 px-8 bg-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">View Details</button>
+<button class="size-11 flex items-center justify-center rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-white hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24]">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-6 hover:shadow-md transition-shadow group">
+<div class="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+<div class="space-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded-md">Operations</span>
+<span class="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-md">Contract</span>
+</div>
+<h2 class="text-[#181411] dark:text-white text-xl font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight">Project Management Lead - Retail Banking</h2>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8a7360] dark:text-gray-400">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>Singapore - West</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span class="font-medium">$7,000 - $9,500 /mo</span>
+</div>
+<div class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-lg">timer</span>
+<span>Deadline: Oct 20, 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex-1 lg:flex-none h-11 px-8 bg-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">View Details</button>
+<button class="size-11 flex items-center justify-center rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-primary bg-primary/5 border-primary/30">
+<span class="material-symbols-outlined fill-1">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-6 hover:shadow-md transition-shadow group">
+<div class="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+<div class="space-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded-md">Customer Service</span>
+<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-md">Full-time</span>
+</div>
+<h2 class="text-[#181411] dark:text-white text-xl font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight">Relationship Manager (Premier Banking)</h2>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8a7360] dark:text-gray-400">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>Singapore - Central</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span class="font-medium">Competitive Salary + Comm</span>
+</div>
+<div class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-lg">timer</span>
+<span>Deadline: Nov 05, 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex-1 lg:flex-none h-11 px-8 bg-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">View Details</button>
+<button class="size-11 flex items-center justify-center rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-white hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24]">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-6 hover:shadow-md transition-shadow group">
+<div class="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+<div class="space-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase rounded-md">Technology</span>
+<span class="px-2 py-1 bg-purple-100 text-purple-700 text-[10px] font-bold uppercase rounded-md">Remote Friendly</span>
+</div>
+<h2 class="text-[#181411] dark:text-white text-xl font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight">Cyber Security Analyst</h2>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#8a7360] dark:text-gray-400">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">location_on</span>
+<span>Singapore - East</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span class="font-medium">$6,000 - $8,800 /mo</span>
+</div>
+<div class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-lg">timer</span>
+<span>Deadline: Oct 28, 2023</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex-1 lg:flex-none h-11 px-8 bg-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">View Details</button>
+<button class="size-11 flex items-center justify-center rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] text-[#181411] dark:text-white hover:bg-[#f5f2f0] dark:hover:bg-[#3d2e24]">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex items-center justify-center gap-2">
+<button class="size-10 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold">1</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] hover:border-primary hover:text-primary font-bold transition-all">2</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] hover:border-primary hover:text-primary font-bold transition-all">3</button>
+<span class="px-2 text-gray-400">...</span>
+<button class="size-10 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] hover:border-primary hover:text-primary font-bold transition-all">16</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-white dark:bg-[#1c140d] border border-[#e6e0db] dark:border-[#3d2e24] text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Newsletter / Footer CTA -->
+<footer class="mt-20 border-t border-[#e6e0db] dark:border-[#3d2e24] bg-white dark:bg-[#1c140d] py-12">
+<div class="max-w-7xl mx-auto px-6 lg:px-20">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="max-w-md text-center md:text-left">
+<h2 class="text-2xl font-bold mb-2">Don't miss a single opportunity.</h2>
+<p class="text-[#8a7360] dark:text-gray-400">Subscribe to our newsletter and get the latest jobs delivered to your inbox every week.</p>
+</div>
+<div class="flex w-full md:w-auto gap-3">
+<input class="flex-1 md:w-72 px-4 py-3 bg-[#f8f7f5] dark:bg-[#2d241d] border border-[#e6e0db] dark:border-[#3d2e24] rounded-lg focus:ring-2 focus:ring-primary dark:text-white" placeholder="Your email address" type="email"/>
+<button class="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:opacity-90 transition-all">Subscribe</button>
+</div>
+</div>
+<div class="mt-16 pt-8 border-t border-[#f5f2f0] dark:border-[#2d241d] flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[#8a7360] dark:text-gray-400">
+<div class="flex items-center gap-6">
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+<a class="hover:text-primary" href="#">Terms of Service</a>
+<a class="hover:text-primary" href="#">Cookie Policy</a>
+</div>
+<p>© 2023 POSB Bank. All rights reserved.</p>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

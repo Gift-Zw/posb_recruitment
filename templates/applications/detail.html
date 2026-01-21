@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Application | POSB Careers{% endblock %}
+{% block content %}
+<h2>{{ application.job_advert.title }}</h2>
+<p>Status: <strong>{{ application.status }}</strong></p>
+<p>Submitted: {{ application.submitted_at }}</p>
+<p>AI Score: {{ application.ai_score|default:"-" }}</p>
+<p>AI Ranking: {{ application.ai_ranking|default:"-" }}</p>
+<hr>
+<h5>Profile Snapshot</h5>
+<pre class="bg-light p-2">{{ application.profile_snapshot }}</pre>
+{% endblock %}

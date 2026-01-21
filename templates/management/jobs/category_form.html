@@ -1,0 +1,41 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}Create Job Category | POSB HR Management{% endblock %}
+
+{% block page_title %}Create Job Category{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Name -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.name.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Category Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="flex flex-col gap-2">
+                <label for="{{ form.description.id_for_label }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="text-xs text-red-500 mt-1">{{ form.description.errors.0 }}</p>{% endif %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Brief description of this category</p>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <a href="{% url 'management:jobs_management:category-list' %}" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20">
+                    Create Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

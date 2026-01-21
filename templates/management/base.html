@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}POSB HR Management Portal{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f68322",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221810",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#181411] dark:text-white font-display">
+    {% block messages %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+                {% for message in messages %}
+                    <div class="message-notification bg-white dark:bg-stone-900 border border-gray-200 dark:border-stone-700 rounded-lg shadow-lg p-4 animate-in fade-in slide-in-from-top">
+                        <div class="flex items-start gap-3">
+                            {% if message.tags == 'error' %}
+                                <span class="material-symbols-outlined text-red-500 flex-shrink-0">error</span>
+                            {% elif message.tags == 'success' %}
+                                <span class="material-symbols-outlined text-green-500 flex-shrink-0">check_circle</span>
+                            {% elif message.tags == 'warning' %}
+                                <span class="material-symbols-outlined text-yellow-500 flex-shrink-0">warning</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-blue-500 flex-shrink-0">info</span>
+                            {% endif %}
+                            <p class="text-sm font-medium text-stone-700 dark:text-stone-300 flex-1">{{ message }}</p>
+                            <button type="button" onclick="this.closest('.message-notification').remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0" aria-label="Close">
+                                <span class="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endblock %}
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-white dark:bg-[#2d221a] border-r border-[#e6e0db] dark:border-[#3d3128] flex flex-col justify-between py-6">
+            <div class="flex flex-col gap-8 px-6">
+                <!-- Brand Identity -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary size-10 rounded-lg flex items-center justify-center text-white">
+                        <span class="material-symbols-outlined">account_balance</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <h1 class="text-base font-bold leading-tight">POSB Bank</h1>
+                        <p class="text-[#8a7360] dark:text-[#a18e7e] text-xs font-normal">HR Management</p>
+                    </div>
+                </div>
+                <!-- Navigation Menu -->
+                <nav class="flex flex-col gap-2">
+                    <a href="{% url 'management:dashboard' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <p class="text-sm font-medium">Dashboard</p>
+                    </a>
+                    <a href="{% url 'management:jobs_management:list' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">work</span>
+                        <p class="text-sm font-medium">Job Adverts</p>
+                    </a>
+                    <a href="{% url 'management:applications_management:list' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">person_search</span>
+                        <p class="text-sm font-medium">Applications</p>
+                    </a>
+                    <a href="{% url 'management:users_management:employees' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">badge</span>
+                        <p class="text-sm font-medium">Employees</p>
+                    </a>
+                    <a href="{% url 'management:users_management:applicants' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">person</span>
+                        <p class="text-sm font-medium">Applicants</p>
+                    </a>
+                    <a href="{% url 'management:jobs_management:category-list' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">category</span>
+                        <p class="text-sm font-medium">Categories</p>
+                    </a>
+                    <a href="{% url 'management:jobs_management:skill-list' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <p class="text-sm font-medium">Skills</p>
+                    </a>
+                    <a href="{% url 'management:shortlisting_management:list' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">how_to_reg</span>
+                        <p class="text-sm font-medium">Shortlisting</p>
+                    </a>
+                    <a href="{% url 'management:integrations_management:exports' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        <p class="text-sm font-medium">ERP Exports</p>
+                    </a>
+                    <a href="{% url 'home' %}" class="flex items-center gap-3 px-3 py-2 text-[#5e4d3e] dark:text-[#c7b9ae] hover:bg-background-light dark:hover:bg-[#3d3128] rounded-lg transition-colors mt-4 border-t border-[#e6e0db] dark:border-[#3d3128] pt-4">
+                        <span class="material-symbols-outlined">home</span>
+                        <p class="text-sm font-medium">Public Portal</p>
+                    </a>
+                </nav>
+            </div>
+            <div class="px-6">
+                {% if user.is_authenticated %}
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="size-10 rounded-full border-2 border-primary/20 bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                        <span class="text-primary font-bold text-sm">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-[#181411] dark:text-white">{{ user.get_full_name|default:user.email }}</p>
+                        <p class="text-xs text-[#8a7360] dark:text-[#a18e7e]">HR Staff</p>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-[#3d3128] hover:bg-gray-200 dark:hover:bg-[#4d4238] text-[#181411] dark:text-white rounded-lg h-10 transition-colors text-sm font-medium">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                    <span>Logout</span>
+                </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto bg-background-light dark:bg-background-dark">
+            <!-- Top Navigation Bar -->
+            <header class="sticky top-0 z-10 flex items-center justify-between bg-white/80 dark:bg-[#2d221a]/80 backdrop-blur-md border-b border-[#e6e0db] dark:border-[#3d3128] px-8 py-3">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-lg font-bold tracking-tight">{% block page_title %}Management Portal{% endblock %}</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    {% block header_actions %}{% endblock %}
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="flex-1 p-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

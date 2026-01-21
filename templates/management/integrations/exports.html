@@ -1,0 +1,88 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}ERP Exports | POSB HR Management{% endblock %}
+
+{% block page_title %}ERP Exports{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Title</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exported</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Failed</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Batch ID</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Started</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completed</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                {% for export in exports %}
+                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-900 dark:text-white">{{ export.job_advert.title }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ export.job_advert.category.name }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if export.status == 'COMPLETED' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                            Completed
+                        </span>
+                        {% elif export.status == 'IN_PROGRESS' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                            In Progress
+                        </span>
+                        {% elif export.status == 'FAILED' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                            Failed
+                        </span>
+                        {% elif export.status == 'PARTIAL' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                            Partial
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
+                            Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{{ export.exported_count }}</td>
+                    <td class="px-6 py-4 text-sm text-red-600 dark:text-red-400">{{ export.failed_count }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 font-mono text-xs">
+                        {% if export.erp_batch_id %}
+                            {{ export.erp_batch_id|truncatechars:20 }}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {% if export.started_at %}
+                            {{ export.started_at|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {% if export.completed_at %}
+                            {{ export.completed_at|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        No ERP exports yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

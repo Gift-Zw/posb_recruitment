@@ -1,0 +1,158 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}Applications | POSB HR Management{% endblock %}
+
+{% block page_title %}Applications{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_applications }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Submitted</p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ submitted_count }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Under Review</p>
+            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ under_review_count }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Shortlisted</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ shortlisted_count }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search by applicant name or email..." class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
+            </div>
+            <div class="md:w-48">
+                <select name="status" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
+                    <option value="">All Status</option>
+                    <option value="SUBMITTED" {% if status_filter == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
+                    <option value="UNDER_REVIEW" {% if status_filter == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
+                    <option value="SHORTLISTED" {% if status_filter == 'SHORTLISTED' %}selected{% endif %}>Shortlisted</option>
+                    <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            <div class="md:w-64">
+                <select name="job_id" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
+                    <option value="">All Jobs</option>
+                    {% for job in jobs %}
+                    <option value="{{ job.pk }}" {% if job_filter == job.pk|stringformat:"s" %}selected{% endif %}>{{ job.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined align-middle">search</span>
+                Filter
+            </button>
+            {% if search_query or status_filter or job_filter %}
+            <a href="{% url 'management:applications_management:list' %}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applicant</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Position</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">AI Score</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    {% for application in applications %}
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ application.applicant.get_full_name|default:application.applicant.email }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ application.applicant.email }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900 dark:text-white">{{ application.job_advert.title }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ application.job_advert.category.name }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if application.status == 'SUBMITTED' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                Submitted
+                            </span>
+                            {% elif application.status == 'UNDER_REVIEW' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                                Under Review
+                            </span>
+                            {% elif application.status == 'SHORTLISTED' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                Shortlisted
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                Rejected
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {% if application.ai_score %}{{ application.ai_score|floatformat:1 }}{% else %}—{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ application.submitted_at|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="View Details">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
+                            <p>No applications found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+            </div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_filter %}&job_id={{ job_filter }}{% endif %}" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                    Previous
+                </a>
+                {% endif %}
+                <span class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_filter %}&job_id={{ job_filter }}{% endif %}" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
