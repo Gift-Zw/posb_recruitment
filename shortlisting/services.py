@@ -2,6 +2,7 @@
 AI Shortlisting service for POSB Recruitment Portal.
 Handles candidate ranking and shortlisting using AI.
 """
+from django.conf import settings
 from django.utils import timezone
 from .models import ShortlistingRun
 from applications.models import Application
@@ -52,12 +53,13 @@ class AIShortlistingService:
                 return None
             
             # Create shortlisting run
+            default_shortlist_count = getattr(settings, 'DEFAULT_SHORTLIST_COUNT', 10)
             shortlisting_run = ShortlistingRun.objects.create(
                 job_advert=job_advert,
                 triggered_by=triggered_by,
                 trigger_type=trigger_type,
                 status='IN_PROGRESS',
-                shortlist_count=job_advert.shortlist_count,
+                shortlist_count=default_shortlist_count,
                 total_applications=total_applications,
                 started_at=timezone.now()
             )
@@ -84,7 +86,7 @@ class AIShortlistingService:
                 application.ai_shortlisted_at = timezone.now()
                 
                 # Update status based on ranking
-                if rank <= job_advert.shortlist_count:
+                if rank <= shortlisting_run.shortlist_count:
                     application.status = 'SHORTLISTED'
                     shortlisting_run.shortlisted_count += 1
                 else:
@@ -120,7 +122,7 @@ class AIShortlistingService:
             log_audit_event(
                 actor=triggered_by,
                 action='AI_SHORTLISTING',
-                action_description=f'AI shortlisting completed for {job_advert.title}',
+                action_description=f'AI shortlisting completed for {job_advert.job_title}',
                 entity=shortlisting_run,
                 metadata={
                     'job_advert_id': job_advert_id,
@@ -168,17 +170,21 @@ class AIShortlistingService:
         scored = []
         
         # Extract job requirements
-        required_skills = list(job_advert.required_skills.values_list('name', flat=True))
-        job_description = job_advert.description
+        required_skills = []
+        if job_advert.skills:
+            required_skills = [s.strip() for s in job_advert.skills.split(';') if s.strip()]
+        job_description = job_advert.job_description
         job_responsibilities = job_advert.responsibilities
-        ai_instructions = job_advert.ai_shortlisting_instructions
         
         for application in applications:
-            # Extract applicant data from snapshot
-            profile = application.profile_snapshot
-            applicant_skills = profile.get('skills', [])
-            applicant_experience = profile.get('experience', [])
-            applicant_education = profile.get('education', [])
+            # Extract applicant data from ApplicationData
+            if not hasattr(application, 'application_data') or not application.application_data:
+                # Skip applications without data
+                continue
+            data = application.application_data
+            applicant_skills = data.get_skills_list()  # Returns list from semicolon-separated string
+            applicant_experience = data.experience if data.experience else []
+            applicant_education = data.education if data.education else []
             
             # TODO: Integrate with actual AI service (OpenAI, custom ML model, etc.)
             # For now, using a simple scoring algorithm as placeholder

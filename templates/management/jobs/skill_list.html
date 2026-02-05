@@ -40,7 +40,7 @@
                     <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Skill Name</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Adverts</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
                     </tr>
                 </thead>
@@ -60,7 +60,8 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ skill.job_adverts.count }}</div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">—</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Used in job descriptions</div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ skill.created_at|date:"M d, Y" }}

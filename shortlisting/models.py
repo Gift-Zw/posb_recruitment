@@ -88,4 +88,4 @@ class ShortlistingRun(models.Model):
         ]
     
     def __str__(self):
-        return f'Shortlisting Run for {self.job_advert.title} - {self.status}'
+        return f'Shortlisting Run for {self.job_advert.job_title} - {self.status}'

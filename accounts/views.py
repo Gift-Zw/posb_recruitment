@@ -343,15 +343,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             form = ProfileForm(request.POST, instance=user, prefix='user')
             if form.is_valid():
                 form.save()
-                messages.success(request, "Basic information updated successfully.")
-                log_audit_event(
-                    actor=user,
-                    action="PROFILE_UPDATED",
-                    action_description="User basic information updated",
-                    entity=user,
-                    request=request,
-                )
-                # If applicant_submit is also present, handle it too
+                # If applicant_submit is also present, handle it too and show only one message
                 if 'applicant_submit' in request.POST and user.is_applicant():
                     from applications.models import ApplicantProfile
                     applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
@@ -372,6 +364,26 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                             entity=applicant_profile,
                             request=request,
                         )
+                    else:
+                        # If applicant form is invalid, still show user form success
+                        messages.success(request, "Basic information updated successfully.")
+                        log_audit_event(
+                            actor=user,
+                            action="PROFILE_UPDATED",
+                            action_description="User basic information updated",
+                            entity=user,
+                            request=request,
+                        )
+                else:
+                    # Only user form was submitted
+                    messages.success(request, "Basic information updated successfully.")
+                    log_audit_event(
+                        actor=user,
+                        action="PROFILE_UPDATED",
+                        action_description="User basic information updated",
+                        entity=user,
+                        request=request,
+                    )
                 return redirect(f"{reverse_lazy('applicant-profile')}?tab=personal")
             else:
                 # If form is invalid, also try to save applicant profile if present

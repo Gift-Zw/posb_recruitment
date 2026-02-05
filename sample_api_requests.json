@@ -1,0 +1,93 @@
+{
+  "description": "Sample API requests to create job adverts for IT, Banking, Procurement, and HR positions",
+  "endpoint": "POST {{baseUrl}}api/v1/vacancies",
+  "headers": {
+    "X-API-Key": "your-api-key-here",
+    "Content-Type": "application/json"
+  },
+  "requests": [
+    {
+      "name": "IT - Software Developer",
+      "request": {
+        "recruitingId": "IT-SD-2026-001",
+        "jobId": "SD-2026-001",
+        "jobTitle": "Senior Software Developer",
+        "jobDescription": "We are seeking an experienced Senior Software Developer to join our IT team. The successful candidate will be responsible for designing, developing, and maintaining software applications that support our banking operations. You will work with cross-functional teams to deliver high-quality solutions and contribute to the technical direction of our development initiatives.",
+        "skills": "C#; .NET Core; SQL Server; RESTful APIs; Microservices Architecture; Git; Agile Methodologies; Problem Solving",
+        "certificates": "Microsoft Certified: Azure Developer Associate; Oracle Certified Java SE Developer",
+        "education": "Bachelor's Degree in Computer Science; Bachelor's Degree in Software Engineering; Bachelor's Degree in Information Technology",
+        "jobTasks": "Design and develop scalable software solutions; Write clean, maintainable code following best practices; Collaborate with business analysts and stakeholders; Perform code reviews and mentor junior developers; Troubleshoot and debug applications; Participate in agile ceremonies",
+        "responsibilities": "Lead development of new features and enhancements; Ensure code quality through testing and code reviews; Maintain and improve existing applications; Document technical specifications and system architecture; Provide technical support when needed",
+        "yearsOfExperience": 5,
+        "location": "Harare Head Office",
+        "jobType": "Full-Time",
+        "jobFunction": "Information Technology",
+        "endDate": "2026-02-28T23:59:59.000"
+      }
+    },
+    {
+      "name": "Banking - Relationship Manager",
+      "request": {
+        "recruitingId": "BANK-RM-2026-001",
+        "jobId": "RM-2026-001",
+        "jobTitle": "Corporate Relationship Manager",
+        "jobDescription": "POSB is looking for a dynamic Corporate Relationship Manager to manage and grow our corporate banking portfolio. The ideal candidate will develop and maintain relationships with corporate clients, identify business opportunities, and ensure excellent customer service. You will work closely with various banking departments to deliver comprehensive financial solutions to our clients.",
+        "skills": "Customer Relationship Management; Financial Analysis; Credit Assessment; Negotiation; Communication; Sales; Banking Products Knowledge; Risk Management",
+        "certificates": "Banking Certificate; Credit Management Certificate; Chartered Institute of Bankers (CIB) Qualification",
+        "education": "Bachelor's Degree in Banking and Finance; Bachelor's Degree in Business Administration; Bachelor's Degree in Economics; Bachelor's Degree in Commerce",
+        "jobTasks": "Manage corporate client relationships; Conduct credit assessments and prepare proposals; Cross-sell banking products and services; Monitor portfolio performance; Prepare reports and presentations; Attend client meetings and negotiations",
+        "responsibilities": "Develop new corporate banking relationships; Maintain existing client portfolios; Ensure compliance with banking regulations; Achieve sales targets and KPIs; Provide exceptional customer service; Coordinate with internal teams for client solutions",
+        "yearsOfExperience": 3,
+        "location": "Harare Branch",
+        "jobType": "Full-Time",
+        "jobFunction": "Banking",
+        "endDate": "2026-03-15T23:59:59.000"
+      }
+    },
+    {
+      "name": "Procurement - Procurement Officer",
+      "request": {
+        "recruitingId": "PROC-PO-2026-001",
+        "jobId": "PO-2026-001",
+        "jobTitle": "Procurement Officer",
+        "jobDescription": "We are seeking a qualified Procurement Officer to manage our procurement processes and ensure cost-effective acquisition of goods and services. The successful candidate will be responsible for vendor management, contract negotiations, and ensuring compliance with procurement policies. You will work with various departments to understand their needs and source appropriate suppliers.",
+        "skills": "Vendor Management; Contract Negotiation; Procurement Processes; Supply Chain Management; Cost Analysis; SAP/ERP Systems; Microsoft Excel; Communication",
+        "certificates": "CIPS (Chartered Institute of Procurement & Supply) Level 4; Procurement and Supply Chain Management Certificate",
+        "education": "Bachelor's Degree in Procurement and Supply Chain Management; Bachelor's Degree in Business Administration; Bachelor's Degree in Commerce",
+        "jobTasks": "Source and evaluate suppliers; Prepare purchase orders and contracts; Negotiate terms and pricing; Monitor supplier performance; Maintain procurement records; Process purchase requisitions; Conduct market research",
+        "responsibilities": "Ensure timely procurement of goods and services; Maintain supplier relationships; Ensure compliance with procurement policies; Achieve cost savings targets; Prepare procurement reports; Coordinate with user departments",
+        "yearsOfExperience": 2,
+        "location": "Harare Head Office",
+        "jobType": "Full-Time",
+        "jobFunction": "Procurement",
+        "endDate": "2026-03-10T23:59:59.000"
+      }
+    },
+    {
+      "name": "HR - Human Resources Business Partner",
+      "request": {
+        "recruitingId": "HR-HRBP-2026-001",
+        "jobId": "HRBP-2026-001",
+        "jobTitle": "Human Resources Business Partner",
+        "jobDescription": "POSB is looking for an experienced Human Resources Business Partner to provide strategic HR support to assigned business units. The successful candidate will partner with management to develop and implement HR strategies, manage employee relations, and drive organizational effectiveness. You will serve as a trusted advisor on all HR matters.",
+        "skills": "Employee Relations; Talent Management; Performance Management; HR Policies and Procedures; Recruitment and Selection; HRIS Systems; Conflict Resolution; Strategic Planning",
+        "certificates": "SHRM Certified Professional (SHRM-CP); Chartered Institute of Personnel and Development (CIPD); HR Management Certificate",
+        "education": "Bachelor's Degree in Human Resources Management; Bachelor's Degree in Business Administration; Bachelor's Degree in Industrial Psychology",
+        "jobTasks": "Partner with business leaders on HR strategy; Manage employee relations issues; Conduct recruitment and selection processes; Facilitate performance management; Develop and implement HR policies; Provide HR guidance and support; Conduct training and development",
+        "responsibilities": "Align HR strategies with business objectives; Ensure compliance with labor laws; Manage employee engagement initiatives; Support organizational change; Handle disciplinary matters; Coordinate talent acquisition; Provide HR analytics and reporting",
+        "yearsOfExperience": 4,
+        "location": "Harare Head Office",
+        "jobType": "Full-Time",
+        "jobFunction": "Human Resources",
+        "endDate": "2026-03-20T23:59:59.000"
+      }
+    }
+  ],
+  "notes": [
+    "Replace 'your-api-key-here' with an actual API key from the management portal",
+    "All dates are in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.fff)",
+    "Semicolon-separated fields (skills, certificates, education, jobTasks, responsibilities) use ';' as delimiter",
+    "yearsOfExperience is optional but recommended",
+    "endDate is optional - if not provided, job will remain open until manually closed"
+  ]
+}

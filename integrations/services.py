@@ -189,14 +189,17 @@ class Dynamics365Service:
         Prepare candidate data for Dynamics 365 API.
         Customize based on your Dynamics 365 entity structure.
         """
-        profile = application.profile_snapshot
+        # Get data from ApplicationData if available
+        phone = ''
+        if hasattr(application, 'application_data') and application.application_data:
+            phone = application.application_data.phone_number or ''
         
         return {
             'first_name': application.applicant.first_name,
             'last_name': application.applicant.last_name,
             'email': application.applicant.email,
-            'phone': profile.get('phone_number', ''),
-            'job_title': application.job_advert.title,
+            'phone': phone,
+            'job_title': application.job_advert.job_title,
             'ai_score': application.ai_score,
             'ai_ranking': application.ai_ranking,
             'application_id': application.id,

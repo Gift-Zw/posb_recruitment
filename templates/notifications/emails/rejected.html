@@ -141,13 +141,13 @@
             <p>Thank you for your interest in joining People's Own Savings Bank.</p>
             
             <div class="message-box">
-                <p>After careful consideration, we regret to inform you that your application for <strong>{{ application.job_advert.title }}</strong> was not successful at this time.</p>
+                <p>After careful consideration, we regret to inform you that your application for <strong>{{ application.job_advert.job_title }}</strong> was not successful at this time.</p>
             </div>
             
             <div class="job-details">
                 <h3>Application Details:</h3>
-                <p><strong>Position:</strong> {{ application.job_advert.title }}</p>
-                <p><strong>Category:</strong> {{ application.job_advert.category.name }}</p>
+                <p><strong>Position:</strong> {{ application.job_advert.job_title }}</p>
+                <p><strong>Category:</strong> {{ application.job_advert.job_function|default:"—" }}</p>
                 <p><strong>Application ID:</strong> #{{ application.id }}</p>
             </div>
             

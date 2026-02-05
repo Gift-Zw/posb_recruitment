@@ -299,10 +299,75 @@ class ApplicationDocument(models.Model):
         return f'{self.document_type} - {self.file_name}'
 
 
+class ApplicationData(models.Model):
+    """
+    Immutable application data captured at submission time.
+    Stores all applicant information as separate fields for better querying and data integrity.
+    This ensures that profile changes don't affect submitted applications.
+    """
+    application = models.OneToOneField(
+        'Application',
+        on_delete=models.CASCADE,
+        related_name='application_data'
+    )
+    
+    # Contact Information
+    phone_number = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    
+    # Address (stored as single string for simplicity, matching original snapshot format)
+    address = models.TextField(blank=True, help_text='Full address as submitted')
+    
+    # Personal Information
+    date_of_birth = models.DateField(null=True, blank=True)
+    nationality = models.CharField(max_length=100, blank=True)
+    
+    # Education and Experience (JSON arrays)
+    education = models.JSONField(
+        default=list,
+        help_text='List of education: [{"institution": "...", "degree": "...", "field": "...", "start_year": "...", "end_year": "...", "gpa": "...", "honors": "..."}]'
+    )
+    experience = models.JSONField(
+        default=list,
+        help_text='List of work experience: [{"company": "...", "position": "...", "start_date": "...", "end_date": "...", "current": false, "responsibilities": "...", "achievements": "..."}]'
+    )
+    
+    # Skills (stored as semicolon-separated text)
+    skills = models.TextField(
+        blank=True,
+        help_text='Skills separated by semicolons (;)'
+    )
+    
+    # Cover Letter
+    cover_letter = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'application_data'
+        verbose_name = 'Application Data'
+        verbose_name_plural = 'Application Data'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['phone_number']),
+            models.Index(fields=['email']),
+        ]
+    
+    def __str__(self):
+        return f'Application Data for {self.application}'
+    
+    def get_skills_list(self):
+        """Return skills as a list."""
+        if not self.skills:
+            return []
+        return [s.strip() for s in self.skills.split(';') if s.strip()]
+
+
 class Application(models.Model):
     """
     Job application model.
-    Stores immutable snapshot of applicant profile at submission time.
+    Links to ApplicationData which stores immutable snapshot of applicant profile at submission time.
     """
     STATUS_CHOICES = [
         ('SUBMITTED', 'Submitted'),
@@ -320,11 +385,6 @@ class Application(models.Model):
         'jobs.JobAdvert',
         on_delete=models.CASCADE,
         related_name='applications'
-    )
-    
-    # Immutable snapshot of profile at submission time
-    profile_snapshot = models.JSONField(
-        help_text='Complete snapshot of applicant profile at time of submission'
     )
     
     # Status tracking
@@ -373,11 +433,11 @@ class Application(models.Model):
         ]
     
     def __str__(self):
-        return f'{self.applicant.email} - {self.job_advert.title}'
+        return f'{self.applicant.email} - {self.job_advert.job_title}'
     
     def get_last_application_data(self):
         """
-        Get data from the last submitted application for reuse.
+        Get ApplicationData from the last submitted application for reuse.
         Returns None if no previous application exists.
         """
         last_application = Application.objects.filter(
@@ -386,6 +446,6 @@ class Application(models.Model):
             id=self.id
         ).order_by('-submitted_at').first()
         
-        if last_application:
-            return last_application.profile_snapshot
+        if last_application and hasattr(last_application, 'application_data'):
+            return last_application.application_data
         return None

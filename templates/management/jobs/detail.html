@@ -1,16 +1,23 @@
 {% extends "management/base.html" %}
 {% load static %}
 
-{% block title %}{{ job.title }} | POSB HR Management{% endblock %}
+{% block title %}{{ job.job_title }} | POSB HR Management{% endblock %}
 
-{% block page_title %}{{ job.title }}{% endblock %}
+{% block page_title %}{{ job.job_title }}{% endblock %}
 
 {% block header_actions %}
 <div class="flex items-center gap-3">
-    <a href="{% url 'management:jobs_management:advert-edit' pk=job.pk %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
-        <span class="material-symbols-outlined text-lg">edit</span>
-        <span>Edit</span>
-    </a>
+    {% if job.status == 'OPEN' %}
+    <button type="button" onclick="openCloseModal()" class="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">close</span>
+        <span>Close Job</span>
+    </button>
+    {% else %}
+    <button type="button" onclick="openReopenModal()" class="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <span>Reopen Job</span>
+    </button>
+    {% endif %}
     <a href="{% url 'management:jobs_management:list' %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">arrow_back</span>
         <span>Back to List</span>
@@ -23,18 +30,23 @@
     <!-- Job Overview -->
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
         <div class="flex items-start justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ job.title }}</h1>
-                <p class="text-gray-600 dark:text-gray-400">{{ job.category.name }}</p>
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ job.job_title }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ job.job_function|default:"—" }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Recruiting ID: {{ job.recruiting_id }} | Job ID: {{ job.job_id }}</p>
+                <div class="mt-4 flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">person_search</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-semibold text-gray-900 dark:text-white">{{ application_count }}</span> Total Applications
+                        </span>
+                    </div>
+                </div>
             </div>
             <div>
                 {% if job.status == 'OPEN' %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                     Open
-                </span>
-                {% elif job.status == 'DRAFT' %}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                    Draft
                 </span>
                 {% else %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
@@ -44,44 +56,33 @@
             </div>
         </div>
 
-        <!-- Application Statistics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Applications</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ application_count }}</p>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Submitted</p>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ submitted_count }}</p>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Under Review</p>
-                <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ under_review_count }}</p>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Shortlisted</p>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ shortlisted_count }}</p>
-            </div>
-        </div>
-
         <!-- Job Details -->
         <div class="space-y-4">
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Job Description</h3>
-                <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ job.description }}</p>
+                <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ job.job_description }}</p>
             </div>
 
+            {% if job.responsibilities %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Key Responsibilities</h3>
                 <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ job.responsibilities }}</p>
             </div>
+            {% endif %}
 
-            {% if job.required_skills.exists %}
+            {% if job.job_tasks %}
+            <div>
+                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Job Tasks</h3>
+                <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ job.job_tasks }}</p>
+            </div>
+            {% endif %}
+
+            {% if job.skills %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Required Skills</h3>
                 <div class="flex flex-wrap gap-2">
-                    {% for skill in job.required_skills.all %}
-                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{{ skill.name }}</span>
+                    {% for skill in job.get_skills_list %}
+                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{{ skill }}</span>
                     {% endfor %}
                 </div>
             </div>
@@ -89,51 +90,60 @@
 
             <!-- Job Requirements -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Location Type</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.get_location_type_display }}</p>
-                </div>
                 {% if job.location %}
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Location</p>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.location }}</p>
                 </div>
                 {% endif %}
+                {% if job.job_type %}
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Contract Type</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.get_contract_type_display }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Job Type</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.job_type }}</p>
                 </div>
-                {% if job.education_level %}
+                {% endif %}
+                {% if job.job_function %}
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Education Level</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.get_education_level_display }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Job Function</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.job_function }}</p>
+                </div>
+                {% endif %}
+                {% if job.years_of_experience %}
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Years of Experience</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.years_of_experience }} years</p>
                 </div>
                 {% endif %}
             </div>
 
-            {% if job.experience_required %}
+            {% if job.education %}
             <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Experience Required</h3>
-                <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ job.experience_required }}</p>
+                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Education Requirements</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ job.education }}</p>
             </div>
             {% endif %}
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            {% if job.certificates %}
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
+                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Certificates</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ job.certificates }}</p>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                {% if job.end_date %}
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Application Deadline</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.application_deadline|date:"M d, Y H:i" }}</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.end_date|date:"M d, Y H:i" }}</p>
                 </div>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Shortlist Count</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.shortlist_count }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Created By</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.created_by.get_full_name|default:job.created_by.email }}</p>
-                </div>
+                {% endif %}
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Created At</p>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.created_at|date:"M d, Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Updated At</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.updated_at|date:"M d, Y" }}</p>
                 </div>
             </div>
         </div>
@@ -143,16 +153,17 @@
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-[#e6e0db] dark:border-[#3d3128] flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Applications</h3>
-            <a href="{% url 'management:applications_management:list' %}?job_id={{ job.pk }}" class="text-sm text-primary hover:underline">View All Applications</a>
+            <a href="{% url 'management:jobs_management:job-applications' pk=job.pk %}" class="text-sm text-primary hover:underline">View All Applications</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
-                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applicant</th>
-                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">AI Score</th>
-                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">First Name</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Name</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gender</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
                         <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -160,43 +171,38 @@
                     {% for application in recent_applications %}
                     <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="font-semibold text-gray-900 dark:text-white">{{ application.applicant.get_full_name|default:application.applicant.email }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ application.applicant.email }}</div>
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ application.applicant.first_name|default:"—" }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            {% if application.status == 'SUBMITTED' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                Submitted
-                            </span>
-                            {% elif application.status == 'UNDER_REVIEW' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                                Under Review
-                            </span>
-                            {% elif application.status == 'SHORTLISTED' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                                Shortlisted
-                            </span>
-                            {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                Rejected
-                            </span>
-                            {% endif %}
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ application.applicant.last_name|default:"—" }}</div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {% if application.ai_score %}{{ application.ai_score|floatformat:1 }}{% else %}—{% endif %}
+                            {% if application.applicant.applicant_profile.gender %}
+                                {{ application.applicant.applicant_profile.get_gender_display }}
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ application.submitted_at|date:"M d, Y" }}
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {% if application.applicant.applicant_profile.city or application.applicant.applicant_profile.country %}
+                                {% if application.applicant.applicant_profile.city %}{{ application.applicant.applicant_profile.city }}{% endif %}{% if application.applicant.applicant_profile.city and application.applicant.applicant_profile.country %}, {% endif %}{% if application.applicant.applicant_profile.country %}{{ application.applicant.applicant_profile.country }}{% endif %}
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
                         <td class="px-6 py-4">
-                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="View Details">
+                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
                                 <span class="material-symbols-outlined text-lg">visibility</span>
+                                View
                             </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
                             <p>No applications yet</p>
                         </td>
@@ -207,4 +213,104 @@
         </div>
     </div>
 </div>
+
+<!-- Close Job Confirmation Modal -->
+<div id="closeModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onclick="closeCloseModal()"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white dark:bg-[#2d221a] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-[#e6e0db] dark:border-[#3d3128]">
+            <div class="px-6 py-5">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">warning</span>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 dark:text-white mb-2" id="modal-title">
+                    Close Job Advert
+                </h3>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+                    Are you sure you want to close <strong>{{ job.job_title }}</strong>? This will prevent new applications from being submitted.
+                </p>
+                <form method="post" action="{% url 'management:jobs_management:advert-close' pk=job.pk %}" id="closeForm">
+                    {% csrf_token %}
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeCloseModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm">
+                            Yes, Close Job
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reopen Job Confirmation Modal -->
+<div id="reopenModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onclick="closeReopenModal()"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white dark:bg-[#2d221a] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-[#e6e0db] dark:border-[#3d3128]">
+            <div class="px-6 py-5">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 dark:text-white mb-2" id="modal-title">
+                    Reopen Job Advert
+                </h3>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+                    Are you sure you want to reopen <strong>{{ job.job_title }}</strong>? This will allow new applications to be submitted again.
+                </p>
+                <form method="post" action="{% url 'management:jobs_management:advert-reopen' pk=job.pk %}" id="reopenForm">
+                    {% csrf_token %}
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeReopenModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+                            Yes, Reopen Job
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Close Job Modal Functions
+    function openCloseModal() {
+        document.getElementById('closeModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCloseModal() {
+        document.getElementById('closeModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Reopen Job Modal Functions
+    function openReopenModal() {
+        document.getElementById('reopenModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeReopenModal() {
+        document.getElementById('reopenModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeCloseModal();
+            closeReopenModal();
+        }
+    });
+</script>
 {% endblock %}

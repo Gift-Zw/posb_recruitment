@@ -6,10 +6,6 @@
 {% block page_title %}Job Adverts{% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'management:jobs_management:advert-create' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-    <span class="material-symbols-outlined text-lg">add</span>
-    <span>New Job Advert</span>
-</a>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +20,6 @@
                 <select name="status" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
                     <option value="">All Status</option>
                     <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
-                    <option value="DRAFT" {% if status_filter == 'DRAFT' %}selected{% endif %}>Draft</option>
                     <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
                 </select>
             </div>
@@ -47,9 +42,9 @@
                 <thead>
                     <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Title</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Function</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contract</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Type</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applications</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Deadline</th>
@@ -62,28 +57,20 @@
                     <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                         <td class="px-6 py-4">
                             <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="font-bold text-gray-900 dark:text-white hover:text-primary transition-colors">
-                                {{ job.title }}
+                                {{ job.job_title }}
                             </a>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ job.category.name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ job.job_function|default:"—" }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {% if job.location %}
-                                {{ job.location }}
-                            {% else %}
-                                <span class="text-gray-400">{{ job.get_location_type_display }}</span>
-                            {% endif %}
+                            {{ job.location|default:"—" }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ job.get_contract_type_display }}
+                            {{ job.job_type|default:"—" }}
                         </td>
                         <td class="px-6 py-4">
                             {% if job.status == 'OPEN' %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                 Open
-                            </span>
-                            {% elif job.status == 'DRAFT' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                                Draft
                             </span>
                             {% else %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
@@ -96,20 +83,20 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ job.shortlisted_count }} shortlisted</div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ job.application_deadline|date:"M d, Y" }}
+                            {% if job.end_date %}
+                            {{ job.end_date|date:"M d, Y" }}
+                            {% else %}
+                            <span class="text-gray-400">—</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ job.created_at|date:"M d, Y" }}
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="View Details">
-                                    <span class="material-symbols-outlined text-lg">visibility</span>
-                                </a>
-                                <a href="{% url 'management:jobs_management:advert-edit' pk=job.pk %}" class="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" title="Edit">
-                                    <span class="material-symbols-outlined text-lg">edit</span>
-                                </a>
-                            </div>
+                            <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                                View
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
@@ -117,7 +104,7 @@
                         <td colspan="9" class="px-6 py-12 text-center">
                             <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">work_off</span>
                             <p class="text-gray-500 dark:text-gray-400">No job adverts found</p>
-                            <a href="{% url 'management:jobs_management:advert-create' %}" class="text-primary hover:underline mt-2 inline-block">Create your first job advert</a>
+                            <p class="text-xs text-gray-400 mt-2">Job adverts are created automatically from D365 integration</p>
                         </td>
                     </tr>
                     {% endfor %}

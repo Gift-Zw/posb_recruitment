@@ -28,7 +28,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ application.applicant.get_full_name|default:application.applicant.email }}</h1>
                 <p class="text-gray-600 dark:text-gray-400">{{ application.applicant.email }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Applied for: <a href="{% url 'management:jobs_management:advert-detail' pk=application.job_advert.pk %}" class="text-primary hover:underline">{{ application.job_advert.title }}</a></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Applied for: <a href="{% url 'management:jobs_management:advert-detail' pk=application.job_advert.pk %}" class="text-primary hover:underline">{{ application.job_advert.job_title }}</a></p>
             </div>
             <div>
                 {% if application.status == 'SUBMITTED' %}
@@ -93,31 +93,47 @@
         </div>
     </div>
 
-    <!-- Application Snapshot Data -->
+    <!-- Application Data -->
+    {% if application.application_data %}
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Application Information (Snapshot)</h2>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Application Information (As Submitted)</h2>
         
-        {% with snapshot=application.profile_snapshot %}
+        {% with data=application.application_data %}
         <div class="space-y-6">
             <!-- Personal Information -->
-            {% if snapshot.first_name or snapshot.last_name or snapshot.phone_number %}
+            {% if application.applicant.first_name or application.applicant.last_name or data.phone_number or data.email %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Personal Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {% if snapshot.first_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">First Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ snapshot.first_name }}</p></div>{% endif %}
-                    {% if snapshot.last_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ snapshot.last_name }}</p></div>{% endif %}
-                    {% if snapshot.phone_number %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phone Number</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ snapshot.phone_number }}</p></div>{% endif %}
-                    {% if snapshot.email %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ snapshot.email }}</p></div>{% endif %}
+                    {% if application.applicant.first_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">First Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ application.applicant.first_name }}</p></div>{% endif %}
+                    {% if application.applicant.last_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ application.applicant.last_name }}</p></div>{% endif %}
+                    {% if data.phone_number %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phone Number</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.phone_number }}</p></div>{% endif %}
+                    {% if data.email %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.email }}</p></div>{% endif %}
+                    {% if data.address %}<div class="md:col-span-2"><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Address</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.address }}</p></div>{% endif %}
+                    {% if data.date_of_birth %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Date of Birth</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.date_of_birth|date:"M d, Y" }}</p></div>{% endif %}
+                    {% if data.nationality %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Nationality</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.nationality }}</p></div>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Skills -->
+            {% if data.skills %}
+            <div>
+                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Skills</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for skill in data.get_skills_list %}
+                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">{{ skill }}</span>
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
 
             <!-- Education -->
-            {% if snapshot.education %}
+            {% if data.education %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Education</h3>
                 <div class="space-y-4">
-                    {% for edu in snapshot.education %}
+                    {% for edu in data.education %}
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <h4 class="font-semibold text-gray-900 dark:text-white">{{ edu.degree }} in {{ edu.field }}</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400">{{ edu.institution }}</p>
@@ -129,11 +145,11 @@
             {% endif %}
 
             <!-- Work Experience -->
-            {% if snapshot.experience %}
+            {% if data.experience %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Work Experience</h3>
                 <div class="space-y-4">
-                    {% for exp in snapshot.experience %}
+                    {% for exp in data.experience %}
                     <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <h4 class="font-semibold text-gray-900 dark:text-white">{{ exp.position }}</h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400">{{ exp.company }}</p>
@@ -146,10 +162,10 @@
             {% endif %}
 
             <!-- Cover Letter -->
-            {% if snapshot.cover_letter %}
+            {% if data.cover_letter %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Cover Letter</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ snapshot.cover_letter }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ data.cover_letter }}</p>
             </div>
             {% endif %}
 
@@ -163,6 +179,7 @@
         </div>
         {% endwith %}
     </div>
+    {% endif %}
 
     <!-- Documents -->
     {% if application.documents.exists %}

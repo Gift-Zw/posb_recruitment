@@ -47,7 +47,7 @@ def check_deadline_and_shortlist():
     # Find job adverts past deadline that haven't been shortlisted
     past_deadline_jobs = JobAdvert.objects.filter(
         status='OPEN',
-        application_deadline__lt=timezone.now()
+        end_date__lt=timezone.now()
     )
     
     for job in past_deadline_jobs:

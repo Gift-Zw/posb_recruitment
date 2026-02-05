@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load job_filters %}
 
 {% block title %}Job Search & Listings | POSB Careers{% endblock %}
 
@@ -79,7 +80,7 @@
                     <span class="font-medium">My Profile</span>
                 </a>
                 {% endif %}
-                <a href="{% url 'jobs:list' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'list' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
+                <a href="{% url 'jobs:list' %}" onclick="closeMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'jobs' %}bg-primary text-white{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800{% endif %} transition-colors">
                     <span class="material-symbols-outlined text-xl">work</span>
                     <span class="font-medium">Jobs</span>
                 </a>
@@ -145,21 +146,21 @@
                     
                     <!-- Collapsible Filter Content -->
                     <div id="filter-content" class="hidden lg:block mt-5 lg:mt-0">
-                        <!-- Category Filter -->
+                        <!-- Job Function Filter -->
                         <div class="mb-5">
                             <div class="flex items-center gap-2 mb-3 text-primary">
                                 <span class="material-symbols-outlined text-lg">category</span>
-                                <span class="text-xs font-bold uppercase tracking-wider">Job Category</span>
+                                <span class="text-xs font-bold uppercase tracking-wider">Job Function</span>
                             </div>
                             <div class="space-y-1.5 max-h-60 overflow-y-auto pr-2">
-                                {% for category in categories %}
+                                {% for func in job_functions %}
                                 <label class="flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
-                                    <input name="category" value="{{ category.id }}" class="h-3.5 w-3.5 rounded border-2 border-[#e6e0db] dark:border-[#3d2e24] bg-transparent text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all" type="checkbox" {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}/>
-                                    <span class="flex-1 text-[#181411] dark:text-gray-200 text-xs font-medium group-hover:text-primary transition-colors">{{ category.name }}</span>
-                                    <span class="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{{ category.job_count }}</span>
+                                    <input name="job_function" value="{{ func.job_function }}" class="h-3.5 w-3.5 rounded border-2 border-[#e6e0db] dark:border-[#3d2e24] bg-transparent text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all" type="checkbox" {% if func.job_function in selected_job_functions %}checked{% endif %}/>
+                                    <span class="flex-1 text-[#181411] dark:text-gray-200 text-xs font-medium group-hover:text-primary transition-colors">{{ func.job_function }}</span>
+                                    <span class="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{{ func.job_count }}</span>
                                 </label>
                                 {% empty %}
-                                <p class="text-xs text-[#8a7360] dark:text-gray-400 py-3 text-center">No categories with open jobs</p>
+                                <p class="text-xs text-[#8a7360] dark:text-gray-400 py-3 text-center">No job functions with open jobs</p>
                                 {% endfor %}
                             </div>
                         </div>
@@ -242,17 +243,27 @@
                             <div class="flex-1 space-y-3">
                                 <!-- Badges -->
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-semibold uppercase rounded-md border border-primary/20">{{ job.category.name }}</span>
-                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.get_contract_type_display }}</span>
-                                    {% if job.education_level %}
-                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">{{ job.get_education_level_display }}</span>
+                                    {% if job.pk in applied_job_ids %}
+                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-semibold uppercase rounded-md border border-green-200 dark:border-green-800 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                                        <span>Already Applied</span>
+                                    </span>
+                                    {% endif %}
+                                    {% if job.job_function %}
+                                    <span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-semibold uppercase rounded-md border border-primary/20">{{ job.job_function }}</span>
+                                    {% endif %}
+                                    {% if job.job_type %}
+                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.job_type }}</span>
+                                    {% endif %}
+                                    {% if job.years_of_experience %}
+                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">{{ job.years_of_experience }} years exp.</span>
                                     {% endif %}
                                 </div>
                                 
                                 <!-- Job Title -->
                                 <div>
                                     <h2 class="text-[#181411] dark:text-white text-lg font-bold group-hover:text-primary transition-colors cursor-pointer leading-tight mb-1.5">
-                                        <a href="{% url 'jobs:detail' job.pk %}" class="hover:underline">{{ job.title }}</a>
+                                        <a href="{% url 'jobs:detail' job.pk %}" class="hover:underline">{{ job.job_title }}</a>
                                     </h2>
                                 </div>
                                 
@@ -263,31 +274,42 @@
                                         <span class="material-symbols-outlined text-primary text-base">location_on</span>
                                         <span>{{ job.location }}</span>
                                     </div>
-                                    {% elif job.get_location_type_display %}
-                                    <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
-                                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
-                                        <span>{{ job.get_location_type_display }}</span>
-                                    </div>
                                     {% endif %}
-                                    {% if job.education_level %}
+                                    {% if job.education %}
                                     <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
                                         <span class="material-symbols-outlined text-primary text-base">school</span>
-                                        <span>{{ job.get_education_level_display }}</span>
+                                        <span>{{ job.education|truncatewords:5 }}</span>
                                     </div>
                                     {% endif %}
+                                    {% if job.end_date %}
                                     <div class="flex items-center gap-1.5 text-red-500 dark:text-red-400 font-semibold">
                                         <span class="material-symbols-outlined text-base">schedule</span>
-                                        <span>Deadline: {{ job.application_deadline|date:"M d, Y" }}</span>
+                                        <span>Deadline: {{ job.end_date|date:"M d, Y" }}</span>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             
                             <!-- Action Button -->
                             <div class="flex items-center gap-3 lg:flex-col lg:items-end">
-                                <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap text-sm w-full sm:w-auto">
-                                    <span>View Details</span>
-                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
-                                </a>
+                                {% with application=applied_jobs_dict|get_item:job.pk %}
+                                {% if application %}
+                                    <a href="{% url 'applications:detail' application.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md shadow-green-200 dark:shadow-green-900/30 hover:shadow-lg transition-all hover:scale-105 active:scale-95 whitespace-nowrap text-sm w-full sm:w-auto">
+                                        <span class="material-symbols-outlined text-base">check_circle</span>
+                                        <span>Already Applied</span>
+                                    </a>
+                                {% elif user.is_authenticated and user.is_applicant %}
+                                    <a href="{% url 'applications:apply' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap text-sm w-full sm:w-auto">
+                                        <span>Apply Now</span>
+                                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-semibold rounded-lg shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap text-sm w-full sm:w-auto">
+                                        <span>View Details</span>
+                                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                    </a>
+                                {% endif %}
+                                {% endwith %}
                             </div>
                         </div>
                     </div>
@@ -426,9 +448,9 @@
                 params.append('search', searchInput.value);
             }
             
-            // Get all checked categories
-            document.querySelectorAll('input[name="category"]:checked').forEach(cb => {
-                params.append('category', cb.value);
+            // Get all checked job functions
+            document.querySelectorAll('input[name="job_function"]:checked').forEach(cb => {
+                params.append('job_function', cb.value);
             });
             
             // Get all checked locations

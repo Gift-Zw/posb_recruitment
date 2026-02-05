@@ -28,7 +28,7 @@ class ApplicationListView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Application.objects.filter(applicant=self.request.user).select_related("job_advert", "job_advert__category").order_by('-submitted_at')
+        return Application.objects.filter(applicant=self.request.user).select_related("job_advert").order_by('-submitted_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -78,11 +78,32 @@ class ApplyView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         job = get_object_or_404(JobAdvert, pk=kwargs["job_id"])
+        if not job.is_open_for_applications():
+            messages.error(request, "This vacancy is closed and no longer accepting applications.")
+            return redirect("jobs:list")
+        
+        # Check if user has already applied to this job
+        existing_application = Application.objects.filter(
+            applicant=request.user,
+            job_advert=job
+        ).first()
+        
+        if existing_application:
+            messages.info(
+                request,
+                f"You have already applied for this position. Your application was submitted on {existing_application.submitted_at.strftime('%B %d, %Y')} and is currently {existing_application.get_status_display().lower()}."
+            )
+            return redirect("applications:detail", pk=existing_application.pk)
+        
         profile = getattr(request.user, "applicant_profile", None)
         initial_profile = {}
         if profile:
             # Use profile email if available, otherwise use user email
             email = profile.email if profile.email else request.user.email
+            # Convert skills to semicolon-separated string
+            skills_list = [skill.name for skill in profile.skills.all()]
+            skills_text = "; ".join(skills_list) if skills_list else ""
+            
             initial_profile = {
                 "phone_number": profile.phone_number,
                 "alternate_phone": profile.alternate_phone,
@@ -91,24 +112,13 @@ class ApplyView(LoginRequiredMixin, TemplateView):
                 "gender": profile.gender,
                 "nationality": profile.nationality,
                 "id_number": profile.id_number,
-                "marital_status": profile.marital_status,
                 "address_line_1": profile.address_line_1,
                 "address_line_2": profile.address_line_2,
                 "city": profile.city,
                 "state_province": profile.state_province,
-                "postal_code": profile.postal_code,
                 "country": profile.country,
                 "professional_summary": profile.professional_summary,
-                "education": json.dumps(profile.education) if profile.education else "",
-                "experience": json.dumps(profile.experience) if profile.experience else "",
-                "skills": profile.skills.all(),
-                "languages": json.dumps(profile.languages) if profile.languages else "",
-                "certifications": json.dumps(profile.certifications) if profile.certifications else "",
-                "references": json.dumps(profile.references) if profile.references else "",
-                "emergency_contact_name": profile.emergency_contact_name,
-                "emergency_contact_relationship": profile.emergency_contact_relationship,
-                "emergency_contact_phone": profile.emergency_contact_phone,
-                "emergency_contact_email": profile.emergency_contact_email,
+                "skills_text": skills_text,
                 "cover_letter": profile.cover_letter,
                 "linkedin_url": profile.linkedin_url,
                 "portfolio_url": profile.portfolio_url,
@@ -131,11 +141,46 @@ class ApplyView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         job = get_object_or_404(JobAdvert, pk=kwargs["job_id"])
+        if not job.is_open_for_applications():
+            messages.error(request, "This vacancy is closed and no longer accepting applications.")
+            return redirect("jobs:list")
+        
+        # Check if user has already applied to this job
+        existing_application = Application.objects.filter(
+            applicant=request.user,
+            job_advert=job
+        ).first()
+        
+        if existing_application:
+            messages.info(
+                request,
+                f"You have already applied for this position. Your application was submitted on {existing_application.submitted_at.strftime('%B %d, %Y')} and is currently {existing_application.get_status_display().lower()}."
+            )
+            return redirect("applications:detail", pk=existing_application.pk)
+        
         profile_form = ApplicantProfileForm(request.POST, instance=getattr(request.user, "applicant_profile", None))
         application_form = ApplicationForm(request.POST, request.FILES)
 
         if profile_form.is_valid() and application_form.is_valid():
             try:
+                # Handle skills_text - convert semicolon-separated string to Skill objects
+                skills_text = profile_form.cleaned_data.get('skills_text', '').strip()
+                skill_objects = []
+                if skills_text:
+                    from jobs.models import Skill
+                    skill_names = [s.strip() for s in skills_text.split(';') if s.strip()]
+                    # Get or create skills
+                    for skill_name in skill_names:
+                        skill, _ = Skill.objects.get_or_create(name=skill_name)
+                        skill_objects.append(skill)
+                
+                # Save profile with skills
+                profile = profile_form.save(commit=False)
+                profile.user = request.user
+                profile.save()
+                profile.skills.set(skill_objects)
+                
+                # Now submit application (it will use the already-saved profile)
                 submit_application(request.user, job, profile_form, application_form)
                 messages.success(request, "Application submitted successfully.")
                 return redirect("applications:list")

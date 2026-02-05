@@ -41,7 +41,7 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = Application.objects.select_related("applicant", "job_advert", "job_advert__category").order_by('-submitted_at')
+        queryset = Application.objects.select_related("applicant", "job_advert").order_by('-submitted_at')
         
         # Filter by status
         status = self.request.GET.get('status')
@@ -94,7 +94,7 @@ class ApplicationManagementDetailView(HRStaffRequiredMixin, DetailView):
     context_object_name = "application"
 
     def get_queryset(self):
-        return Application.objects.select_related("applicant", "job_advert", "job_advert__category").prefetch_related("documents")
+        return Application.objects.select_related("applicant", "job_advert").prefetch_related("documents")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -124,7 +124,7 @@ class ApplicantProfileManagementView(HRStaffRequiredMixin, DetailView):
         # Get all applications by this applicant
         context['applications'] = Application.objects.filter(
             applicant=self.object.user
-        ).select_related('job_advert', 'job_advert__category').order_by('-submitted_at')
+        ).select_related('job_advert').order_by('-submitted_at')
         
         return context
 

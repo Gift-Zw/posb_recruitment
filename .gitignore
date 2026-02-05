@@ -139,9 +139,6 @@ staticfiles/
 secrets.json
 credentials.json
 
-# Node modules (if any frontend tooling)
-node_modules/
-
 # Logs
 logs/
 *.log

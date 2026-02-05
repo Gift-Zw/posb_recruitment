@@ -9,11 +9,10 @@ app_name = "jobs_management"
 
 urlpatterns = [
     path('', views.JobAdvertListView.as_view(), name='list'),
-    path('create/', views.JobAdvertCreateView.as_view(), name='advert-create'),
     path('<int:pk>/', views.JobAdvertDetailView.as_view(), name='advert-detail'),
-    path('<int:pk>/edit/', views.JobAdvertUpdateView.as_view(), name='advert-edit'),
-    path('categories/', views.JobCategoryListView.as_view(), name='category-list'),
-    path('categories/create/', views.JobCategoryCreateView.as_view(), name='category-create'),
+    path('<int:pk>/close/', views.JobAdvertCloseView.as_view(), name='advert-close'),
+    path('<int:pk>/reopen/', views.JobAdvertReopenView.as_view(), name='advert-reopen'),
+    path('<int:pk>/applications/', views.JobApplicationsListView.as_view(), name='job-applications'),
     path('skills/', views.SkillListView.as_view(), name='skill-list'),
     path('skills/create/', views.SkillCreateView.as_view(), name='skill-create'),
 ]

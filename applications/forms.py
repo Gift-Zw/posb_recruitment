@@ -37,6 +37,16 @@ class ApplicantProfileForm(forms.ModelForm):
         help_text="JSON list of references.",
     )
 
+    # Skills as semicolon-separated text input
+    skills_text = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
+            'placeholder': 'e.g., Python; JavaScript; Project Management; Communication'
+        }),
+        help_text="Enter your skills separated by semicolons (;)",
+    )
+
     class Meta:
         model = ApplicantProfile
         fields = [
@@ -49,25 +59,17 @@ class ApplicantProfileForm(forms.ModelForm):
             "gender",
             "nationality",
             "id_number",
-            "marital_status",
             # Address Information
             "address_line_1",
             "address_line_2",
             "city",
             "state_province",
-            "postal_code",
             "country",
             # Professional Summary
             "professional_summary",
-            # Skills (ManyToMany - handled separately in view)
-            "skills",
+            # Note: skills_text is handled separately (not a model field)
             # Note: education, experience, languages, certifications, references, and projects
             # are JSON fields handled separately via JavaScript and submitted via hidden inputs
-            # Emergency Contact
-            "emergency_contact_name",
-            "emergency_contact_relationship",
-            "emergency_contact_phone",
-            "emergency_contact_email",
             # Additional Information
             "cover_letter",
             "linkedin_url",
@@ -114,9 +116,6 @@ class ApplicantProfileForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
                 'placeholder': 'National ID number'
             }),
-            "marital_status": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm'
-            }),
             "address_line_1": forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
                 'placeholder': 'Street address'
@@ -133,10 +132,6 @@ class ApplicantProfileForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
                 'placeholder': 'State/Province'
             }),
-            "postal_code": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Postal code'
-            }),
             "country": forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
                 'placeholder': 'Country'
@@ -145,25 +140,6 @@ class ApplicantProfileForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
                 'rows': 5,
                 'placeholder': 'Tell us about yourself, your professional background, achievements, and career goals...'
-            }),
-            "skills": forms.CheckboxSelectMultiple(attrs={
-                'class': 'space-y-2'
-            }),
-            "emergency_contact_name": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Full name'
-            }),
-            "emergency_contact_relationship": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'e.g., Spouse, Parent, Sibling'
-            }),
-            "emergency_contact_phone": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Phone number'
-            }),
-            "emergency_contact_email": forms.EmailInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Email address'
             }),
             "cover_letter": forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
@@ -290,7 +266,7 @@ class ApplicationForm(forms.Form):
     cv_file = forms.FileField(
         required=True,
         widget=forms.FileInput(attrs={
-            'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90',
+            'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary py-2.5 px-4 text-sm file:mr-6 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90',
             'accept': '.pdf,.doc,.docx'
         })
     )

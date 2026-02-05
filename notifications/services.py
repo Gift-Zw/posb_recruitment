@@ -103,10 +103,10 @@ class EmailService:
             notification = EmailNotification.objects.create(
                 recipient=application.applicant,
                 notification_type='APPLICATION_SUBMITTED',
-                subject=f'Application Submitted - {application.job_advert.title}',
-                message=f'Your application for {application.job_advert.title} has been successfully submitted.',
+                subject=f'Application Submitted - {application.job_advert.job_title}',
+                message=f'Your application for {application.job_advert.job_title} has been successfully submitted.',
                 related_application=application,
-                metadata={'application_id': application.id, 'job_title': application.job_advert.title}
+                metadata={'application_id': application.id, 'job_title': application.job_advert.job_title}
             )
             
             # Build portal URL
@@ -182,8 +182,8 @@ class EmailService:
             notification = EmailNotification.objects.create(
                 recipient=application.applicant,
                 notification_type='SHORTLISTED',
-                subject=f'Congratulations! You have been shortlisted - {application.job_advert.title}',
-                message=f'Congratulations! Your application for {application.job_advert.title} has been shortlisted. We will contact you soon.',
+                subject=f'Congratulations! You have been shortlisted - {application.job_advert.job_title}',
+                message=f'Congratulations! Your application for {application.job_advert.job_title} has been shortlisted. We will contact you soon.',
                 related_application=application,
                 metadata={'application_id': application.id, 'ai_score': application.ai_score}
             )
@@ -261,8 +261,8 @@ class EmailService:
             notification = EmailNotification.objects.create(
                 recipient=application.applicant,
                 notification_type='REJECTED',
-                subject=f'Application Update - {application.job_advert.title}',
-                message=f'Thank you for your interest. Unfortunately, your application for {application.job_advert.title} was not successful at this time.',
+                subject=f'Application Update - {application.job_advert.job_title}',
+                message=f'Thank you for your interest. Unfortunately, your application for {application.job_advert.job_title} was not successful at this time.',
                 related_application=application,
                 metadata={'application_id': application.id}
             )

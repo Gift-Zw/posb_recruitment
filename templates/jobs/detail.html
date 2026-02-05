@@ -55,9 +55,11 @@
         <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
         <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors" href="{% url 'jobs:list' %}">Jobs</a>
         <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
-        <span class="text-[#181411] dark:text-white text-sm font-semibold">{{ job.category.name }}</span>
+        {% if job.job_function %}
+        <span class="text-[#181411] dark:text-white text-sm font-semibold">{{ job.job_function }}</span>
         <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
-        <span class="text-[#181411] dark:text-white text-sm font-semibold line-clamp-1">{{ job.title }}</span>
+        {% endif %}
+        <span class="text-[#181411] dark:text-white text-sm font-semibold line-clamp-1">{{ job.job_title }}</span>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -68,44 +70,50 @@
                 <div class="flex flex-col gap-4">
                     <!-- Badges -->
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold uppercase rounded-md border border-primary/20">{{ job.category.name }}</span>
-                        <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.get_contract_type_display }}</span>
-                        {% if job.education_level %}
-                        <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">{{ job.get_education_level_display }}</span>
+                        {% if job.job_function %}
+                        <span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold uppercase rounded-md border border-primary/20">{{ job.job_function }}</span>
+                        {% endif %}
+                        {% if job.job_type %}
+                        <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.job_type }}</span>
+                        {% endif %}
+                        {% if job.years_of_experience %}
+                        <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">{{ job.years_of_experience }} years exp.</span>
                         {% endif %}
                     </div>
                     
                     <!-- Job Title -->
                     <h1 class="text-[#181411] dark:text-white text-2xl md:text-3xl font-bold leading-tight">
-                        {{ job.title }}
+                        {{ job.job_title }}
                     </h1>
                     
                     <!-- Job Meta Info -->
                     <div class="flex flex-wrap gap-x-6 gap-y-2 text-[#8a7360] dark:text-gray-400 text-xs">
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-base">tag</span>
-                            <span>Job ID: {{ job.id }}</span>
+                            <span>Job ID: {{ job.job_id }}</span>
                         </div>
                         {% if job.location %}
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-base">location_on</span>
                             <span>{{ job.location }}</span>
                         </div>
-                        {% elif job.get_location_type_display %}
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-primary text-base">location_on</span>
-                            <span>{{ job.get_location_type_display }}</span>
-                        </div>
                         {% endif %}
+                        {% if job.job_function %}
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-base">corporate_fare</span>
-                            <span>{{ job.category.name }}</span>
+                            <span>{{ job.job_function }}</span>
                         </div>
+                        {% endif %}
                     </div>
                     
                     <!-- Apply Button -->
                     <div class="pt-3 border-t border-[#e6e0db] dark:border-[#3d2e24]">
-                        {% if user.is_authenticated and user.is_applicant %}
+                        {% if existing_application %}
+                            <a href="{% url 'applications:detail' existing_application.pk %}" class="inline-flex items-center justify-center gap-2 min-h-[44px] w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-md shadow-green-200 dark:shadow-green-900/30 hover:shadow-lg transition-all">
+                                <span class="material-symbols-outlined text-lg">check_circle</span>
+                                <span>Already Applied</span>
+                            </a>
+                        {% elif user.is_authenticated and user.is_applicant %}
                             <a href="{% url 'applications:apply' job.pk %}" class="inline-flex items-center justify-center gap-2 min-h-[44px] w-full md:w-auto bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
                                 <span>Apply Now</span>
                                 <span class="material-symbols-outlined text-lg">arrow_forward</span>
@@ -130,7 +138,7 @@
                     </div>
                     <div class="prose prose-slate dark:prose-invert max-w-none prose-sm">
                         <p class="text-[#181411]/90 dark:text-white/90 leading-relaxed text-sm">
-                            {{ job.description|linebreaks }}
+                            {{ job.job_description|linebreaks }}
                         </p>
                     </div>
                 </section>
@@ -155,40 +163,66 @@
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Required Skills</h2>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        {% for skill in job.required_skills.all %}
-                            <span class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-colors">{{ skill.name }}</span>
-                        {% empty %}
+                        {% if job.skills %}
+                            {% for skill in job.get_skills_list %}
+                                <span class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-colors">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
                             <p class="text-[#8a7360] dark:text-gray-400 italic text-sm">Not specified</p>
-                        {% endfor %}
+                        {% endif %}
                     </div>
                 </section>
 
                 <!-- Requirements -->
-                {% if job.education_level or job.experience_required %}
+                {% if job.education or job.years_of_experience or job.certificates %}
                 <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
                     <div class="flex items-center gap-2.5 mb-4">
                         <span class="material-symbols-outlined text-primary text-xl">verified</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Requirements</h2>
                     </div>
                     <div class="space-y-3">
-                        {% if job.education_level %}
-                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
-                            <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-primary text-base">school</span>
-                                Education Level
-                            </p>
-                            <p class="text-sm text-[#181411]/90 dark:text-white/90">{{ job.get_education_level_display }}</p>
-                        </div>
-                        {% endif %}
-                        {% if job.experience_required %}
+                        {% if job.years_of_experience %}
                         <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
                             <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-primary text-base">work_history</span>
-                                Experience Required
+                                Years of Experience
                             </p>
-                            <p class="text-sm text-[#181411]/90 dark:text-white/90 whitespace-pre-wrap">{{ job.experience_required }}</p>
+                            <p class="text-sm text-[#181411]/90 dark:text-white/90">{{ job.years_of_experience }} years</p>
                         </div>
                         {% endif %}
+                        {% if job.education %}
+                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
+                            <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-primary text-base">school</span>
+                                Education
+                            </p>
+                            <p class="text-sm text-[#181411]/90 dark:text-white/90">{{ job.education }}</p>
+                        </div>
+                        {% endif %}
+                        {% if job.certificates %}
+                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
+                            <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-primary text-base">verified</span>
+                                Certificates
+                            </p>
+                            <p class="text-sm text-[#181411]/90 dark:text-white/90">{{ job.certificates }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Job Tasks -->
+                {% if job.job_tasks %}
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <span class="material-symbols-outlined text-primary text-xl">task</span>
+                        <h2 class="text-lg font-bold text-[#181411] dark:text-white">Job Tasks</h2>
+                    </div>
+                    <div class="prose prose-slate dark:prose-invert max-w-none prose-sm">
+                        <p class="text-[#181411]/90 dark:text-white/90 leading-relaxed text-sm">
+                            {{ job.job_tasks|linebreaks }}
+                        </p>
                     </div>
                 </section>
                 {% endif %}
@@ -196,6 +230,20 @@
 
             <!-- Call to Action -->
             <div class="pt-5 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+                {% if existing_application %}
+                <div class="bg-gradient-to-r from-green-50 via-green-50/50 to-transparent dark:from-green-900/20 dark:via-green-900/10 p-4 sm:p-6 rounded-xl border-2 border-green-200 dark:border-green-800 text-center">
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl">check_circle</span>
+                        <h3 class="text-base font-bold text-green-800 dark:text-green-300">You've Already Applied!</h3>
+                    </div>
+                    <p class="text-xs text-green-700 dark:text-green-400 mb-1">Your application was submitted on <strong>{{ existing_application.submitted_at|date:"F d, Y" }}</strong></p>
+                    <p class="text-xs text-green-700 dark:text-green-400 mb-4">Current status: <strong>{{ existing_application.get_status_display }}</strong></p>
+                    <a href="{% url 'applications:detail' existing_application.pk %}" class="inline-flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-md shadow-green-200 dark:shadow-green-900/30 hover:shadow-lg transition-all">
+                        <span>View My Application</span>
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                    </a>
+                </div>
+                {% else %}
                 <div class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 p-4 sm:p-6 rounded-xl border border-primary/20 text-center">
                     <h3 class="text-base font-bold text-[#181411] dark:text-white mb-2">Ready to Apply?</h3>
                     <p class="text-xs text-[#8a7360] dark:text-gray-400 mb-4">Take the next step in your career journey with POSB Bank</p>
@@ -211,6 +259,7 @@
                         </a>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -220,13 +269,15 @@
             <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-5 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
                 <h3 class="text-base font-bold text-[#181411] dark:text-white mb-4 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">Job Details</h3>
                 <div class="space-y-4">
+                    {% if job.job_type %}
                     <div class="flex items-start gap-2.5">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5">work</span>
                         <div>
-                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Contract Type</p>
-                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.get_contract_type_display }}</p>
+                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Job Type</p>
+                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.job_type }}</p>
                         </div>
                     </div>
+                    {% endif %}
                     {% if job.location %}
                     <div class="flex items-start gap-2.5">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5">location_on</span>
@@ -236,12 +287,21 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if job.education_level %}
+                    {% if job.job_function %}
                     <div class="flex items-start gap-2.5">
-                        <span class="material-symbols-outlined text-primary text-lg mt-0.5">school</span>
+                        <span class="material-symbols-outlined text-primary text-lg mt-0.5">corporate_fare</span>
                         <div>
-                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Education</p>
-                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.get_education_level_display }}</p>
+                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Job Function</p>
+                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.job_function }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if job.years_of_experience %}
+                    <div class="flex items-start gap-2.5">
+                        <span class="material-symbols-outlined text-primary text-lg mt-0.5">work_history</span>
+                        <div>
+                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Experience</p>
+                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.years_of_experience }} years</p>
                         </div>
                     </div>
                     {% endif %}
@@ -254,7 +314,11 @@
                     <span class="material-symbols-outlined text-red-500 dark:text-red-400 text-xl">schedule</span>
                     <h3 class="text-sm font-bold text-[#181411] dark:text-white">Application Deadline</h3>
                 </div>
-                <p class="text-base font-bold text-red-600 dark:text-red-400 mb-1">{{ job.application_deadline|date:"F d, Y" }}</p>
+                {% if job.end_date %}
+                <p class="text-base font-bold text-red-600 dark:text-red-400 mb-1">{{ job.end_date|date:"F d, Y" }}</p>
+                {% else %}
+                <p class="text-base font-bold text-red-600 dark:text-red-400 mb-1">No deadline set</p>
+                {% endif %}
                 <p class="text-xs text-[#8a7360] dark:text-gray-400">Apply before the deadline</p>
             </div>
 

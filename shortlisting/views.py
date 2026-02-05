@@ -53,7 +53,7 @@ class TriggerShortlistingView(HRStaffRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         job = get_object_or_404(JobAdvert, pk=kwargs["job_id"])
         trigger_shortlisting_task(job.id, triggered_by_id=request.user.id, trigger_type="MANUAL")
-        messages.success(request, f"Shortlisting triggered for {job.title}.")
+        messages.success(request, f"Shortlisting triggered for {job.job_title}.")
         return redirect("management:shortlisting_management:list")
 
     def get(self, request, *args, **kwargs):

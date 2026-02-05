@@ -24,8 +24,8 @@
                 {% for export in exports %}
                 <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                     <td class="px-6 py-4">
-                        <div class="font-bold text-gray-900 dark:text-white">{{ export.job_advert.title }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ export.job_advert.category.name }}</div>
+                        <div class="font-bold text-gray-900 dark:text-white">{{ export.job_advert.job_title }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ export.job_advert.job_function|default:"—" }}</div>
                     </td>
                     <td class="px-6 py-4">
                         {% if export.status == 'COMPLETED' %}

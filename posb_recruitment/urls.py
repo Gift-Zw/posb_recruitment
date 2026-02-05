@@ -22,6 +22,9 @@ urlpatterns = [
     
     # Management portal (HR employees only) - separate from applicant portal
     path('management/', include('management.urls')),
+
+    # External API (D365 job postings)
+    path('api/v1/', include('integrations.api_urls')),
 ]
 
 # Serve media files in development

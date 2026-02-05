@@ -6,63 +6,69 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'management:jobs_management:advert-create' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-    <span class="material-symbols-outlined text-lg">add</span>
-    <span>New Job Advert</span>
-</a>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-8">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 p-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome back!</h2>
+                <p class="text-gray-600 dark:text-gray-400">Here's an overview of your recruitment activities</p>
+            </div>
+            <span class="material-symbols-outlined text-6xl text-primary/20 dark:text-primary/30">dashboard</span>
+        </div>
+    </div>
+
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Job Statistics -->
-        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Total Jobs Card -->
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Jobs</h3>
-                <span class="material-symbols-outlined text-primary">work</span>
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Jobs</h3>
+                <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-xl">work</span>
+                </div>
             </div>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_jobs }}</p>
-            <div class="mt-4 flex items-center gap-4 text-xs">
-                <span class="text-green-600 dark:text-green-400">{{ open_jobs }} Open</span>
-                <span class="text-gray-400">•</span>
-                <span class="text-gray-500 dark:text-gray-400">{{ draft_jobs }} Draft</span>
+            <p class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ total_jobs }}</p>
+            <div class="flex items-center gap-3 text-sm">
+                <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    {{ open_jobs }} Open
+                </span>
+                <span class="text-gray-300 dark:text-gray-600">•</span>
+                <span class="text-gray-500 dark:text-gray-400">{{ closed_jobs }} Closed</span>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+        <!-- Open Jobs Card -->
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Open Jobs</h3>
-                <span class="material-symbols-outlined text-green-500">check_circle</span>
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Open Jobs</h3>
+                <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl">check_circle</span>
+                </div>
             </div>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ open_jobs }}</p>
-            <div class="mt-4 flex items-center gap-4 text-xs">
-                <span class="text-blue-600 dark:text-blue-400">Active Recruitment</span>
+            <p class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ open_jobs }}</p>
+            <div class="flex items-center gap-1 text-sm text-green-600 dark:text-green-400 font-medium">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                Active Recruitment
             </div>
         </div>
 
-        <!-- Application Statistics -->
-        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+        <!-- Total Applications Card -->
+        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Applications</h3>
-                <span class="material-symbols-outlined text-blue-500">person_search</span>
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Applications</h3>
+                <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-xl">person_search</span>
+                </div>
             </div>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_applications }}</p>
-            <div class="mt-4 flex items-center gap-4 text-xs">
-                <span class="text-blue-600 dark:text-blue-400">{{ submitted_applications }} New</span>
-                <span class="text-gray-400">•</span>
-                <span class="text-yellow-600 dark:text-yellow-400">{{ under_review_applications }} Review</span>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Shortlisted</h3>
-                <span class="material-symbols-outlined text-green-500">how_to_reg</span>
-            </div>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ shortlisted_applications }}</p>
-            <div class="mt-4 flex items-center gap-4 text-xs">
-                <span class="text-green-600 dark:text-green-400">Ready for Review</span>
+            <p class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ total_applications }}</p>
+            <div class="flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 font-medium">
+                <span class="material-symbols-outlined text-sm">groups</span>
+                All Applicants
             </div>
         </div>
     </div>
@@ -71,47 +77,54 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Recent Job Adverts -->
         <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-[#e6e0db] dark:border-[#3d3128] flex items-center justify-between">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Job Adverts</h3>
-                <a href="{% url 'management:jobs_management:list' %}" class="text-sm text-primary hover:underline">View All</a>
+            <div class="px-6 py-5 border-b border-[#e6e0db] dark:border-[#3d3128] bg-gray-50 dark:bg-gray-900/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">work</span>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Job Adverts</h3>
+                    </div>
+                    <a href="{% url 'management:jobs_management:list' %}" class="text-sm text-primary hover:underline font-medium">View All →</a>
+                </div>
             </div>
             <div class="divide-y divide-[#e6e0db] dark:divide-[#3d3128]">
                 {% for job in recent_jobs %}
                 <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#3d3128] transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors">
-                                {{ job.title }}
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors block truncate">
+                                {{ job.job_title }}
                             </a>
-                            <div class="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                <span>{{ job.category.name }}</span>
+                            <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">business_center</span>
+                                    {{ job.job_function|default:"—" }}
+                                </span>
                                 <span>•</span>
-                                <span>{{ job.applications.count }} applications</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">people</span>
+                                    {{ job.applications.count }} applications
+                                </span>
                             </div>
                         </div>
-                        <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
-                    </div>
-                    <div class="mt-2">
-                        {% if job.status == 'OPEN' %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                            Open
-                        </span>
-                        {% elif job.status == 'DRAFT' %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                            Draft
-                        </span>
-                        {% else %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
-                            Closed
-                        </span>
-                        {% endif %}
+                        <div class="flex flex-col items-end gap-2">
+                            {% if job.status == 'OPEN' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                Open
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
+                                Closed
+                            </span>
+                            {% endif %}
+                            <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    <span class="material-symbols-outlined text-4xl mb-2">work_off</span>
-                    <p>No job adverts yet</p>
-                    <a href="{% url 'management:jobs_management:advert-create' %}" class="text-primary hover:underline mt-2 inline-block">Create your first job advert</a>
+                <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-5xl mb-3 opacity-50">work_off</span>
+                    <p class="font-medium">No job adverts yet</p>
+                    <p class="text-xs mt-2">Job adverts are created automatically from D365 integration</p>
                 </div>
                 {% endfor %}
             </div>
@@ -119,51 +132,57 @@
 
         <!-- Recent Applications -->
         <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-[#e6e0db] dark:border-[#3d3128] flex items-center justify-between">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Applications</h3>
-                <a href="{% url 'management:applications_management:list' %}" class="text-sm text-primary hover:underline">View All</a>
+            <div class="px-6 py-5 border-b border-[#e6e0db] dark:border-[#3d3128] bg-gray-50 dark:bg-gray-900/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">person_add</span>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Recent Applications</h3>
+                    </div>
+                    <a href="{% url 'management:applications_management:list' %}" class="text-sm text-primary hover:underline font-medium">View All →</a>
+                </div>
             </div>
             <div class="divide-y divide-[#e6e0db] dark:divide-[#3d3128]">
                 {% for application in recent_applications %}
                 <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#3d3128] transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors block truncate">
                                 {{ application.applicant.get_full_name|default:application.applicant.email }}
                             </a>
-                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Applied for: {{ application.job_advert.title }}
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">
+                                Applied for: {{ application.job_advert.job_title }}
                             </div>
-                            <div class="mt-2 text-xs text-gray-400">
+                            <div class="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                                <span class="material-symbols-outlined text-sm">schedule</span>
                                 {{ application.submitted_at|timesince }} ago
                             </div>
                         </div>
-                        <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
-                    </div>
-                    <div class="mt-2">
-                        {% if application.status == 'SUBMITTED' %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                            Submitted
-                        </span>
-                        {% elif application.status == 'UNDER_REVIEW' %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                            Under Review
-                        </span>
-                        {% elif application.status == 'SHORTLISTED' %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                            Shortlisted
-                        </span>
-                        {% else %}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                            Rejected
-                        </span>
-                        {% endif %}
+                        <div class="flex flex-col items-end gap-2">
+                            {% if application.status == 'SUBMITTED' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                Submitted
+                            </span>
+                            {% elif application.status == 'UNDER_REVIEW' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                                Under Review
+                            </span>
+                            {% elif application.status == 'SHORTLISTED' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                Shortlisted
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                Rejected
+                            </span>
+                            {% endif %}
+                            <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
-                    <p>No applications yet</p>
+                <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-5xl mb-3 opacity-50">person_off</span>
+                    <p class="font-medium">No applications yet</p>
                 </div>
                 {% endfor %}
             </div>

@@ -2,7 +2,7 @@
 Serializers for jobs app.
 """
 from rest_framework import serializers
-from .models import JobCategory, Skill, JobAdvert
+from .models import Skill, Certification, JobAdvert
 
 
 class SkillSerializer(serializers.ModelSerializer):
@@ -13,26 +13,24 @@ class SkillSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
 
 
-class JobCategorySerializer(serializers.ModelSerializer):
-    """Serializer for JobCategory model."""
+class CertificationSerializer(serializers.ModelSerializer):
+    """Serializer for Certification model."""
     
     class Meta:
-        model = JobCategory
+        model = Certification
         fields = ['id', 'name', 'description']
 
 
 class JobAdvertListSerializer(serializers.ModelSerializer):
     """Serializer for job advert list (public view)."""
-    category = JobCategorySerializer(read_only=True)
-    required_skills = SkillSerializer(many=True, read_only=True)
     is_open = serializers.SerializerMethodField()
     
     class Meta:
         model = JobAdvert
         fields = [
-            'id', 'title', 'category', 'description', 'responsibilities',
-            'required_skills', 'application_deadline', 'status', 'is_open',
-            'created_at'
+            'id', 'recruiting_id', 'job_id', 'job_title', 'job_function',
+            'job_description', 'location', 'job_type', 'end_date',
+            'status', 'is_open', 'created_at'
         ]
     
     def get_is_open(self, obj):
@@ -40,30 +38,16 @@ class JobAdvertListSerializer(serializers.ModelSerializer):
 
 
 class JobAdvertDetailSerializer(serializers.ModelSerializer):
-    """Serializer for job advert detail (includes HR-only fields)."""
-    category = JobCategorySerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(
-        queryset=JobCategory.objects.all(),
-        source='category',
-        write_only=True
-    )
-    required_skills = SkillSerializer(many=True, read_only=True)
-    required_skill_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Skill.objects.all(),
-        source='required_skills',
-        many=True,
-        write_only=True,
-        required=False
-    )
+    """Serializer for job advert detail (includes all fields)."""
     is_open = serializers.SerializerMethodField()
     
     class Meta:
         model = JobAdvert
         fields = [
-            'id', 'title', 'category', 'category_id', 'description', 'responsibilities',
-            'required_skills', 'required_skill_ids', 'application_deadline',
-            'status', 'shortlist_count', 'ai_shortlisting_instructions',
-            'is_open', 'created_at', 'updated_at'
+            'id', 'recruiting_id', 'job_id', 'job_title', 'job_description',
+            'skills', 'certificates', 'education', 'job_tasks', 'responsibilities',
+            'years_of_experience', 'location', 'job_type', 'job_function',
+            'end_date', 'status', 'is_open', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     

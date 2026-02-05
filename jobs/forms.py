@@ -2,7 +2,7 @@
 Forms for job management (server-rendered).
 """
 from django import forms
-from .models import JobCategory, Skill, JobAdvert
+from .models import Skill, Certification
 
 
 class ContactForm(forms.Form):
@@ -40,23 +40,6 @@ class ContactForm(forms.Form):
     )
 
 
-class JobCategoryForm(forms.ModelForm):
-    class Meta:
-        model = JobCategory
-        fields = ["name", "description"]
-        widgets = {
-            "name": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
-                'placeholder': 'Category name'
-            }),
-            "description": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
-                'rows': 4,
-                'placeholder': 'Category description (optional)'
-            }),
-        }
-
-
 class SkillForm(forms.ModelForm):
     class Meta:
         model = Skill
@@ -74,81 +57,18 @@ class SkillForm(forms.ModelForm):
         }
 
 
-class JobAdvertForm(forms.ModelForm):
-    application_deadline = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={
-            "type": "datetime-local",
-            'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
-        })
-    )
-
+class CertificationForm(forms.ModelForm):
     class Meta:
-        model = JobAdvert
-        fields = [
-            "title",
-            "category",
-            "description",
-            "responsibilities",
-            "location_type",
-            "location",
-            "contract_type",
-            "education_level",
-            "experience_required",
-            "required_skills",
-            "application_deadline",
-            "status",
-            "shortlist_count",
-            "ai_shortlisting_instructions",
-        ]
+        model = Certification
+        fields = ["name", "description"]
         widgets = {
-            "title": forms.TextInput(attrs={
+            "name": forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
-                'placeholder': 'Job title'
-            }),
-            "category": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
+                'placeholder': 'Certification name'
             }),
             "description": forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
-                'rows': 6,
-                'placeholder': 'Full job description'
-            }),
-            "responsibilities": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
-                'rows': 6,
-                'placeholder': 'Key responsibilities and duties'
-            }),
-            "location_type": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
-            }),
-            "location": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
-                'placeholder': 'e.g., Harare Branch, Bulawayo, Remote'
-            }),
-            "contract_type": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
-            }),
-            "education_level": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
-            }),
-            "experience_required": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
-                'rows': 3,
-                'placeholder': 'e.g., "2 years in banking", "5 years customer service experience"'
-            }),
-            "required_skills": forms.CheckboxSelectMultiple(attrs={
-                'class': 'space-y-2'
-            }),
-            "status": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'
-            }),
-            "shortlist_count": forms.NumberInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
-                'min': 1
-            }),
-            "ai_shortlisting_instructions": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
                 'rows': 4,
-                'placeholder': 'Custom instructions for AI shortlisting algorithm (optional)'
+                'placeholder': 'Certification description (optional)'
             }),
         }
