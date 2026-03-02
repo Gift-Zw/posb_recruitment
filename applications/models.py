@@ -264,10 +264,10 @@ class ApplicationData(models.Model):
     )
     
     # D365 contract fields (PascalCase mapping in comments)
-    first_name = models.CharField(max_length=255)  # FirstName
-    last_name = models.CharField(max_length=255)  # LastName
+    first_name = models.CharField(max_length=255, default="")  # FirstName
+    last_name = models.CharField(max_length=255, default="")  # LastName
     middle_name = models.CharField(max_length=255, blank=True)  # MiddleName
-    email = models.EmailField()  # Email
+    email = models.EmailField(default="")  # Email
     phone_number = models.CharField(max_length=20, blank=True)  # Phone
     date_of_birth = models.DateField(null=True, blank=True)  # BirthDateUtc
     gender = models.CharField(max_length=20, blank=True)  # Gender (Male/Female)
