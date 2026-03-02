@@ -164,6 +164,7 @@
                         <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gender</th>
                         <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
                         <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">D365</th>
                         <th class="px-6 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -194,6 +195,25 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
+                            {% if application.d365_push_status == 'PUSHED' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                <span class="material-symbols-outlined text-sm mr-0.5">cloud_done</span>
+                            </span>
+                            {% elif application.d365_push_status == 'FAILED' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300" title="{{ application.d365_push_error }}">
+                                <span class="material-symbols-outlined text-sm mr-0.5">error</span>
+                            </span>
+                            {% elif application.d365_push_status == 'DUPLICATE' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                                <span class="material-symbols-outlined text-sm mr-0.5">content_copy</span>
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-sm mr-0.5">cloud_off</span>
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
                             <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
                                 <span class="material-symbols-outlined text-lg">visibility</span>
                                 View
@@ -202,7 +222,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
                             <p>No applications yet</p>
                         </td>
@@ -229,11 +249,20 @@
                 <h3 class="text-xl font-bold text-center text-gray-900 dark:text-white mb-2" id="modal-title">
                     Close Job Advert
                 </h3>
-                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
                     Are you sure you want to close <strong>{{ job.job_title }}</strong>? This will prevent new applications from being submitted.
                 </p>
                 <form method="post" action="{% url 'management:jobs_management:advert-close' pk=job.pk %}" id="closeForm">
                     {% csrf_token %}
+                    <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" name="push_to_d365" value="1" class="mt-0.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" checked>
+                            <div>
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">Push all applications to D365</span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Send all unpushed applications to Dynamics 365 when closing. This eliminates first-applied bias by submitting everyone at once.</p>
+                            </div>
+                        </label>
+                    </div>
                     <div class="flex gap-3">
                         <button type="button" onclick="closeCloseModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
                             Cancel

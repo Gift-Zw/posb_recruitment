@@ -7,7 +7,7 @@ from .models import ApplicantProfile, Application, ApplicationDocument, Applican
 
 @admin.register(ApplicantProfile)
 class ApplicantProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'phone_number', 'nationality', 'created_at']
+    list_display = ['user', 'phone_number', 'citizenship', 'country', 'created_at']
     search_fields = ['user__email', 'user__first_name', 'user__last_name']
     filter_horizontal = ['skills']
     readonly_fields = ['created_at', 'updated_at']
@@ -34,22 +34,22 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 @admin.register(ApplicationData)
 class ApplicationDataAdmin(admin.ModelAdmin):
-    list_display = ['application', 'phone_number', 'email', 'nationality', 'created_at']
-    list_filter = ['created_at', 'nationality']
+    list_display = ['application', 'phone_number', 'email', 'citizenship', 'country', 'created_at']
+    list_filter = ['created_at']
     search_fields = ['application__applicant__email', 'phone_number', 'email']
     readonly_fields = ['created_at']
     fieldsets = (
         ('Application', {
             'fields': ('application',)
         }),
-        ('Contact Information', {
-            'fields': ('phone_number', 'email', 'address')
+        ('D365 Contract Fields', {
+            'fields': ('first_name', 'last_name', 'middle_name', 'email', 'phone_number',
+                       'date_of_birth', 'gender', 'citizenship', 'marital_status',
+                       'street_address', 'city', 'zip_code', 'country',
+                       'current_job_title', 'education_level', 'cover_letter')
         }),
-        ('Personal Information', {
-            'fields': ('date_of_birth', 'nationality')
-        }),
-        ('Professional Information', {
-            'fields': ('skills', 'education', 'experience', 'cover_letter')
+        ('Portal Fields', {
+            'fields': ('nationality', 'skills', 'education', 'experience')
         }),
         ('Timestamps', {
             'fields': ('created_at',)

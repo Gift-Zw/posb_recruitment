@@ -118,9 +118,9 @@
         {% csrf_token %}
 
         <!-- Personal Information Section -->
-        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 max-w-full overflow-x-hidden animate-slide-up opacity-0 group">
             <div class="flex items-center gap-2.5 mb-4 sm:mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                <span class="material-symbols-outlined text-primary text-xl">person</span>
+                <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">person</span>
                 <h2 class="text-lg font-bold text-[#181411] dark:text-white">Personal Information</h2>
             </div>
             
@@ -128,51 +128,52 @@
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.phone_number.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Phone Number *</label>
                     {{ profile_form.phone_number }}
-                    {% if profile_form.phone_number.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.phone_number.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.phone_number.errors %}<p class="text-xs text-red-500">{{ profile_form.phone_number.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.alternate_phone.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Alternate Phone</label>
                     {{ profile_form.alternate_phone }}
-                    {% if profile_form.alternate_phone.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.alternate_phone.errors.0 }}</p>
-                    {% endif %}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.email.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Email *</label>
                     {{ profile_form.email }}
-                    {% if profile_form.email.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.email.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.email.errors %}<p class="text-xs text-red-500">{{ profile_form.email.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.middle_name.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Middle Name</label>
+                    {{ profile_form.middle_name }}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.date_of_birth.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Date of Birth *</label>
                     {{ profile_form.date_of_birth }}
-                    {% if profile_form.date_of_birth.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.date_of_birth.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.date_of_birth.errors %}<p class="text-xs text-red-500">{{ profile_form.date_of_birth.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.gender.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Gender *</label>
                     {{ profile_form.gender }}
-                    {% if profile_form.gender.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.gender.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.gender.errors %}<p class="text-xs text-red-500">{{ profile_form.gender.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
-                    <label for="{{ profile_form.nationality.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Nationality *</label>
-                    {{ profile_form.nationality }}
-                    {% if profile_form.nationality.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.nationality.errors.0 }}</p>
-                    {% endif %}
+                    <label for="{{ profile_form.citizenship.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Citizenship *</label>
+                    {{ profile_form.citizenship }}
+                    {% if profile_form.citizenship.errors %}<p class="text-xs text-red-500">{{ profile_form.citizenship.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.id_number.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">ID Number *</label>
                     {{ profile_form.id_number }}
-                    {% if profile_form.id_number.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.id_number.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.id_number.errors %}<p class="text-xs text-red-500">{{ profile_form.id_number.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.marital_status.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Marital Status</label>
+                    {{ profile_form.marital_status }}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.current_job_title.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Current Job Title</label>
+                    {{ profile_form.current_job_title }}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.education_level.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Education Level</label>
+                    {{ profile_form.education_level }}
                 </div>
             </div>
         </div>
@@ -209,16 +210,15 @@
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.state_province.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">State/Province</label>
                     {{ profile_form.state_province }}
-                    {% if profile_form.state_province.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.state_province.errors.0 }}</p>
-                    {% endif %}
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-0">
+                    <label for="{{ profile_form.postal_code.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Postal / Zip Code</label>
+                    {{ profile_form.postal_code }}
                 </div>
                 <div class="flex flex-col gap-1.5 min-w-0">
                     <label for="{{ profile_form.country.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Country *</label>
                     {{ profile_form.country }}
-                    {% if profile_form.country.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.country.errors.0 }}</p>
-                    {% endif %}
+                    {% if profile_form.country.errors %}<p class="text-xs text-red-500">{{ profile_form.country.errors.0 }}</p>{% endif %}
                 </div>
             </div>
         </div>
@@ -258,9 +258,9 @@
         </div>
 
         <!-- Application Documents Section -->
-        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 max-w-full overflow-x-hidden animate-slide-up [animation-delay:100ms] opacity-0 group">
             <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                <span class="material-symbols-outlined text-primary text-xl">attach_file</span>
+                <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">attach_file</span>
                 <h2 class="text-lg font-bold text-[#181411] dark:text-white">Application Documents</h2>
             </div>
             
@@ -288,9 +288,9 @@
         </div>
 
         <!-- Additional Information Section -->
-        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
+        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 max-w-full overflow-x-hidden animate-slide-up [animation-delay:200ms] opacity-0 group">
             <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                <span class="material-symbols-outlined text-primary text-xl">info</span>
+                <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">info</span>
                 <h2 class="text-lg font-bold text-[#181411] dark:text-white">Additional Information</h2>
             </div>
             
@@ -327,14 +327,14 @@
         </div>
 
         <!-- Form Actions -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-[#e6e0db] dark:border-[#3d2e24]">
-            <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-[#e6e0db] dark:border-[#3d2e24] animate-fade-in [animation-delay:300ms] opacity-0">
+            <a href="{% url 'jobs:detail' job.pk %}" class="flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors hover:scale-[1.02] active:scale-95">
+                <span class="material-symbols-outlined text-base transition-transform group-hover:-translate-x-1">arrow_back</span>
                 <span>Cancel</span>
             </a>
-            <button type="submit" class="flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-lg font-semibold text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
+            <button type="submit" class="group flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-lg font-semibold text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 active:scale-95">
                 <span>Submit Application</span>
-                <span class="material-symbols-outlined text-lg">send</span>
+                <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">send</span>
             </button>
         </div>
     </form>

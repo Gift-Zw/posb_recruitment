@@ -238,7 +238,7 @@
                 <!-- Job Listing Cards -->
                 <div class="grid grid-cols-1 gap-4">
                     {% for job in jobs %}
-                    <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 group">
+                    <div class="bg-white dark:bg-[#1c140d] rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] p-5 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 group animate-slide-up opacity-0" style="animation-delay: {{ forloop.counter }}00ms">
                         <div class="flex flex-col lg:flex-row justify-between lg:items-start gap-4">
                             <div class="flex-1 space-y-3">
                                 <!-- Badges -->

@@ -98,9 +98,7 @@ class ApplyView(LoginRequiredMixin, TemplateView):
         profile = getattr(request.user, "applicant_profile", None)
         initial_profile = {}
         if profile:
-            # Use profile email if available, otherwise use user email
             email = profile.email if profile.email else request.user.email
-            # Convert skills to semicolon-separated string
             skills_list = [skill.name for skill in profile.skills.all()]
             skills_text = "; ".join(skills_list) if skills_list else ""
             
@@ -108,15 +106,20 @@ class ApplyView(LoginRequiredMixin, TemplateView):
                 "phone_number": profile.phone_number,
                 "alternate_phone": profile.alternate_phone,
                 "email": email,
+                "middle_name": profile.middle_name,
                 "date_of_birth": profile.date_of_birth,
                 "gender": profile.gender,
-                "nationality": profile.nationality,
+                "citizenship": profile.citizenship_id,
                 "id_number": profile.id_number,
+                "marital_status": profile.marital_status,
+                "current_job_title": profile.current_job_title,
+                "education_level": profile.education_level_id,
                 "address_line_1": profile.address_line_1,
                 "address_line_2": profile.address_line_2,
                 "city": profile.city,
                 "state_province": profile.state_province,
-                "country": profile.country,
+                "postal_code": profile.postal_code,
+                "country": profile.country_id,
                 "professional_summary": profile.professional_summary,
                 "skills_text": skills_text,
                 "cover_letter": profile.cover_letter,
@@ -128,7 +131,6 @@ class ApplyView(LoginRequiredMixin, TemplateView):
                 "notice_period": profile.notice_period,
             }
         else:
-            # If no profile exists, at least populate email from user
             initial_profile = {
                 "email": request.user.email,
             }

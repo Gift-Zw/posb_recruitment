@@ -64,9 +64,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         <!-- Left Column: Content -->
-        <div class="lg:col-span-8 space-y-4 sm:space-y-6">
+        <div class="lg:col-span-8 space-y-4 sm:space-y-6 animate-fade-in">
             <!-- Page Heading -->
-            <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+            <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-lg transition-shadow duration-300">
                 <div class="flex flex-col gap-4">
                     <!-- Badges -->
                     <div class="flex flex-wrap gap-2">
@@ -131,9 +131,9 @@
             <!-- Job Details -->
             <div class="space-y-5">
                 <!-- About the Role -->
-                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 group">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <span class="material-symbols-outlined text-primary text-xl">info</span>
+                        <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">info</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">About the Role</h2>
                     </div>
                     <div class="prose prose-slate dark:prose-invert max-w-none prose-sm">
@@ -144,9 +144,9 @@
                 </section>
 
                 <!-- Key Responsibilities -->
-                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 group">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <span class="material-symbols-outlined text-primary text-xl">checklist</span>
+                        <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">checklist</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Key Responsibilities</h2>
                     </div>
                     <div class="prose prose-slate dark:prose-invert max-w-none prose-sm">
@@ -157,9 +157,9 @@
                 </section>
 
                 <!-- Required Skills -->
-                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 group">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <span class="material-symbols-outlined text-primary text-xl">psychology</span>
+                        <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">psychology</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Required Skills</h2>
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -175,14 +175,14 @@
 
                 <!-- Requirements -->
                 {% if job.education or job.years_of_experience or job.certificates %}
-                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 group">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <span class="material-symbols-outlined text-primary text-xl">verified</span>
+                        <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">verified</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Requirements</h2>
                     </div>
                     <div class="space-y-3">
                         {% if job.years_of_experience %}
-                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] group-hover:border-primary/20 transition-colors">
                             <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-primary text-base">work_history</span>
                                 Years of Experience
@@ -191,7 +191,7 @@
                         </div>
                         {% endif %}
                         {% if job.education %}
-                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] group-hover:border-primary/20 transition-colors">
                             <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-primary text-base">school</span>
                                 Education
@@ -200,7 +200,7 @@
                         </div>
                         {% endif %}
                         {% if job.certificates %}
-                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="p-3 bg-gray-50 dark:bg-[#2d241d] rounded-lg border border-[#e6e0db] dark:border-[#3d2e24] group-hover:border-primary/20 transition-colors">
                             <p class="text-xs font-semibold text-[#181411] dark:text-white mb-1.5 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-primary text-base">verified</span>
                                 Certificates
@@ -214,9 +214,9 @@
                 
                 <!-- Job Tasks -->
                 {% if job.job_tasks %}
-                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+                <section class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 group">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <span class="material-symbols-outlined text-primary text-xl">task</span>
+                        <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">task</span>
                         <h2 class="text-lg font-bold text-[#181411] dark:text-white">Job Tasks</h2>
                     </div>
                     <div class="prose prose-slate dark:prose-invert max-w-none prose-sm">
@@ -264,9 +264,9 @@
         </div>
 
         <!-- Right Column: Sidebar -->
-        <aside class="lg:col-span-4 space-y-4 sm:space-y-6">
+        <aside class="lg:col-span-4 space-y-4 sm:space-y-6 animate-slide-right [animation-delay:200ms] opacity-0">
             <!-- Quick Info Card -->
-            <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-5 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
+            <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-5 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md transition-shadow duration-300">
                 <h3 class="text-base font-bold text-[#181411] dark:text-white mb-4 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">Job Details</h3>
                 <div class="space-y-4">
                     {% if job.job_type %}

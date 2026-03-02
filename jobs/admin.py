@@ -2,7 +2,7 @@
 Admin configuration for jobs app.
 """
 from django.contrib import admin
-from .models import Skill, Certification, JobAdvert
+from .models import Skill, EducationLevel, Country, JobAdvert
 
 
 @admin.register(Skill)
@@ -11,10 +11,19 @@ class SkillAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
-@admin.register(Certification)
-class CertificationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'created_at']
-    search_fields = ['name']
+@admin.register(EducationLevel)
+class EducationLevelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'd365_code', 'sort_order', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['name', 'd365_code']
+
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'iso2', 'iso3', 'is_active', 'sort_order']
+    list_filter = ['is_active']
+    search_fields = ['name', 'iso2', 'iso3']
+    list_editable = ['sort_order', 'is_active']
 
 
 @admin.register(JobAdvert)

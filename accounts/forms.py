@@ -162,27 +162,32 @@ class ProfileForm(forms.ModelForm):
 
 
 class ApplicantProfileForm(forms.ModelForm):
-    """Form for updating ApplicantProfile details."""
+    """Form for updating ApplicantProfile details on the profile page."""
     class Meta:
         model = ApplicantProfile
-        exclude = ['user', 'skills', 'education', 'experience', 'languages', 'certifications', 'references', 'projects', 'additional_info']
+        exclude = ['user', 'skills', 'education', 'experience']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'availability_date': forms.DateInput(attrs={'type': 'date'}),
             'professional_summary': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Write a brief professional summary about yourself, your skills, and career goals...'}),
             'cover_letter': forms.Textarea(attrs={'rows': 4}),
             'gender': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
+            'marital_status': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
+            'education_level': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
+            'citizenship': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
+            'country': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
             'linkedin_url': forms.URLInput(attrs={'placeholder': 'https://linkedin.com/in/yourprofile'}),
-            'github_url': forms.URLInput(attrs={'placeholder': 'https://github.com/yourusername'}),
-            'twitter_url': forms.URLInput(attrs={'placeholder': 'https://twitter.com/yourusername'}),
-            'facebook_url': forms.URLInput(attrs={'placeholder': 'https://facebook.com/yourprofile'}),
-            'instagram_url': forms.URLInput(attrs={'placeholder': 'https://instagram.com/yourusername'}),
-            'youtube_url': forms.URLInput(attrs={'placeholder': 'https://youtube.com/@yourchannel'}),
-            'behance_url': forms.URLInput(attrs={'placeholder': 'https://behance.net/yourprofile'}),
-            'dribbble_url': forms.URLInput(attrs={'placeholder': 'https://dribbble.com/yourusername'}),
-            'medium_url': forms.URLInput(attrs={'placeholder': 'https://medium.com/@yourusername'}),
-            'stackoverflow_url': forms.URLInput(attrs={'placeholder': 'https://stackoverflow.com/users/yourid'}),
             'portfolio_url': forms.URLInput(attrs={'placeholder': 'https://yourportfolio.com'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from jobs.models import Country, EducationLevel
+        self.fields['citizenship'].queryset = Country.objects.filter(is_active=True)
+        self.fields['citizenship'].empty_label = '— Select citizenship —'
+        self.fields['country'].queryset = Country.objects.filter(is_active=True)
+        self.fields['country'].empty_label = '— Select country —'
+        self.fields['education_level'].queryset = EducationLevel.objects.filter(is_active=True)
 
 
 class PasswordChangeForm(forms.Form):

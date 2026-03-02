@@ -1,48 +1,21 @@
 """
 Forms for application submission (server-rendered).
 """
-import json
 from django import forms
-from django.core.exceptions import ValidationError
 from applications.models import ApplicantProfile, ApplicantProfileDocument
-from jobs.models import Skill
+from jobs.models import EducationLevel, Country
+
+FIELD_CLASS = 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm'
 
 
 class ApplicantProfileForm(forms.ModelForm):
-    """Collect detailed applicant profile data."""
+    """Collect applicant profile data aligned with D365 Applicant Import fields."""
 
-    education = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": 'e.g. [{"institution": "...", "degree": "...", "field": "...", "start_year": "...", "end_year": "..."}]'}),
-        help_text="JSON list of education entries.",
-    )
-    experience = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 3, "placeholder": 'e.g. [{"company": "...", "position": "...", "start_date": "...", "end_date": "...", "current": false}]'}),
-        help_text="JSON list of experience entries.",
-    )
-    languages = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 2, "placeholder": 'e.g. [{"language": "English", "proficiency": "Fluent"}]'}),
-        help_text="JSON list of languages.",
-    )
-    certifications = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 2, "placeholder": 'e.g. [{"name": "...", "issuing_organization": "...", "issue_date": "..."}]'}),
-        help_text="JSON list of certifications.",
-    )
-    references = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 2, "placeholder": 'e.g. [{"name": "...", "position": "...", "company": "...", "email": "...", "phone": "..."}]'}),
-        help_text="JSON list of references.",
-    )
-
-    # Skills as semicolon-separated text input
     skills_text = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-            'placeholder': 'e.g., Python; JavaScript; Project Management; Communication'
+            'class': FIELD_CLASS,
+            'placeholder': 'e.g., Python; JavaScript; Project Management'
         }),
         help_text="Enter your skills separated by semicolons (;)",
     )
@@ -50,158 +23,57 @@ class ApplicantProfileForm(forms.ModelForm):
     class Meta:
         model = ApplicantProfile
         fields = [
-            # Contact Information
-            "phone_number",
-            "alternate_phone",
-            "email",
-            # Personal Information
-            "date_of_birth",
-            "gender",
-            "nationality",
-            "id_number",
-            # Address Information
-            "address_line_1",
-            "address_line_2",
-            "city",
-            "state_province",
-            "country",
-            # Professional Summary
-            "professional_summary",
-            # Note: skills_text is handled separately (not a model field)
-            # Note: education, experience, languages, certifications, references, and projects
-            # are JSON fields handled separately via JavaScript and submitted via hidden inputs
-            # Additional Information
-            "cover_letter",
-            "linkedin_url",
-            "github_url",
-            "twitter_url",
-            "facebook_url",
-            "instagram_url",
-            "youtube_url",
-            "behance_url",
-            "dribbble_url",
-            "medium_url",
-            "stackoverflow_url",
-            "portfolio_url",
-            "availability_date",
-            "current_salary",
-            "expected_salary",
-            "notice_period",
+            "phone_number", "alternate_phone", "email",
+            "middle_name", "date_of_birth", "gender", "citizenship",
+            "id_number", "marital_status",
+            "address_line_1", "address_line_2", "city",
+            "state_province", "postal_code", "country",
+            "current_job_title", "education_level",
+            "professional_summary", "cover_letter",
+            "linkedin_url", "portfolio_url",
+            "availability_date", "current_salary", "expected_salary", "notice_period",
         ]
         widgets = {
-            "phone_number": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'e.g., +263 77 123 4567'
-            }),
-            "alternate_phone": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Optional'
-            }),
-            "email": forms.EmailInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'your.email@example.com'
-            }),
-            "date_of_birth": forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm'
-            }),
-            "gender": forms.Select(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm'
-            }),
-            "nationality": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'e.g., Zimbabwean'
-            }),
-            "id_number": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'National ID number'
-            }),
-            "address_line_1": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Street address'
-            }),
-            "address_line_2": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Apartment, suite, etc. (optional)'
-            }),
-            "city": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'City'
-            }),
-            "state_province": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'State/Province'
-            }),
-            "country": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Country'
-            }),
+            "phone_number": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': '+263 77 123 4567'}),
+            "alternate_phone": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Optional'}),
+            "email": forms.EmailInput(attrs={'class': FIELD_CLASS, 'placeholder': 'your.email@example.com'}),
+            "middle_name": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Middle name (optional)'}),
+            "date_of_birth": forms.DateInput(attrs={'type': 'date', 'class': FIELD_CLASS}),
+            "gender": forms.Select(attrs={'class': FIELD_CLASS}),
+            "citizenship": forms.Select(attrs={'class': FIELD_CLASS}),
+            "id_number": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'National ID number'}),
+            "marital_status": forms.Select(attrs={'class': FIELD_CLASS}),
+            "address_line_1": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Street address'}),
+            "address_line_2": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Apartment, suite, etc. (optional)'}),
+            "city": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'City'}),
+            "state_province": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'State/Province'}),
+            "postal_code": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Postal / Zip Code'}),
+            "country": forms.Select(attrs={'class': FIELD_CLASS}),
+            "current_job_title": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'e.g., Software Developer'}),
+            "education_level": forms.Select(attrs={'class': FIELD_CLASS}),
             "professional_summary": forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
-                'rows': 5,
-                'placeholder': 'Tell us about yourself, your professional background, achievements, and career goals...'
+                'rows': 5, 'placeholder': 'Tell us about yourself...'
             }),
             "cover_letter": forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
-                'rows': 6,
-                'placeholder': 'Write a cover letter explaining why you are interested in this position...'
+                'rows': 6, 'placeholder': 'Write a cover letter explaining why you are interested in this position...'
             }),
-            "linkedin_url": forms.URLInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'https://linkedin.com/in/yourprofile'
-            }),
-            "github_url": forms.URLInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'https://github.com/yourusername'
-            }),
-            "portfolio_url": forms.URLInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'https://yourportfolio.com'
-            }),
-            "availability_date": forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm'
-            }),
-            "current_salary": forms.NumberInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Current salary (optional)'
-            }),
-            "expected_salary": forms.NumberInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'Expected salary (optional)'
-            }),
-            "notice_period": forms.TextInput(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm',
-                'placeholder': 'e.g., 2 weeks, 1 month'
-            }),
+            "linkedin_url": forms.URLInput(attrs={'class': FIELD_CLASS, 'placeholder': 'https://linkedin.com/in/yourprofile'}),
+            "portfolio_url": forms.URLInput(attrs={'class': FIELD_CLASS, 'placeholder': 'https://yourportfolio.com'}),
+            "availability_date": forms.DateInput(attrs={'type': 'date', 'class': FIELD_CLASS}),
+            "current_salary": forms.NumberInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Current salary (optional)'}),
+            "expected_salary": forms.NumberInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Expected salary (optional)'}),
+            "notice_period": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'e.g., 2 weeks, 1 month'}),
         }
 
-    def clean_education(self):
-        return self._parse_json_field("education")
-
-    def clean_experience(self):
-        return self._parse_json_field("experience")
-    
-    def clean_languages(self):
-        return self._parse_json_field("languages")
-    
-    def clean_certifications(self):
-        return self._parse_json_field("certifications")
-    
-    def clean_references(self):
-        return self._parse_json_field("references")
-
-    def _parse_json_field(self, field):
-        value = self.cleaned_data.get(field, "")
-        if not value:
-            return []
-        try:
-            parsed = json.loads(value)
-            if not isinstance(parsed, list):
-                raise ValidationError(f"{field} must be a JSON array.")
-            return parsed
-        except json.JSONDecodeError:
-            raise ValidationError("Invalid JSON format.")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['education_level'].queryset = EducationLevel.objects.filter(is_active=True)
+        self.fields['citizenship'].queryset = Country.objects.filter(is_active=True)
+        self.fields['citizenship'].empty_label = '— Select citizenship —'
+        self.fields['country'].queryset = Country.objects.filter(is_active=True)
+        self.fields['country'].empty_label = '— Select country —'
 
 
 class DocumentUploadForm(forms.ModelForm):
@@ -229,9 +101,9 @@ class DocumentUploadForm(forms.ModelForm):
         if file:
             allowed_exts = ['.pdf', '.doc', '.docx']
             if not any(file.name.lower().endswith(ext) for ext in allowed_exts):
-                raise ValidationError("Allowed file types: PDF, DOC, DOCX.")
-            if file.size > 10 * 1024 * 1024:  # 10MB
-                raise ValidationError("File too large (max 10MB).")
+                raise forms.ValidationError("Allowed file types: PDF, DOC, DOCX.")
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("File too large (max 10MB).")
         return file
     
     def save(self, commit=True):
@@ -245,7 +117,7 @@ class DocumentUploadForm(forms.ModelForm):
 
 
 class ApplicationForm(forms.Form):
-    """Application submission data."""
+    """Application submission — CV upload and cover letter."""
 
     cover_letter = forms.CharField(
         required=False,
@@ -253,14 +125,6 @@ class ApplicationForm(forms.Form):
             'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
             'rows': 6,
             'placeholder': 'Write a cover letter explaining why you are interested in this position...'
-        })
-    )
-    reuse_last = forms.BooleanField(
-        required=False,
-        initial=True,
-        help_text="Reuse previous application data if available.",
-        widget=forms.CheckboxInput(attrs={
-            'class': 'w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary'
         })
     )
     cv_file = forms.FileField(
@@ -275,7 +139,7 @@ class ApplicationForm(forms.Form):
         file = self.cleaned_data["cv_file"]
         allowed_exts = [".pdf", ".doc", ".docx"]
         if not any(file.name.lower().endswith(ext) for ext in allowed_exts):
-            raise ValidationError("Allowed file types: pdf, doc, docx.")
+            raise forms.ValidationError("Allowed file types: pdf, doc, docx.")
         if file.size > 10 * 1024 * 1024:
-            raise ValidationError("File too large (max 10MB).")
+            raise forms.ValidationError("File too large (max 10MB).")
         return file

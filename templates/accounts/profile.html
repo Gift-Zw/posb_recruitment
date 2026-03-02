@@ -73,13 +73,9 @@
                         <span class="material-symbols-outlined text-[20px]">work</span>
                         <p class="text-sm {% if active_tab == 'experience' %}font-semibold{% else %}font-medium{% endif %}">Work Experience</p>
                     </a>
-                    <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'projects' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=projects">
-                        <span class="material-symbols-outlined text-[20px]">code</span>
-                        <p class="text-sm {% if active_tab == 'projects' %}font-semibold{% else %}font-medium{% endif %}">Projects</p>
-                    </a>
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'social' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=social">
                         <span class="material-symbols-outlined text-[20px]">public</span>
-                        <p class="text-sm {% if active_tab == 'social' %}font-semibold{% else %}font-medium{% endif %}">Social Media</p>
+                        <p class="text-sm {% if active_tab == 'social' %}font-semibold{% else %}font-medium{% endif %}">Online Presence</p>
                     </a>
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg {% if active_tab == 'documents' %}bg-primary text-white shadow-md shadow-primary/20{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors{% endif %}" href="?tab=documents">
                         <span class="material-symbols-outlined text-[20px]">description</span>
@@ -134,13 +130,9 @@
                         <span class="material-symbols-outlined text-lg">work</span>
                         <span class="text-xs font-medium">Experience</span>
                     </a>
-                    <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'projects' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=projects">
-                        <span class="material-symbols-outlined text-lg">code</span>
-                        <span class="text-xs font-medium">Projects</span>
-                    </a>
                     <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'social' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=social">
                         <span class="material-symbols-outlined text-lg">public</span>
-                        <span class="text-xs font-medium">Social</span>
+                        <span class="text-xs font-medium">Online Presence</span>
                     </a>
                     <a class="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap {% if active_tab == 'documents' %}bg-primary text-white shadow-md shadow-primary/20{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-colors" href="?tab=documents">
                         <span class="material-symbols-outlined text-lg">description</span>
@@ -227,9 +219,14 @@
                             {% if applicant_form.gender.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.gender.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Nationality</label>
-                            <input type="text" name="applicant-nationality" value="{{ applicant_profile.nationality|default:'' }}" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="e.g., Zimbabwean">
-                            {% if applicant_form.nationality.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.nationality.errors.0 }}</p>{% endif %}
+                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Citizenship</label>
+                            <select name="applicant-citizenship" class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm">
+                                <option value="">— Select citizenship —</option>
+                                {% for c in all_countries %}
+                                <option value="{{ c.id }}" {% if applicant_profile.citizenship_id == c.id %}selected{% endif %}>{{ c.name }} ({{ c.iso3 }})</option>
+                                {% endfor %}
+                            </select>
+                            {% if applicant_form.citizenship.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.citizenship.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="flex flex-col gap-1.5 min-w-0">
                             <label class="text-xs font-semibold text-[#181411] dark:text-white">Location</label>
@@ -303,30 +300,12 @@
                 </div>
                 {% endif %}
 
-                <!-- Projects Section -->
-                {% if active_tab == 'projects' and user.is_applicant %}
-                <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="projects">
-                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-primary text-xl">code</span>
-                            <h3 class="text-lg font-bold dark:text-white">Projects</h3>
-                        </div>
-                        <button type="button" id="add-project-btn" class="text-primary text-xs font-semibold hover:underline">+ Add Project</button>
-                    </div>
-                    <div class="flex flex-col gap-4" id="projects-container">
-                        <!-- Project entries will be added here via JavaScript -->
-                    </div>
-                    <input type="hidden" name="projects_json" id="projects_json" value="{{ projects_json|safe }}">
-                    <input type="hidden" name="projects_submit" value="1">
-                </div>
-                {% endif %}
-
                 <!-- Social Media Section -->
                 {% if active_tab == 'social' and user.is_applicant %}
                 <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800" id="social">
                     <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
                         <span class="material-symbols-outlined text-primary text-xl">public</span>
-                        <h3 class="text-lg font-bold dark:text-white">Social Media & Online Presence</h3>
+                        <h3 class="text-lg font-bold dark:text-white">Online Presence</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                         <div class="flex flex-col gap-1.5 min-w-0">
@@ -336,78 +315,6 @@
                                 <input type="url" name="applicant-linkedin_url" value="{{ applicant_profile.linkedin_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://linkedin.com/in/yourprofile">
                             </div>
                             {% if applicant_form.linkedin_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.linkedin_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">GitHub</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">code</span>
-                                <input type="url" name="applicant-github_url" value="{{ applicant_profile.github_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://github.com/yourusername">
-                            </div>
-                            {% if applicant_form.github_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.github_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Twitter/X</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">chat</span>
-                                <input type="url" name="applicant-twitter_url" value="{{ applicant_profile.twitter_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://twitter.com/yourusername">
-                            </div>
-                            {% if applicant_form.twitter_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.twitter_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Facebook</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">group</span>
-                                <input type="url" name="applicant-facebook_url" value="{{ applicant_profile.facebook_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://facebook.com/yourprofile">
-                            </div>
-                            {% if applicant_form.facebook_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.facebook_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Instagram</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">photo_camera</span>
-                                <input type="url" name="applicant-instagram_url" value="{{ applicant_profile.instagram_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://instagram.com/yourusername">
-                            </div>
-                            {% if applicant_form.instagram_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.instagram_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">YouTube</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">play_circle</span>
-                                <input type="url" name="applicant-youtube_url" value="{{ applicant_profile.youtube_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://youtube.com/@yourchannel">
-                            </div>
-                            {% if applicant_form.youtube_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.youtube_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Behance</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">palette</span>
-                                <input type="url" name="applicant-behance_url" value="{{ applicant_profile.behance_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://behance.net/yourprofile">
-                            </div>
-                            {% if applicant_form.behance_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.behance_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Dribbble</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">brush</span>
-                                <input type="url" name="applicant-dribbble_url" value="{{ applicant_profile.dribbble_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://dribbble.com/yourusername">
-                            </div>
-                            {% if applicant_form.dribbble_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.dribbble_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Medium</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">article</span>
-                                <input type="url" name="applicant-medium_url" value="{{ applicant_profile.medium_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://medium.com/@yourusername">
-                            </div>
-                            {% if applicant_form.medium_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.medium_url.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div class="flex flex-col gap-1.5 min-w-0">
-                            <label class="text-xs font-semibold text-[#181411] dark:text-white">Stack Overflow</label>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-400 text-base">help</span>
-                                <input type="url" name="applicant-stackoverflow_url" value="{{ applicant_profile.stackoverflow_url|default:'' }}" class="flex-1 min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm" placeholder="https://stackoverflow.com/users/yourid">
-                            </div>
-                            {% if applicant_form.stackoverflow_url.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.stackoverflow_url.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="flex flex-col gap-1.5 md:col-span-2">
                             <label class="text-xs font-semibold text-[#181411] dark:text-white">Portfolio / Personal Website</label>
@@ -839,137 +746,9 @@
     renderExperience();
     {% endif %}
     
-    // Projects Management
-    {% if active_tab == 'projects' and user.is_applicant %}
-    let projectsData = {{ projects_json|safe }};
-    
-    function renderProjects() {
-        const container = document.getElementById('projects-container');
-        container.innerHTML = '';
-        
-        projectsData.forEach((project, index) => {
-            const div = document.createElement('div');
-            div.className = 'bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-dashed border-[#e6e0db] dark:border-[#3d2e24]';
-            div.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <div class="flex flex-col gap-1.5 md:col-span-2 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Project Name *</label>
-                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
-                               type="text" placeholder="Project Name" value="${project.name || ''}" data-index="${index}" data-field="name" required>
-                    </div>
-                    <div class="flex flex-col gap-1.5 md:col-span-2 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Description *</label>
-                        <textarea class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary p-3 text-sm resize-y project-field" 
-                                  placeholder="Describe your project, its purpose, and key features..." rows="3" data-index="${index}" data-field="description" required>${project.description || ''}</textarea>
-                    </div>
-                    <div class="flex flex-col gap-1.5 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Technologies Used</label>
-                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
-                               type="text" placeholder="React, Node.js, MongoDB" value="${project.technologies || ''}" data-index="${index}" data-field="technologies">
-                    </div>
-                    <div class="flex flex-col gap-1.5 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Project URL</label>
-                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
-                               type="url" placeholder="https://project-demo.com" value="${project.url || ''}" data-index="${index}" data-field="url">
-                    </div>
-                    <div class="flex flex-col gap-1.5 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">Start Date</label>
-                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
-                               type="date" value="${project.start_date || ''}" data-index="${index}" data-field="start_date">
-                    </div>
-                    <div class="flex flex-col gap-1.5 min-w-0">
-                        <label class="text-xs font-semibold text-[#181411] dark:text-white">End Date</label>
-                        <input class="w-full min-w-0 rounded-lg border-[#e6e0db] dark:border-[#3d2e24] dark:bg-[#2d241d] dark:text-white focus:border-primary focus:ring-primary h-10 px-3 text-sm project-field" 
-                               type="date" value="${project.end_date || ''}" data-index="${index}" data-field="end_date" ${project.current ? 'disabled' : ''}>
-                    </div>
-                    <div class="flex items-center gap-2 md:col-span-2">
-                        <input type="checkbox" class="project-current-checkbox rounded border-gray-300 text-primary focus:ring-primary" 
-                               data-index="${index}" ${project.current ? 'checked' : ''} id="proj-current-${index}">
-                        <label for="proj-current-${index}" class="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">Ongoing project</label>
-                    </div>
-                    <div class="flex items-center justify-end md:col-span-2">
-                        <button type="button" class="remove-project text-red-500 hover:text-red-700 text-xs font-medium" data-index="${index}">Remove</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-        
-        updateProjectsJSON();
-    }
-    
-    function addProject() {
-        projectsData.push({ 
-            name: '', 
-            description: '', 
-            technologies: '',
-            url: '',
-            start_date: '', 
-            end_date: '', 
-            current: false
-        });
-        renderProjects();
-    }
-    
-    function removeProject(index) {
-        if (index < 0 || index >= projectsData.length) return;
-        showConfirmModal('Are you sure you want to remove this project?', () => {
-            projectsData.splice(index, 1);
-            updateProjectsJSON();
-            renderProjects();
-            // Auto-submit form to save changes
-            document.getElementById('profile-form').submit();
-        });
-    }
-    
-    function updateProjectsJSON() {
-        document.getElementById('projects_json').value = JSON.stringify(projectsData);
-    }
-    
-    document.getElementById('add-project-btn')?.addEventListener('click', addProject);
-    document.getElementById('projects-container')?.addEventListener('click', (e) => {
-        if (e.target.closest('.remove-project')) {
-            const index = parseInt(e.target.closest('.remove-project').dataset.index);
-            removeProject(index);
-        }
-    });
-    document.getElementById('projects-container')?.addEventListener('input', (e) => {
-        if (e.target.classList.contains('project-field')) {
-            const index = parseInt(e.target.dataset.index);
-            const field = e.target.dataset.field;
-            projectsData[index][field] = e.target.value;
-            updateProjectsJSON();
-        }
-    });
-    
-    // Handle "current" checkbox for projects
-    document.getElementById('projects-container')?.addEventListener('change', (e) => {
-        if (e.target.classList.contains('project-current-checkbox')) {
-            const index = parseInt(e.target.dataset.index);
-            const isCurrent = e.target.checked;
-            projectsData[index].current = isCurrent;
-            
-            // Disable/enable end date field
-            const endDateInput = document.querySelector(`input[data-index="${index}"][data-field="end_date"]`);
-            if (endDateInput) {
-                if (isCurrent) {
-                    endDateInput.disabled = true;
-                    endDateInput.value = '';
-                    projectsData[index].end_date = '';
-                } else {
-                    endDateInput.disabled = false;
-                }
-            }
-            updateProjectsJSON();
-        }
-    });
-    
-    renderProjects();
-    {% endif %}
-
     // Handle form field styling
     document.querySelectorAll('input, select, textarea').forEach(input => {
-        if (!input.classList.contains('education-field') && !input.classList.contains('experience-field') && !input.classList.contains('project-field') && input.type !== 'hidden' && !input.disabled) {
+        if (!input.classList.contains('education-field') && !input.classList.contains('experience-field') && input.type !== 'hidden' && !input.disabled) {
             input.className = 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4';
             if (input.tagName === 'TEXTAREA') {
                 input.className = input.className.replace('h-11', 'p-3');

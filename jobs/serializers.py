@@ -2,27 +2,28 @@
 Serializers for jobs app.
 """
 from rest_framework import serializers
-from .models import Skill, Certification, JobAdvert
+from .models import Skill, EducationLevel, Country, JobAdvert
 
 
 class SkillSerializer(serializers.ModelSerializer):
-    """Serializer for Skill model."""
-    
     class Meta:
         model = Skill
         fields = ['id', 'name', 'description']
 
 
-class CertificationSerializer(serializers.ModelSerializer):
-    """Serializer for Certification model."""
-    
+class EducationLevelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Certification
-        fields = ['id', 'name', 'description']
+        model = EducationLevel
+        fields = ['id', 'name', 'd365_code', 'sort_order']
+
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['id', 'name', 'iso2', 'iso3', 'is_active', 'sort_order']
 
 
 class JobAdvertListSerializer(serializers.ModelSerializer):
-    """Serializer for job advert list (public view)."""
     is_open = serializers.SerializerMethodField()
     
     class Meta:
@@ -38,7 +39,6 @@ class JobAdvertListSerializer(serializers.ModelSerializer):
 
 
 class JobAdvertDetailSerializer(serializers.ModelSerializer):
-    """Serializer for job advert detail (includes all fields)."""
     is_open = serializers.SerializerMethodField()
     
     class Meta:

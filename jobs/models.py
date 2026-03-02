@@ -23,20 +23,43 @@ class Skill(models.Model):
         return self.name
 
 
-class Certification(models.Model):
-    """Certification model for applicant profiles and reporting."""
-    name = models.CharField(max_length=150, unique=True)
-    description = models.TextField(blank=True)
+class EducationLevel(models.Model):
+    """Education levels that must match D365 HcmEducationLevel values."""
+    name = models.CharField(max_length=255, unique=True, help_text='Must match D365 HcmEducationLevel description')
+    d365_code = models.CharField(max_length=50, blank=True, help_text='D365 education level ID/code')
+    sort_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'certifications'
-        verbose_name = 'Certification'
-        verbose_name_plural = 'Certifications'
-        ordering = ['name']
+        db_table = 'education_levels'
+        verbose_name = 'Education Level'
+        verbose_name_plural = 'Education Levels'
+        ordering = ['sort_order', 'name']
 
     def __str__(self):
         return self.name
+
+
+class Country(models.Model):
+    """
+    Country reference data with ISO codes for D365 integration.
+    D365 expects Country as ISO-2 (e.g. ZW) and Citizenship as ISO-3 (e.g. ZWE).
+    """
+    name = models.CharField(max_length=255, unique=True)
+    iso2 = models.CharField(max_length=2, unique=True, help_text='ISO 3166-1 alpha-2 (e.g. ZW)')
+    iso3 = models.CharField(max_length=3, unique=True, help_text='ISO 3166-1 alpha-3 (e.g. ZWE)')
+    is_active = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=0, help_text='Lower = higher in dropdown. Use 0 for commonly used countries.')
+
+    class Meta:
+        db_table = 'countries'
+        verbose_name = 'Country'
+        verbose_name_plural = 'Countries'
+        ordering = ['sort_order', 'name']
+
+    def __str__(self):
+        return f'{self.name} ({self.iso2})'
 
 
 class JobAdvert(models.Model):

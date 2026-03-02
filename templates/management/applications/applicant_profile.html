@@ -95,59 +95,12 @@
     </div>
     {% endif %}
 
-    <!-- Languages -->
-    {% if profile.languages %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Languages</h2>
-        <div class="flex flex-wrap gap-2">
-            {% for lang in profile.languages %}
-            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm">{{ lang.language }} ({{ lang.proficiency }})</span>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Certifications -->
-    {% if profile.certifications %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Certifications</h2>
-        <div class="space-y-4">
-            {% for cert in profile.certifications %}
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ cert.name }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ cert.issuing_organization }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Issued: {{ cert.issue_date }}</p>
-                {% if cert.expiry_date %}<p class="text-xs text-gray-500 dark:text-gray-400">Expires: {{ cert.expiry_date }}</p>{% endif %}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Projects -->
-    {% if profile.projects %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Projects</h2>
-        <div class="space-y-4">
-            {% for project in profile.projects %}
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ project.name }}</h4>
-                {% if project.description %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ project.description }}</p>{% endif %}
-                {% if project.technologies %}<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Technologies: {{ project.technologies }}</p>{% endif %}
-                {% if project.url %}<a href="{{ project.url }}" target="_blank" class="text-primary hover:underline text-xs mt-1 inline-block">View Project →</a>{% endif %}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Social Media Links -->
-    {% if profile.linkedin_url or profile.github_url or profile.portfolio_url %}
+    <!-- Online Presence -->
+    {% if profile.linkedin_url or profile.portfolio_url %}
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Online Presence</h2>
         <div class="flex flex-wrap gap-3">
             {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm">LinkedIn</a>{% endif %}
-            {% if profile.github_url %}<a href="{{ profile.github_url }}" target="_blank" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">GitHub</a>{% endif %}
             {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" target="_blank" class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm">Portfolio</a>{% endif %}
         </div>
     </div>

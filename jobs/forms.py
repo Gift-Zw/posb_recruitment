@@ -2,7 +2,7 @@
 Forms for job management (server-rendered).
 """
 from django import forms
-from .models import Skill, Certification
+from .models import Skill, EducationLevel, Country
 
 
 class ContactForm(forms.Form):
@@ -57,18 +57,60 @@ class SkillForm(forms.ModelForm):
         }
 
 
-class CertificationForm(forms.ModelForm):
+class EducationLevelForm(forms.ModelForm):
     class Meta:
-        model = Certification
-        fields = ["name", "description"]
+        model = EducationLevel
+        fields = ["name", "d365_code", "sort_order", "is_active"]
         widgets = {
             "name": forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
-                'placeholder': 'Certification name'
+                'placeholder': 'e.g. Bachelor\'s Degree'
             }),
-            "description": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3',
-                'rows': 4,
-                'placeholder': 'Certification description (optional)'
+            "d365_code": forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': 'D365 education level code (optional)'
+            }),
+            "sort_order": forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': '0'
             }),
         }
+
+
+class CountryForm(forms.ModelForm):
+    class Meta:
+        model = Country
+        fields = ["name", "iso2", "iso3", "sort_order", "is_active"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': 'e.g. Zimbabwe'
+            }),
+            "iso2": forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': 'e.g. ZW',
+                'maxlength': '2',
+                'style': 'text-transform: uppercase;'
+            }),
+            "iso3": forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': 'e.g. ZWE',
+                'maxlength': '3',
+                'style': 'text-transform: uppercase;'
+            }),
+            "sort_order": forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
+                'placeholder': '0 = top of dropdown'
+            }),
+        }
+        help_texts = {
+            "iso2": "ISO 3166-1 alpha-2 code. D365 Country field uses this format.",
+            "iso3": "ISO 3166-1 alpha-3 code. D365 Citizenship field uses this format.",
+            "sort_order": "Lower values appear first in dropdowns. Use 0 for frequently used countries.",
+        }
+
+    def clean_iso2(self):
+        return self.cleaned_data["iso2"].upper()
+
+    def clean_iso3(self):
+        return self.cleaned_data["iso3"].upper()

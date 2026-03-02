@@ -1,230 +1,247 @@
 """
-Dynamics 365 ERP integration service for POSB Recruitment Portal.
-Handles export of shortlisted candidates to Dynamics 365.
+D365 Applicant Import API integration service.
+Pushes applicant data to D365 Finance & Operations HCM via the SubmitApplicant custom service.
 """
+import logging
 import requests
 from django.conf import settings
 from django.utils import timezone
-from .models import ERPExport, ERPExportItem
-from shortlisting.models import ShortlistingRun
 from applications.models import Application
 from audit.services import log_audit_event
 from system_logs.services import log_system_event
 
+logger = logging.getLogger(__name__)
 
-class Dynamics365Service:
+
+class Dynamics365ApplicantService:
     """
-    Service for integrating with Dynamics 365 ERP.
-    This is a stub implementation - customize based on actual Dynamics 365 API.
+    Service for pushing applicant data to D365 F&O via the SubmitApplicant endpoint.
+    Payload follows PascalCase convention wrapped in a 'contract' key.
     """
-    
+
     @staticmethod
-    def export_shortlisted_candidates(shortlisting_run_id, triggered_by=None):
+    def get_access_token():
+        """Acquire OAuth 2.0 Bearer token from Azure AD for D365 F&O."""
+        tenant_id = settings.DYNAMICS_365_TENANT_ID
+        client_id = settings.DYNAMICS_365_CLIENT_ID
+        client_secret = settings.DYNAMICS_365_CLIENT_SECRET
+        resource = settings.DYNAMICS_365_API_URL
+
+        if not all([tenant_id, client_id, client_secret, resource]):
+            raise ValueError("D365 credentials not configured. Check environment variables.")
+
+        token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "resource": resource,
+        }
+
+        response = requests.post(token_url, data=data, timeout=30)
+        response.raise_for_status()
+        return response.json()["access_token"]
+
+    @staticmethod
+    def build_applicant_payload(application):
         """
-        Export shortlisted candidates to Dynamics 365 ERP.
-        
-        Args:
-            shortlisting_run_id: ID of the shortlisting run
-            triggered_by: User who triggered the export
-        
-        Returns:
-            ERPExport instance
+        Build the PascalCase JSON payload for the SubmitApplicant endpoint.
+        Uses data from ApplicationData (immutable snapshot).
+        """
+        app_data = application.application_data
+
+        # Generate a unique applicant ID: POSB-AI-XXXXX
+        if not application.d365_applicant_id:
+            application.d365_applicant_id = f"POSB-AI-{application.id:05d}"
+            application.save(update_fields=["d365_applicant_id"])
+
+        payload = {
+            "contract": {
+                "ApplicantId": application.d365_applicant_id,
+                "RecruitingId": application.job_advert.recruiting_id,
+                "FirstName": app_data.first_name,
+                "LastName": app_data.last_name,
+                "MiddleName": app_data.middle_name or "",
+                "Email": app_data.email,
+                "Phone": app_data.phone_number or "",
+                "BirthDateUtc": app_data.date_of_birth.isoformat() if app_data.date_of_birth else "",
+                "Gender": app_data.gender or "",
+                "Citizenship": app_data.citizenship or "",
+                "MaritalStatus": app_data.marital_status or "",
+                "StreetAddress": app_data.street_address or "",
+                "City": app_data.city or "",
+                "ZipCode": app_data.zip_code or "",
+                "Country": app_data.country or "",
+                "CurrentJobTitle": app_data.current_job_title or "",
+                "EducationLevelDescription": app_data.education_level or "",
+                "CoverLetter": app_data.cover_letter or "",
+            }
+        }
+        return payload
+
+    @staticmethod
+    def push_application(application_id, triggered_by=None):
+        """
+        Push a single application to D365.
+        Updates the application's d365_push_status based on the response.
         """
         try:
-            shortlisting_run = ShortlistingRun.objects.get(id=shortlisting_run_id)
-            job_advert = shortlisting_run.job_advert
-            
-            # Get shortlisted applications
-            shortlisted_applications = Application.objects.filter(
-                job_advert=job_advert,
-                status='SHORTLISTED',
-                ai_shortlisted_at__isnull=False
-            ).order_by('ai_ranking')
-            
-            if not shortlisted_applications.exists():
-                log_system_event(
-                    level='WARNING',
-                    source='INTEGRATION',
-                    message=f'No shortlisted candidates for export: {shortlisting_run_id}',
-                    module='integrations.services',
-                    function='export_shortlisted_candidates'
-                )
-                return None
-            
-            # Create ERP export record
-            erp_export = ERPExport.objects.create(
-                shortlisting_run=shortlisting_run,
-                job_advert=job_advert,
-                status='IN_PROGRESS',
-                total_candidates=shortlisted_applications.count(),
-                started_at=timezone.now()
-            )
-            
-            # Get access token (OAuth 2.0)
-            access_token = Dynamics365Service._get_access_token()
-            
-            # Export each candidate
-            exported_count = 0
-            failed_count = 0
-            
-            for application in shortlisted_applications:
-                try:
-                    export_item = ERPExportItem.objects.create(
-                        export=erp_export,
-                        application=application,
-                        status='PENDING'
-                    )
-                    
-                    # Prepare candidate data
-                    candidate_data = Dynamics365Service._prepare_candidate_data(application)
-                    
-                    # Upload to Dynamics 365
-                    response = Dynamics365Service._upload_to_dynamics365(
-                        access_token,
-                        candidate_data,
-                        application
-                    )
-                    
-                    # Update export item
-                    export_item.status = 'EXPORTED'
-                    export_item.erp_candidate_id = response.get('candidate_id', '')
-                    export_item.erp_document_id = response.get('document_id', '')
-                    export_item.exported_at = timezone.now()
-                    export_item.save()
-                    
-                    exported_count += 1
-                    
-                except Exception as e:
-                    if 'export_item' in locals():
-                        export_item.status = 'FAILED'
-                        export_item.error_message = str(e)
-                        export_item.save()
-                    
-                    failed_count += 1
-                    log_system_event(
-                        level='ERROR',
-                        source='INTEGRATION',
-                        message=f'Failed to export candidate {application.id}: {str(e)}',
-                        module='integrations.services',
-                        function='export_shortlisted_candidates'
-                    )
-            
-            # Update export status
-            erp_export.exported_count = exported_count
-            erp_export.failed_count = failed_count
-            
-            if failed_count == 0:
-                erp_export.status = 'COMPLETED'
-            elif exported_count > 0:
-                erp_export.status = 'PARTIAL'
-            else:
-                erp_export.status = 'FAILED'
-            
-            erp_export.completed_at = timezone.now()
-            erp_export.save()
-            
-            # Audit log
-            log_audit_event(
-                actor=triggered_by,
-                action='ERP_EXPORT',
-                action_description=f'Exported {exported_count} candidates to Dynamics 365',
-                entity=erp_export,
-                metadata={
-                    'shortlisting_run_id': shortlisting_run_id,
-                    'exported_count': exported_count,
-                    'failed_count': failed_count
-                }
-            )
-            
-            return erp_export
-            
-        except ShortlistingRun.DoesNotExist:
+            application = Application.objects.select_related(
+                "applicant", "job_advert"
+            ).get(id=application_id)
+        except Application.DoesNotExist:
             log_system_event(
-                level='ERROR',
-                source='INTEGRATION',
-                message=f'Shortlisting run not found: {shortlisting_run_id}',
-                module='integrations.services',
-                function='export_shortlisted_candidates'
+                level="ERROR", source="INTEGRATION",
+                message=f"Application {application_id} not found for D365 push",
+                module="integrations.services", function="push_application"
             )
             return None
-        except Exception as e:
-            if 'erp_export' in locals():
-                erp_export.status = 'FAILED'
-                erp_export.error_message = str(e)
-                erp_export.completed_at = timezone.now()
-                erp_export.save()
-            
-            log_system_event(
-                level='ERROR',
-                source='INTEGRATION',
-                message=f'ERP export failed: {str(e)}',
-                module='integrations.services',
-                function='export_shortlisted_candidates'
+
+        if not hasattr(application, "application_data"):
+            application.d365_push_status = "FAILED"
+            application.d365_push_error = "No application data snapshot found"
+            application.save(update_fields=["d365_push_status", "d365_push_error"])
+            return application
+
+        application.d365_push_status = "PENDING"
+        application.d365_push_attempts += 1
+        application.save(update_fields=["d365_push_status", "d365_push_attempts"])
+
+        try:
+            access_token = Dynamics365ApplicantService.get_access_token()
+            payload = Dynamics365ApplicantService.build_applicant_payload(application)
+
+            api_url = f"{settings.DYNAMICS_365_API_URL.rstrip('/')}/api/services/POSBRecruitmentServiceGroup/POSBRecruitmentService/SubmitApplicant"
+
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            }
+
+            response = requests.post(api_url, json=payload, headers=headers, timeout=60)
+            response.raise_for_status()
+
+            result = response.json()
+
+            # D365 returns parmStatus: "Created" or "Duplicate"
+            parm_status = ""
+            applicant_rec_id = None
+            application_rec_id = None
+
+            if isinstance(result, dict):
+                parm_status = result.get("parmStatus", result.get("Status", ""))
+                applicant_rec_id = result.get("parmApplicantRecId") or result.get("ApplicantRecId")
+                application_rec_id = result.get("parmApplicationRecId") or result.get("ApplicationRecId")
+
+            if parm_status.lower() == "duplicate":
+                application.d365_push_status = "DUPLICATE"
+            else:
+                application.d365_push_status = "PUSHED"
+
+            application.d365_pushed_at = timezone.now()
+            application.d365_push_error = ""
+            if applicant_rec_id:
+                application.d365_applicant_rec_id = int(applicant_rec_id)
+            if application_rec_id:
+                application.d365_application_rec_id = int(application_rec_id)
+            application.save()
+
+            log_audit_event(
+                actor=triggered_by,
+                action="D365_PUSH",
+                action_description=f"Application {application.id} pushed to D365 ({parm_status})",
+                entity=application,
+                metadata={
+                    "applicant_id": application.d365_applicant_id,
+                    "status": parm_status,
+                    "rec_id": applicant_rec_id,
+                }
             )
-            raise
-    
+
+            log_system_event(
+                level="INFO", source="INTEGRATION",
+                message=f"D365 push success: Application {application.id} -> {parm_status}",
+                module="integrations.services", function="push_application"
+            )
+
+            return application
+
+        except requests.exceptions.RequestException as e:
+            error_msg = str(e)
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_msg = f"{e.response.status_code}: {e.response.text[:500]}"
+                except Exception:
+                    pass
+
+            application.d365_push_status = "FAILED"
+            application.d365_push_error = error_msg
+            application.save(update_fields=["d365_push_status", "d365_push_error"])
+
+            log_system_event(
+                level="ERROR", source="INTEGRATION",
+                message=f"D365 push failed for application {application_id}: {error_msg}",
+                module="integrations.services", function="push_application"
+            )
+            return application
+
+        except Exception as e:
+            application.d365_push_status = "FAILED"
+            application.d365_push_error = str(e)[:500]
+            application.save(update_fields=["d365_push_status", "d365_push_error"])
+
+            log_system_event(
+                level="ERROR", source="INTEGRATION",
+                message=f"D365 push error for application {application_id}: {str(e)}",
+                module="integrations.services", function="push_application"
+            )
+            return application
+
     @staticmethod
-    def _get_access_token():
+    def push_all_for_job(job_advert_id, triggered_by=None):
         """
-        Get OAuth 2.0 access token for Dynamics 365 API.
-        This is a stub - implement based on your Dynamics 365 authentication.
+        Push all applications for a job to D365.
+        Used when closing a job to eliminate first-applied bias.
+        Returns summary dict.
         """
-        # TODO: Implement OAuth 2.0 flow
-        # Example:
-        # token_url = f"https://login.microsoftonline.com/{settings.DYNAMICS_365_TENANT_ID}/oauth2/v2.0/token"
-        # data = {
-        #     'client_id': settings.DYNAMICS_365_CLIENT_ID,
-        #     'client_secret': settings.DYNAMICS_365_CLIENT_SECRET,
-        #     'scope': 'https://your-dynamics-instance.crm.dynamics.com/.default',
-        #     'grant_type': 'client_credentials'
-        # }
-        # response = requests.post(token_url, data=data)
-        # return response.json()['access_token']
-        
-        return 'placeholder_token'
-    
-    @staticmethod
-    def _prepare_candidate_data(application):
-        """
-        Prepare candidate data for Dynamics 365 API.
-        Customize based on your Dynamics 365 entity structure.
-        """
-        # Get data from ApplicationData if available
-        phone = ''
-        if hasattr(application, 'application_data') and application.application_data:
-            phone = application.application_data.phone_number or ''
-        
-        return {
-            'first_name': application.applicant.first_name,
-            'last_name': application.applicant.last_name,
-            'email': application.applicant.email,
-            'phone': phone,
-            'job_title': application.job_advert.job_title,
-            'ai_score': application.ai_score,
-            'ai_ranking': application.ai_ranking,
-            'application_id': application.id,
-            'submitted_at': application.submitted_at.isoformat(),
+        applications = Application.objects.filter(
+            job_advert_id=job_advert_id,
+            status="SUBMITTED",
+        ).exclude(
+            d365_push_status="PUSHED"
+        ).order_by("submitted_at")
+
+        total = applications.count()
+        pushed = 0
+        failed = 0
+        duplicates = 0
+
+        for application in applications:
+            result = Dynamics365ApplicantService.push_application(
+                application.id, triggered_by=triggered_by
+            )
+            if result:
+                if result.d365_push_status == "PUSHED":
+                    pushed += 1
+                elif result.d365_push_status == "DUPLICATE":
+                    duplicates += 1
+                else:
+                    failed += 1
+            else:
+                failed += 1
+
+        summary = {
+            "total": total,
+            "pushed": pushed,
+            "duplicates": duplicates,
+            "failed": failed,
         }
-    
-    @staticmethod
-    def _upload_to_dynamics365(access_token, candidate_data, application):
-        """
-        Upload candidate data to Dynamics 365.
-        This is a stub - implement based on your Dynamics 365 API.
-        """
-        # TODO: Implement actual Dynamics 365 API call
-        # Example:
-        # headers = {
-        #     'Authorization': f'Bearer {access_token}',
-        #     'Content-Type': 'application/json'
-        # }
-        # url = f"{settings.DYNAMICS_365_API_URL}/api/data/v9.2/contacts"
-        # response = requests.post(url, json=candidate_data, headers=headers)
-        # response.raise_for_status()
-        # return response.json()
-        
-        # Placeholder response
-        return {
-            'candidate_id': f'D365-{application.id}',
-            'document_id': f'DOC-{application.id}'
-        }
+
+        log_audit_event(
+            actor=triggered_by,
+            action="D365_BULK_PUSH",
+            action_description=f"Bulk D365 push for job {job_advert_id}: {pushed} pushed, {duplicates} duplicates, {failed} failed",
+            metadata=summary
+        )
+
+        return summary

@@ -9,9 +9,10 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import ListView, DetailView, CreateView, TemplateView, FormView
-from .models import Skill, JobAdvert
-from .forms import SkillForm, ContactForm
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView, FormView
+from django.views import View
+from .models import Skill, EducationLevel, Country, JobAdvert
+from .forms import SkillForm, EducationLevelForm, CountryForm, ContactForm
 from audit.services import log_audit_event
 from system_logs.services import log_system_event
 
@@ -331,23 +332,39 @@ class JobAdvertDetailView(HRStaffRequiredMixin, DetailView):
 
 
 class JobAdvertCloseView(HRStaffRequiredMixin, DetailView):
-    """Close a job advert manually (HR only)."""
+    """Close a job advert and optionally push all applications to D365."""
     
     model = JobAdvert
     
     def post(self, request, *args, **kwargs):
         job = self.get_object()
+        push_to_d365 = request.POST.get("push_to_d365") == "1"
+        
         job.status = 'CLOSED'
         job.save()
-        messages.success(request, f"Job advert '{job.job_title}' has been closed.")
+        
         log_audit_event(
             actor=request.user,
             action="CLOSE",
             action_description=f"Job advert closed: {job.job_title}",
             entity=job,
-            metadata={"job_id": job.job_id, "recruiting_id": job.recruiting_id},
+            metadata={"job_id": job.job_id, "recruiting_id": job.recruiting_id, "push_to_d365": push_to_d365},
             request=request
         )
+        
+        if push_to_d365:
+            from integrations.tasks import push_all_applications_for_job_task
+            summary = push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
+            if summary:
+                messages.success(
+                    request,
+                    f"Job advert '{job.job_title}' closed. D365 push: {summary['pushed']} pushed, {summary['duplicates']} duplicates, {summary['failed']} failed out of {summary['total']}."
+                )
+            else:
+                messages.warning(request, f"Job advert '{job.job_title}' closed. D365 push encountered an error — check system logs.")
+        else:
+            messages.success(request, f"Job advert '{job.job_title}' has been closed.")
+        
         return redirect("management:jobs_management:advert-detail", pk=job.pk)
 
 
@@ -444,14 +461,157 @@ class JobApplicationsListView(HRStaffRequiredMixin, ListView):
         job = get_object_or_404(JobAdvert, pk=self.kwargs['pk'])
         context['job'] = job
         
-        # Application statistics for this job
         applications = Application.objects.filter(job_advert=job)
         context['total_applications'] = applications.count()
         
-        # Filters
+        # D365 push stats
+        context['d365_pushed'] = applications.filter(d365_push_status='PUSHED').count()
+        context['d365_failed'] = applications.filter(d365_push_status='FAILED').count()
+        context['d365_not_pushed'] = applications.filter(d365_push_status='NOT_PUSHED').count()
+        
         context['status_filter'] = self.request.GET.get('status', '')
         context['search_query'] = self.request.GET.get('search', '')
         
         return context
+
+
+class JobPushAllToD365View(HRStaffRequiredMixin, DetailView):
+    """Push all unpushed applications for a job to D365 (manual trigger)."""
+    
+    model = JobAdvert
+    
+    def post(self, request, *args, **kwargs):
+        job = self.get_object()
+        from integrations.tasks import push_all_applications_for_job_task
+        summary = push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
+        if summary:
+            messages.success(
+                request,
+                f"D365 push complete: {summary['pushed']} pushed, {summary['duplicates']} duplicates, {summary['failed']} failed out of {summary['total']}."
+            )
+        else:
+            messages.error(request, "D365 push failed. Check system logs for details.")
+        return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+
+class EducationLevelListView(HRStaffRequiredMixin, ListView):
+    """List all education levels."""
+    
+    model = EducationLevel
+    template_name = "management/jobs/education_level_list.html"
+    context_object_name = "education_levels"
+    paginate_by = 20
+
+    def get_queryset(self):
+        return EducationLevel.objects.all().order_by("sort_order", "name")
+
+
+class EducationLevelCreateView(HRStaffRequiredMixin, CreateView):
+    """Create a new education level."""
+    
+    model = EducationLevel
+    form_class = EducationLevelForm
+    template_name = "management/jobs/education_level_form.html"
+    success_url = reverse_lazy("management:jobs_management:education-level-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Education level created successfully.")
+        return super().form_valid(form)
+
+
+class EducationLevelUpdateView(HRStaffRequiredMixin, UpdateView):
+    """Edit an existing education level."""
+
+    model = EducationLevel
+    form_class = EducationLevelForm
+    template_name = "management/jobs/education_level_form.html"
+    success_url = reverse_lazy("management:jobs_management:education-level-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Education level updated successfully.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["is_edit"] = True
+        return ctx
+
+
+class EducationLevelDeleteView(HRStaffRequiredMixin, View):
+    """Delete (deactivate) an education level."""
+
+    def post(self, request, pk):
+        level = get_object_or_404(EducationLevel, pk=pk)
+        level.is_active = not level.is_active
+        level.save(update_fields=["is_active"])
+        status = "activated" if level.is_active else "deactivated"
+        messages.success(request, f"Education level '{level.name}' {status}.")
+        return redirect("management:jobs_management:education-level-list")
+
+
+# --- Country Management Views ---
+
+class CountryListView(HRStaffRequiredMixin, ListView):
+    """List all countries for management."""
+
+    model = Country
+    template_name = "management/jobs/country_list.html"
+    context_object_name = "countries"
+    paginate_by = 50
+
+    def get_queryset(self):
+        qs = Country.objects.all()
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(Q(name__icontains=q) | Q(iso2__icontains=q) | Q(iso3__icontains=q))
+        return qs.order_by("sort_order", "name")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["search_query"] = self.request.GET.get("q", "")
+        return ctx
+
+
+class CountryCreateView(HRStaffRequiredMixin, CreateView):
+    """Create a new country."""
+
+    model = Country
+    form_class = CountryForm
+    template_name = "management/jobs/country_form.html"
+    success_url = reverse_lazy("management:jobs_management:country-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Country added successfully.")
+        return super().form_valid(form)
+
+
+class CountryUpdateView(HRStaffRequiredMixin, UpdateView):
+    """Edit an existing country."""
+
+    model = Country
+    form_class = CountryForm
+    template_name = "management/jobs/country_form.html"
+    success_url = reverse_lazy("management:jobs_management:country-list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Country updated successfully.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["is_edit"] = True
+        return ctx
+
+
+class CountryToggleView(HRStaffRequiredMixin, View):
+    """Toggle a country's active status."""
+
+    def post(self, request, pk):
+        country = get_object_or_404(Country, pk=pk)
+        country.is_active = not country.is_active
+        country.save(update_fields=["is_active"])
+        status = "activated" if country.is_active else "deactivated"
+        messages.success(request, f"Country '{country.name}' {status}.")
+        return redirect("management:jobs_management:country-list")
 
 

@@ -37,7 +37,7 @@
             <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
                 <div class="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
                     <div class="flex flex-col gap-6">
-                        <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-4 animate-slide-right">
                             <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full w-fit">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -46,28 +46,28 @@
                                 <span class="text-primary font-bold text-xs uppercase tracking-widest">Growing the Nation Since 1904</span>
                             </div>
                             <h1 class="text-[#1a1a1a] dark:text-white text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight">
-                                Build Your Future With <span class="text-primary tracking-tighter italic">People's Own Savings Bank.</span>
+                                Build Your Future With <br/><span class="text-primary tracking-tighter italic">People's Own Savings Bank.</span>
                             </h1>
                             <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-[560px] leading-relaxed">
                                 Join Zimbabwe's leading savings bank. We are looking for passionate professionals to help us drive financial inclusion across our 32+ branches nationwide.
                             </p>
                         </div>
-                        <div class="bg-white dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl max-w-[640px]">
+                        <div class="bg-white dark:bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl max-w-[640px] animate-slide-up [animation-delay:200ms] opacity-0 group hover:shadow-primary/10 transition-all duration-300">
                             <form method="get" action="{% url 'jobs:list' %}" class="flex flex-col sm:flex-row gap-3">
-                                <div class="flex flex-[1.5] items-center px-3 sm:px-4 gap-2 sm:gap-3 bg-gray-50 dark:bg-white/5 rounded-lg sm:rounded-xl min-h-[44px] sm:h-16 border border-transparent focus-within:border-primary transition-all">
-                                    <span class="material-symbols-outlined text-gray-400 text-lg sm:text-xl">search</span>
+                                <div class="flex flex-[1.5] items-center px-3 sm:px-4 gap-2 sm:gap-3 bg-gray-50 dark:bg-white/5 rounded-lg sm:rounded-xl min-h-[44px] sm:h-16 border border-transparent focus-within:border-primary focus-within:bg-white dark:focus-within:bg-white/10 transition-all duration-300">
+                                    <span class="material-symbols-outlined text-gray-400 text-lg sm:text-xl group-focus-within:text-primary transition-colors">search</span>
                                     <input name="search" class="bg-transparent border-none focus:ring-0 text-sm sm:text-base w-full placeholder:text-gray-400" placeholder="Role (e.g. Branch Manager, Teller)" type="text"/>
                                 </div>
-                                <button type="submit" class="bg-primary text-white font-bold min-h-[44px] sm:h-16 px-6 sm:px-10 rounded-lg sm:rounded-xl hover:bg-[#d96e14] shadow-lg shadow-primary/25 transition-all active:scale-95 text-sm sm:text-base">
+                                <button type="submit" class="bg-primary text-white font-bold min-h-[44px] sm:h-16 px-6 sm:px-10 rounded-lg sm:rounded-xl hover:bg-[#d96e14] shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 text-sm sm:text-base">
                                     Find Jobs
                                 </button>
                             </form>
                         </div>
                     </div>
-                    <div class="hidden lg:block relative">
-                        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                            <img src="{% static 'images/home.webp' %}" alt="People's Own Savings Bank Careers" class="w-full h-auto object-cover"/>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                    <div class="hidden lg:block relative animate-fade-in [animation-delay:400ms] opacity-0">
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl group hover:shadow-primary/20 transition-all duration-500">
+                            <img src="{% static 'images/home.webp' %}" alt="People's Own Savings Bank Careers" class="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"/>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
                         </div>
                     </div>
                 </div>

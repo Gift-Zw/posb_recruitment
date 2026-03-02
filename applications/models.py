@@ -9,9 +9,8 @@ from django.core.validators import FileExtensionValidator
 
 class ApplicantProfile(models.Model):
     """
-    Detailed applicant profile model.
-    Stores comprehensive personal, education, experience, and skills information.
-    Only for users with user_type='APPLICANT' (not employees).
+    Applicant profile model aligned with D365 Applicant Import API fields.
+    Only for users with user_type='APPLICANT'.
     """
     user = models.OneToOneField(
         'accounts.User',
@@ -22,22 +21,27 @@ class ApplicantProfile(models.Model):
     
     # Contact Information
     phone_number = models.CharField(max_length=20, blank=True)
-    alternate_phone = models.CharField(max_length=20, blank=True, help_text='Alternate contact number')
+    alternate_phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True, help_text='Primary email (if different from user email)')
     
-    # Personal Information
+    # Personal Information (D365: FirstName/LastName on User model)
+    middle_name = models.CharField(max_length=255, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(
         max_length=20,
         choices=[
             ('MALE', 'Male'),
             ('FEMALE', 'Female'),
-            ('OTHER', 'Other'),
-            ('PREFER_NOT_TO_SAY', 'Prefer not to say'),
         ],
         blank=True
     )
-    nationality = models.CharField(max_length=100, blank=True)
+    citizenship = models.ForeignKey(
+        'jobs.Country',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='citizens',
+        help_text='Citizenship / Nationality — D365 sends ISO-3 (e.g. ZWE)'
+    )
     id_number = models.CharField(max_length=50, blank=True, help_text='National ID / Passport Number')
     marital_status = models.CharField(
         max_length=20,
@@ -50,25 +54,33 @@ class ApplicantProfile(models.Model):
         blank=True
     )
     
-    # Address Information
+    # Address Information (D365: StreetAddress, City, ZipCode, Country)
     address_line_1 = models.CharField(max_length=255, blank=True, help_text='Street address')
-    address_line_2 = models.CharField(max_length=255, blank=True, help_text='Apartment, suite, etc.')
+    address_line_2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
     state_province = models.CharField(max_length=100, blank=True)
     postal_code = models.CharField(max_length=20, blank=True)
-    country = models.CharField(max_length=100, blank=True, default='Singapore')
-    
-    # Education (detailed JSON)
-    education = models.JSONField(
-        default=list,
-        help_text='List of education: [{"institution": "...", "degree": "...", "field": "...", "start_year": "...", "end_year": "...", "gpa": "...", "honors": "..."}]'
+    country = models.ForeignKey(
+        'jobs.Country',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='residents',
+        help_text='Country of residence — D365 sends ISO-2 (e.g. ZW)'
     )
     
-    # Work Experience (detailed JSON)
-    experience = models.JSONField(
-        default=list,
-        help_text='List of work experience: [{"company": "...", "position": "...", "start_date": "...", "end_date": "...", "current": false, "responsibilities": "...", "achievements": "..."}]'
+    # Professional (D365: CurrentJobTitle, EducationLevelDescription)
+    current_job_title = models.CharField(max_length=255, blank=True)
+    education_level = models.ForeignKey(
+        'jobs.EducationLevel',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='applicant_profiles',
+        help_text='Highest education level (must match D365 HcmEducationLevel)'
     )
+    
+    # Education & Experience (detailed JSON for portal use)
+    education = models.JSONField(default=list, blank=True)
+    experience = models.JSONField(default=list, blank=True)
     
     # Skills
     skills = models.ManyToManyField(
@@ -76,62 +88,20 @@ class ApplicantProfile(models.Model):
         related_name='applicant_profiles',
         blank=True
     )
-    languages = models.JSONField(
-        default=list,
-        help_text='Languages: [{"language": "...", "proficiency": "Native/Fluent/Intermediate/Basic"}]'
-    )
-    certifications = models.JSONField(
-        default=list,
-        help_text='Certifications: [{"name": "...", "issuing_organization": "...", "issue_date": "...", "expiry_date": "...", "credential_id": "..."}]'
-    )
-    
-    # References
-    references = models.JSONField(
-        default=list,
-        help_text='References: [{"name": "...", "position": "...", "company": "...", "email": "...", "phone": "..."}]'
-    )
-    
-    # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=200, blank=True)
-    emergency_contact_relationship = models.CharField(max_length=50, blank=True, help_text='Relationship to applicant')
-    emergency_contact_phone = models.CharField(max_length=20, blank=True)
-    emergency_contact_email = models.EmailField(blank=True)
     
     # Additional Information
-    professional_summary = models.TextField(blank=True, help_text='Professional summary / About yourself')
-    cover_letter = models.TextField(blank=True, help_text='Cover letter / Personal statement')
+    professional_summary = models.TextField(blank=True)
+    cover_letter = models.TextField(blank=True)
     
-    # Social Media & Online Presence
-    linkedin_url = models.URLField(blank=True, help_text='LinkedIn profile URL')
-    github_url = models.URLField(blank=True, help_text='GitHub profile URL')
-    twitter_url = models.URLField(blank=True, help_text='Twitter/X profile URL')
-    facebook_url = models.URLField(blank=True, help_text='Facebook profile URL')
-    instagram_url = models.URLField(blank=True, help_text='Instagram profile URL')
-    youtube_url = models.URLField(blank=True, help_text='YouTube channel URL')
-    behance_url = models.URLField(blank=True, help_text='Behance portfolio URL')
-    dribbble_url = models.URLField(blank=True, help_text='Dribbble portfolio URL')
-    medium_url = models.URLField(blank=True, help_text='Medium profile URL')
-    stackoverflow_url = models.URLField(blank=True, help_text='Stack Overflow profile URL')
+    # Online Presence
+    linkedin_url = models.URLField(blank=True)
     portfolio_url = models.URLField(blank=True, help_text='Portfolio / Personal website URL')
     
-    # Projects (detailed JSON)
-    projects = models.JSONField(
-        default=list,
-        blank=True,
-        help_text='List of projects: [{"name": "...", "description": "...", "technologies": "...", "url": "...", "start_date": "...", "end_date": "...", "current": false}]'
-    )
+    availability_date = models.DateField(null=True, blank=True)
+    current_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    expected_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notice_period = models.CharField(max_length=50, blank=True)
     
-    availability_date = models.DateField(null=True, blank=True, help_text='Earliest available start date')
-    current_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Current salary (if applicable)')
-    expected_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Expected salary range')
-    notice_period = models.CharField(max_length=50, blank=True, help_text='Notice period (e.g., "2 weeks", "1 month")')
-    additional_info = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text='Additional flexible information as JSON'
-    )
-    
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -150,53 +120,35 @@ class ApplicantProfile(models.Model):
     
     @property
     def completion_percentage(self):
-        """Calculate profile completion percentage based on filled fields."""
         total_fields = 0
         filled_fields = 0
         
-        # Personal Information (8 fields)
         personal_fields = [
             self.user.first_name, self.user.last_name,
             self.phone_number, self.date_of_birth, self.gender,
-            self.nationality, self.id_number, self.marital_status
+            self.citizenship_id, self.id_number,
         ]
-        total_fields += 8
+        total_fields += 7
         filled_fields += sum(1 for field in personal_fields if field)
         
-        # Address Information (5 fields)
         address_fields = [
-            self.address_line_1, self.city, self.state_province,
-            self.postal_code, self.country
+            self.address_line_1, self.city, self.country_id
         ]
-        total_fields += 5
+        total_fields += 3
         filled_fields += sum(1 for field in address_fields if field)
         
-        # Education (at least 1 entry)
         total_fields += 1
-        if self.education and len(self.education) > 0:
+        if self.education_level:
             filled_fields += 1
         
-        # Work Experience (at least 1 entry)
-        total_fields += 1
-        if self.experience and len(self.experience) > 0:
-            filled_fields += 1
-        
-        # Skills (at least 1 skill)
         total_fields += 1
         if self.skills.exists():
             filled_fields += 1
         
-        # Languages (at least 1 entry)
-        total_fields += 1
-        if self.languages and len(self.languages) > 0:
-            filled_fields += 1
-        
-        # Cover Letter
         total_fields += 1
         if self.cover_letter:
             filled_fields += 1
         
-        # Calculate percentage
         if total_fields == 0:
             return 0
         return int((filled_fields / total_fields) * 100)
@@ -302,7 +254,7 @@ class ApplicationDocument(models.Model):
 class ApplicationData(models.Model):
     """
     Immutable application data captured at submission time.
-    Stores all applicant information as separate fields for better querying and data integrity.
+    Fields are aligned with the D365 Applicant Import API contract.
     This ensures that profile changes don't affect submitted applications.
     """
     application = models.OneToOneField(
@@ -311,37 +263,30 @@ class ApplicationData(models.Model):
         related_name='application_data'
     )
     
-    # Contact Information
-    phone_number = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(blank=True)
-    
-    # Address (stored as single string for simplicity, matching original snapshot format)
-    address = models.TextField(blank=True, help_text='Full address as submitted')
-    
-    # Personal Information
-    date_of_birth = models.DateField(null=True, blank=True)
+    # D365 contract fields (PascalCase mapping in comments)
+    first_name = models.CharField(max_length=255)  # FirstName
+    last_name = models.CharField(max_length=255)  # LastName
+    middle_name = models.CharField(max_length=255, blank=True)  # MiddleName
+    email = models.EmailField()  # Email
+    phone_number = models.CharField(max_length=20, blank=True)  # Phone
+    date_of_birth = models.DateField(null=True, blank=True)  # BirthDateUtc
+    gender = models.CharField(max_length=20, blank=True)  # Gender (Male/Female)
+    citizenship = models.CharField(max_length=10, blank=True, help_text='ISO-3 country code e.g. ZWE')  # Citizenship
+    marital_status = models.CharField(max_length=20, blank=True)  # MaritalStatus
+    street_address = models.CharField(max_length=255, blank=True)  # StreetAddress
+    city = models.CharField(max_length=100, blank=True)  # City
+    zip_code = models.CharField(max_length=20, blank=True)  # ZipCode
+    country = models.CharField(max_length=10, blank=True, help_text='ISO-2 or ISO-3 country code')  # Country
+    current_job_title = models.CharField(max_length=255, blank=True)  # CurrentJobTitle
+    education_level = models.CharField(max_length=255, blank=True, help_text='Must match D365 HcmEducationLevel')  # EducationLevelDescription
+    cover_letter = models.TextField(blank=True)  # CoverLetter
+
+    # Extra fields (not in D365 contract but useful for portal)
     nationality = models.CharField(max_length=100, blank=True)
+    education = models.JSONField(default=list, help_text='Detailed education entries')
+    experience = models.JSONField(default=list, help_text='Detailed work experience entries')
+    skills = models.TextField(blank=True, help_text='Skills separated by semicolons (;)')
     
-    # Education and Experience (JSON arrays)
-    education = models.JSONField(
-        default=list,
-        help_text='List of education: [{"institution": "...", "degree": "...", "field": "...", "start_year": "...", "end_year": "...", "gpa": "...", "honors": "..."}]'
-    )
-    experience = models.JSONField(
-        default=list,
-        help_text='List of work experience: [{"company": "...", "position": "...", "start_date": "...", "end_date": "...", "current": false, "responsibilities": "...", "achievements": "..."}]'
-    )
-    
-    # Skills (stored as semicolon-separated text)
-    skills = models.TextField(
-        blank=True,
-        help_text='Skills separated by semicolons (;)'
-    )
-    
-    # Cover Letter
-    cover_letter = models.TextField(blank=True)
-    
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -350,7 +295,6 @@ class ApplicationData(models.Model):
         verbose_name_plural = 'Application Data'
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['phone_number']),
             models.Index(fields=['email']),
         ]
     
@@ -358,7 +302,6 @@ class ApplicationData(models.Model):
         return f'Application Data for {self.application}'
     
     def get_skills_list(self):
-        """Return skills as a list."""
         if not self.skills:
             return []
         return [s.strip() for s in self.skills.split(';') if s.strip()]
@@ -374,6 +317,14 @@ class Application(models.Model):
         ('UNDER_REVIEW', 'Under Review'),
         ('SHORTLISTED', 'Shortlisted'),
         ('REJECTED', 'Rejected'),
+    ]
+
+    D365_PUSH_STATUS_CHOICES = [
+        ('NOT_PUSHED', 'Not Pushed'),
+        ('PENDING', 'Pending'),
+        ('PUSHED', 'Pushed'),
+        ('DUPLICATE', 'Duplicate (Existing Applicant)'),
+        ('FAILED', 'Failed'),
     ]
     
     applicant = models.ForeignKey(
@@ -414,6 +365,35 @@ class Application(models.Model):
         blank=True,
         help_text='Timestamp when AI shortlisting was performed'
     )
+
+    # D365 Push tracking
+    d365_push_status = models.CharField(
+        max_length=20,
+        choices=D365_PUSH_STATUS_CHOICES,
+        default='NOT_PUSHED',
+    )
+    d365_applicant_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='POSB-AI-XXXXX assigned by our system for D365'
+    )
+    d365_applicant_rec_id = models.BigIntegerField(
+        null=True, blank=True,
+        help_text='D365 HcmApplicant RecId'
+    )
+    d365_application_rec_id = models.BigIntegerField(
+        null=True, blank=True,
+        help_text='D365 HRMApplication RecId'
+    )
+    d365_push_error = models.TextField(
+        blank=True,
+        help_text='Error message from last D365 push attempt'
+    )
+    d365_pushed_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text='When this application was pushed to D365'
+    )
+    d365_push_attempts = models.IntegerField(default=0)
     
     # Timestamps
     submitted_at = models.DateTimeField(auto_now_add=True)

@@ -263,24 +263,21 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         if applicant_profile:
             context['applicant_profile'] = applicant_profile
             context['applicant_form'] = ApplicantProfileForm(instance=applicant_profile, prefix='applicant')
-            # Get all skills for the skills selector
-            from jobs.models import Skill
+            # Get all skills and countries for selectors
+            from jobs.models import Skill, Country
             context['all_skills'] = Skill.objects.all().order_by('name')
+            context['all_countries'] = Country.objects.filter(is_active=True).order_by('sort_order', 'name')
             # Serialize JSON fields for JavaScript
             import json
             context['education_json'] = json.dumps(applicant_profile.education or [])
             context['experience_json'] = json.dumps(applicant_profile.experience or [])
-            context['certifications_json'] = json.dumps(applicant_profile.certifications or [])
-            context['languages_json'] = json.dumps(applicant_profile.languages or [])
-            context['references_json'] = json.dumps(applicant_profile.references or [])
-            context['projects_json'] = json.dumps(applicant_profile.projects or [])
             
             # Calculate profile completion percentage
             completion = 0
             total_fields = 5  # personal, contact, education, experience, documents
             if user.first_name and user.last_name and applicant_profile.phone_number:
                 completion += 1  # Personal info
-            if applicant_profile.address_line_1 and applicant_profile.city and applicant_profile.country:
+            if applicant_profile.address_line_1 and applicant_profile.city and applicant_profile.country_id:
                 completion += 1  # Contact
             if applicant_profile.education and len(applicant_profile.education) > 0:
                 completion += 1  # Education
@@ -306,10 +303,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             import json
             context['education_json'] = '[]'
             context['experience_json'] = '[]'
-            context['certifications_json'] = '[]'
-            context['languages_json'] = '[]'
-            context['references_json'] = '[]'
-            context['projects_json'] = '[]'
             context['uploaded_documents'] = []
             from applications.forms import DocumentUploadForm
             context['document_form'] = DocumentUploadForm()
@@ -465,58 +458,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                 return redirect(f"{reverse_lazy('applicant-profile')}?tab=experience")
             except json.JSONDecodeError:
                 messages.error(request, "Invalid experience data format.")
-        
-        elif 'certifications_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                certifications_data = json.loads(request.POST.get('certifications_json', '[]'))
-                applicant_profile.certifications = certifications_data
-                applicant_profile.save()
-                messages.success(request, "Certifications updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=certifications")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid certifications data format.")
-        
-        elif 'languages_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                languages_data = json.loads(request.POST.get('languages_json', '[]'))
-                applicant_profile.languages = languages_data
-                applicant_profile.save()
-                messages.success(request, "Languages updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=skills")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid languages data format.")
-        
-        elif 'references_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                references_data = json.loads(request.POST.get('references_json', '[]'))
-                applicant_profile.references = references_data
-                applicant_profile.save()
-                messages.success(request, "References updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=references")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid references data format.")
-        
-        elif 'projects_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                projects_data = json.loads(request.POST.get('projects_json', '[]'))
-                applicant_profile.projects = projects_data
-                applicant_profile.save()
-                messages.success(request, "Projects updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=projects")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid projects data format.")
         
         elif 'document_upload' in request.POST and user.is_applicant():
             from applications.models import ApplicantProfile

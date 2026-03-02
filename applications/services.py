@@ -13,24 +13,20 @@ from audit.services import log_audit_event
 def submit_application(applicant, job_advert, profile_form, application_form):
     """
     Create or update applicant profile and submit an application with immutable data.
+    After submission, triggers a background task to push to D365.
     """
     if not job_advert.is_open_for_applications():
         raise ValidationError("Job is not accepting applications.")
 
-    # Persist profile (may already be saved with skills from view)
     profile, _ = ApplicantProfile.objects.get_or_create(user=applicant)
-    # Only update if form has changes (skills are already handled in view)
     profile = profile_form.save(commit=False)
     profile.user = applicant
     profile.save()
-    # Only call save_m2m if form has ManyToMany fields (skills is handled separately)
     try:
         profile_form.save_m2m()
     except ValueError:
-        # If form doesn't have m2m fields, that's fine - skills are already set
         pass
 
-    # Create or update application
     application, _ = Application.objects.update_or_create(
         applicant=applicant,
         job_advert=job_advert,
@@ -40,38 +36,12 @@ def submit_application(applicant, job_advert, profile_form, application_form):
             "ai_score": None,
             "ai_ranking": None,
             "ai_explanation": "",
+            "d365_push_status": "NOT_PUSHED",
         },
     )
 
-    # Check if we should reuse last application data
-    reuse_last = application_form.cleaned_data.get("reuse_last", False)
-    if reuse_last:
-        last_application = Application.objects.filter(applicant=applicant).exclude(id=application.id).order_by("-submitted_at").first()
-        if last_application and hasattr(last_application, 'application_data'):
-            # Copy data from last application
-            last_data = last_application.application_data
-            ApplicationData.objects.update_or_create(
-                application=application,
-                defaults={
-                    "phone_number": last_data.phone_number,
-                    "email": last_data.email,
-                    "address": last_data.address,
-                    "date_of_birth": last_data.date_of_birth,
-                    "nationality": last_data.nationality,
-                    "education": last_data.education,
-                    "experience": last_data.experience,
-                    "skills": last_data.skills,
-                    "cover_letter": last_data.cover_letter,
-                }
-            )
-        else:
-            # No previous data, create from current profile
-            _create_application_data(application, profile)
-    else:
-        # Create application data from current profile
-        _create_application_data(application, profile)
+    _create_application_data(application, profile, applicant)
 
-    # Attach documents
     cv_file = application_form.cleaned_data["cv_file"]
     ApplicationDocument.objects.create(
         application=application,
@@ -81,7 +51,6 @@ def submit_application(applicant, job_advert, profile_form, application_form):
         file_size=cv_file.size,
     )
 
-    # Audit + email
     log_audit_event(
         actor=applicant,
         action="APPLICATION_SUBMITTED",
@@ -90,43 +59,44 @@ def submit_application(applicant, job_advert, profile_form, application_form):
     )
     send_application_submitted_email_task(application.id)
 
+    # Queue D365 push as background task
+    from integrations.tasks import push_application_to_d365_task
+    push_application_to_d365_task(application.id)
+
     return application
 
 
-def _create_application_data(application, profile):
-    """Helper function to create ApplicationData from ApplicantProfile."""
-    # Build address string from address fields
-    address_parts = []
-    if profile.address_line_1:
-        address_parts.append(profile.address_line_1)
-    if profile.address_line_2:
-        address_parts.append(profile.address_line_2)
-    if profile.city:
-        address_parts.append(profile.city)
-    if profile.state_province:
-        address_parts.append(profile.state_province)
-    if profile.country:
-        address_parts.append(profile.country)
-    address = ", ".join(address_parts) if address_parts else ""
-    
-    # Convert skills to semicolon-separated string
+def _create_application_data(application, profile, applicant):
+    """Create immutable ApplicationData snapshot aligned with D365 Applicant Import fields."""
     skills_list = list(profile.skills.values_list("name", flat=True))
     skills_text = "; ".join(skills_list) if skills_list else ""
-    
-    # Use profile email if available, otherwise use user email
-    email = profile.email if profile.email else application.applicant.email
-    
+    email = profile.email if profile.email else applicant.email
+
+    street_parts = [profile.address_line_1, profile.address_line_2]
+    street_address = ", ".join(p for p in street_parts if p)
+
     ApplicationData.objects.update_or_create(
         application=application,
         defaults={
-            "phone_number": profile.phone_number or "",
+            "first_name": applicant.first_name or "",
+            "last_name": applicant.last_name or "",
+            "middle_name": profile.middle_name or "",
             "email": email,
-            "address": address,
+            "phone_number": profile.phone_number or "",
             "date_of_birth": profile.date_of_birth,
-            "nationality": profile.nationality or "",
+            "gender": profile.gender or "",
+            "citizenship": profile.citizenship.iso3 if profile.citizenship else "",
+            "marital_status": profile.marital_status or "",
+            "street_address": street_address,
+            "city": profile.city or "",
+            "zip_code": profile.postal_code or "",
+            "country": profile.country.iso2 if profile.country else "",
+            "current_job_title": profile.current_job_title or "",
+            "education_level": profile.education_level.name if profile.education_level else "",
+            "cover_letter": profile.cover_letter or "",
+            "nationality": profile.citizenship.name if profile.citizenship else "",
             "education": profile.education if profile.education else [],
             "experience": profile.experience if profile.experience else [],
             "skills": skills_text,
-            "cover_letter": profile.cover_letter or "",
         }
     )

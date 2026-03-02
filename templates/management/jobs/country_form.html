@@ -1,0 +1,57 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Add{% endif %} Country | POSB HR Management{% endblock %}
+
+{% block page_title %}{% if is_edit %}Edit{% else %}Add{% endif %} Country{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-3">
+    <a href="{% url 'management:jobs_management:country-list' %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        <span>Back to List</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-6">
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg mt-0.5">info</span>
+                <div class="text-sm text-blue-800 dark:text-blue-300">
+                    <p class="font-semibold mb-1">D365 Format Requirements</p>
+                    <ul class="space-y-1 text-blue-700 dark:text-blue-400">
+                        <li><strong>Country</strong> field uses ISO-2 (e.g. <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">ZW</code> for Zimbabwe)</li>
+                        <li><strong>Citizenship</strong> field uses ISO-3 (e.g. <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">ZWE</code> for Zimbabwe)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="flex flex-col gap-1.5">
+                <label for="{{ field.id_for_label }}" class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                <p class="text-xs text-red-500">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="pt-4 flex gap-3">
+                <a href="{% url 'management:jobs_management:country-list' %}" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                    {% if is_edit %}Update{% else %}Save{% endif %} Country
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

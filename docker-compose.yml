@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - media:/app/media
+      - staticfiles:/app/staticfiles
+    command: ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "posb_recruitment.wsgi:application"]
+
+volumes:
+  media:
+  staticfiles:

@@ -7,6 +7,13 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-3">
+    <form method="post" action="{% url 'management:jobs_management:push-d365' pk=job.pk %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Push all unpushed applications to D365?')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+            <span class="material-symbols-outlined text-lg">cloud_upload</span>
+            <span>Push All to D365</span>
+        </button>
+    </form>
     <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">arrow_back</span>
         <span>Back to Job</span>
@@ -23,11 +30,29 @@
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-1">{{ job.job_title }}</h2>
                 <p class="text-gray-600 dark:text-gray-400">{{ job.job_function|default:"—" }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Recruiting ID: {{ job.recruiting_id }} | Job ID: {{ job.job_id }}</p>
-                <div class="mt-4 flex items-center gap-4">
+                <div class="mt-4 flex flex-wrap items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary text-lg">person_search</span>
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ total_applications }}</span> Total Applications
+                            <span class="font-semibold text-gray-900 dark:text-white">{{ total_applications }}</span> Total
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-green-600 text-lg">cloud_done</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-semibold text-green-700 dark:text-green-300">{{ d365_pushed }}</span> Pushed
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-red-600 text-lg">cloud_off</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-semibold text-red-700 dark:text-red-300">{{ d365_failed }}</span> Failed
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-gray-500 text-lg">pending</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">{{ d365_not_pushed }}</span> Not Pushed
                         </span>
                     </div>
                 </div>
@@ -84,6 +109,7 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gender</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">D365 Status</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -114,6 +140,29 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
+                            {% if application.d365_push_status == 'PUSHED' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" title="{{ application.d365_pushed_at|date:'M d, Y H:i' }}">
+                                <span class="material-symbols-outlined text-sm">cloud_done</span> Pushed
+                            </span>
+                            {% elif application.d365_push_status == 'DUPLICATE' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300" title="Duplicate found in D365">
+                                <span class="material-symbols-outlined text-sm">content_copy</span> Duplicate
+                            </span>
+                            {% elif application.d365_push_status == 'FAILED' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300" title="{{ application.d365_push_error }}">
+                                <span class="material-symbols-outlined text-sm">error</span> Failed
+                            </span>
+                            {% elif application.d365_push_status == 'PENDING' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-sm">hourglass_top</span> Pending
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined text-sm">cloud_off</span> Not Pushed
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
                             <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
                                 <span class="material-symbols-outlined text-lg">visibility</span>
                                 View
@@ -122,7 +171,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
+                        <td colspan="7" class="px-6 py-12 text-center">
                             <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">person_off</span>
                             <p class="text-gray-500 dark:text-gray-400">No applications found for this job</p>
                         </td>
