@@ -5,6 +5,19 @@
 
 {% block page_title %}Applications{% endblock %}
 
+{% block header_actions %}
+<form method="post" action="{% url 'management:applications_management:upload-bulk' %}" class="inline">
+    {% csrf_token %}
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="job_id" value="{{ job_filter }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <button type="submit" onclick="return confirm('Start background bulk upload for pending/failed applications in this filtered view?')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">cloud_upload</span>
+        <span>Bulk Upload to D365</span>
+    </button>
+</form>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-6">
     <!-- Statistics Cards -->
@@ -108,9 +121,21 @@
                             {{ application.submitted_at|date:"M d, Y" }}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="View Details">
-                                <span class="material-symbols-outlined text-lg">visibility</span>
-                            </a>
+                            <div class="flex items-center gap-2">
+                                {% if application.status != 'UPLOADED_TO_ERP' %}
+                                <form method="post" action="{% url 'management:applications_management:upload-single' pk=application.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs" title="Upload to D365">
+                                        <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                                        Upload
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="text-primary hover:text-primary/80 transition-colors" title="View Details">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}

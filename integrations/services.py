@@ -116,7 +116,9 @@ class Dynamics365ApplicantService:
             access_token = Dynamics365ApplicantService.get_access_token()
             payload = Dynamics365ApplicantService.build_applicant_payload(application)
 
-            api_url = f"{settings.DYNAMICS_365_API_URL.rstrip('/')}/api/services/POSBRecruitmentServiceGroup/POSBRecruitmentService/SubmitApplicant"
+            api_url = settings.DYNAMICS_365_API_URL.strip()
+            if not api_url:
+                raise ValueError("DYNAMICS_365_API_URL is empty. Set the full SubmitApplicant endpoint URL in .env.")
 
             headers = {
                 "Authorization": f"Bearer {access_token}",

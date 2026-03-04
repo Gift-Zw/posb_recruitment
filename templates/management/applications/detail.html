@@ -7,6 +7,16 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-3">
+    {% if application.status != 'UPLOADED_TO_ERP' %}
+    <form method="post" action="{% url 'management:applications_management:upload-single' pk=application.pk %}" class="inline">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'management:applications_management:detail' pk=application.pk %}">
+        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+            <span class="material-symbols-outlined text-lg">cloud_upload</span>
+            <span>Upload to D365</span>
+        </button>
+    </form>
+    {% endif %}
     <a href="{% url 'management:applications_management:list' %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">arrow_back</span>
         <span>Back to List</span>
@@ -67,20 +77,12 @@
             </div>
         </div>
 
-        <!-- Status Update Form -->
+        <!-- Status Management -->
         <div class="border-t border-gray-200 dark:border-gray-800 pt-6">
-            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Update Application Status</h3>
-            <form method="post" action="{% url 'management:applications_management:update-status' pk=application.pk %}" class="flex items-center gap-3">
-                {% csrf_token %}
-                <select name="status" class="flex-1 max-w-xs rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
-                    <option value="PENDING_UPLOAD" {% if application.status == 'PENDING_UPLOAD' %}selected{% endif %}>Pending Upload</option>
-                    <option value="UPLOADED_TO_ERP" {% if application.status == 'UPLOADED_TO_ERP' %}selected{% endif %}>Uploaded to ERP</option>
-                    <option value="UPLOAD_FAILED" {% if application.status == 'UPLOAD_FAILED' %}selected{% endif %}>Upload Failed</option>
-                </select>
-                <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-                    Update Status
-                </button>
-            </form>
+            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Status Management</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Status is automatic and driven by actual D365 upload results. It cannot be changed manually.
+            </p>
         </div>
     </div>
 

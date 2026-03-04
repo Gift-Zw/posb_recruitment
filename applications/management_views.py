@@ -4,13 +4,29 @@ Handles viewing and managing all applications.
 """
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, View
-from django.http import JsonResponse
 from jobs.models import JobAdvert
 from applications.models import Application, ApplicantProfile
-from audit.services import log_audit_event
+
+
+def apply_application_filters(queryset, status=None, job_id=None, search=None):
+    """Apply reusable status/job/search filters to application querysets."""
+    if status in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
+        queryset = queryset.filter(status=status)
+
+    if job_id:
+        queryset = queryset.filter(job_advert_id=job_id)
+
+    if search:
+        queryset = queryset.filter(
+            Q(applicant__first_name__icontains=search) |
+            Q(applicant__last_name__icontains=search) |
+            Q(applicant__email__icontains=search)
+        )
+
+    return queryset
 
 
 class HRStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -42,29 +58,12 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = Application.objects.select_related("applicant", "job_advert").order_by('-submitted_at')
-        
-        # Filter by status
-        status = self.request.GET.get('status')
-        if status in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
-            queryset = queryset.filter(status=status)
-        
-        # Filter by job
-        job_id = self.request.GET.get('job_id')
-        if job_id:
-            queryset = queryset.filter(job_advert_id=job_id)
-        
-        # Search by applicant name or email
-        search = self.request.GET.get('search')
-        if search:
-            queryset = queryset.filter(
-                applicant__first_name__icontains=search
-            ) | queryset.filter(
-                applicant__last_name__icontains=search
-            ) | queryset.filter(
-                applicant__email__icontains=search
-            )
-        
-        return queryset
+        return apply_application_filters(
+            queryset,
+            status=self.request.GET.get('status'),
+            job_id=self.request.GET.get('job_id'),
+            search=self.request.GET.get('search'),
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -128,33 +127,58 @@ class ApplicantProfileManagementView(HRStaffRequiredMixin, DetailView):
         return context
 
 
-class UpdateApplicationStatusView(HRStaffRequiredMixin, View):
-    """Update application status (AJAX or POST)."""
+class UploadSingleApplicationView(HRStaffRequiredMixin, View):
+    """Queue a single application ERP upload."""
 
     def post(self, request, *args, **kwargs):
         application = get_object_or_404(Application, pk=kwargs['pk'])
-        new_status = request.POST.get('status')
-        
-        if new_status not in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
-            messages.error(request, "Invalid status.")
+        next_url = request.POST.get("next")
+
+        if application.status == "UPLOADED_TO_ERP":
+            messages.info(request, "This application is already uploaded to ERP.")
+            if next_url:
+                return redirect(next_url)
             return redirect('management:applications_management:detail', pk=application.pk)
-        
-        old_status = application.status
-        application.status = new_status
-        application.save()
-        
-        log_audit_event(
-            actor=request.user,
-            action="APPLICATION_STATUS_UPDATED",
-            action_description=f"Application status changed from {old_status} to {new_status}",
-            entity=application,
-            request=request,
-        )
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'status': new_status})
-        
-        messages.success(request, f"Application status updated to {new_status}.")
+
+        from integrations.tasks import enqueue_push_application_to_d365_task
+        queued = enqueue_push_application_to_d365_task(application.id)
+        if queued:
+            messages.success(request, "ERP upload started in the background.")
+        else:
+            messages.error(request, "Could not start ERP upload. Check system logs.")
+
+        if next_url:
+            return redirect(next_url)
         return redirect('management:applications_management:detail', pk=application.pk)
+
+
+class UploadBulkApplicationsView(HRStaffRequiredMixin, View):
+    """Queue ERP uploads in bulk based on current filters."""
+
+    def post(self, request, *args, **kwargs):
+        queryset = Application.objects.select_related("job_advert")
+        queryset = apply_application_filters(
+            queryset,
+            status=request.POST.get("status"),
+            job_id=request.POST.get("job_id"),
+            search=request.POST.get("search"),
+        )
+        queryset = queryset.filter(status__in=["PENDING_UPLOAD", "UPLOAD_FAILED"])
+
+        job_ids = list(queryset.values_list("job_advert_id", flat=True).distinct())
+        if not job_ids:
+            messages.info(request, "No pending or failed applications found for bulk upload.")
+            return redirect('management:applications_management:list')
+
+        from integrations.tasks import enqueue_push_all_applications_for_job_task
+        started = 0
+        for job_id in job_ids:
+            if enqueue_push_all_applications_for_job_task(job_id, triggered_by_id=request.user.id):
+                started += 1
+
+        if started:
+            messages.success(request, f"Started background bulk upload for {started} job advert(s).")
+        else:
+            messages.error(request, "Could not start any bulk uploads. Check system logs.")
+
+        return redirect('management:applications_management:list')
