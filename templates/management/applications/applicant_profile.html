@@ -47,65 +47,6 @@
         {% endif %}
     </div>
 
-    <!-- Education -->
-    {% if profile.education %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Education</h2>
-        <div class="space-y-4">
-            {% for edu in profile.education %}
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ edu.degree }}{% if edu.field %} in {{ edu.field }}{% endif %}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ edu.institution }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ edu.start_year }} - {{ edu.end_year|default:"Present" }}</p>
-                {% if edu.gpa %}<p class="text-xs text-gray-500 dark:text-gray-400">GPA: {{ edu.gpa }}</p>{% endif %}
-                {% if edu.honors %}<p class="text-xs text-gray-500 dark:text-gray-400">Honors: {{ edu.honors }}</p>{% endif %}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Work Experience -->
-    {% if profile.experience %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Work Experience</h2>
-        <div class="space-y-4">
-            {% for exp in profile.experience %}
-            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ exp.position }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ exp.company }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ exp.start_date }} - {{ exp.end_date|default:"Present" }}</p>
-                {% if exp.responsibilities %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">{{ exp.responsibilities }}</p>{% endif %}
-                {% if exp.achievements %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">Achievements: {{ exp.achievements }}</p>{% endif %}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Skills -->
-    {% if profile.skills.exists %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Skills</h2>
-        <div class="flex flex-wrap gap-2">
-            {% for skill in profile.skills.all %}
-            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{{ skill.name }}</span>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Online Presence -->
-    {% if profile.linkedin_url or profile.portfolio_url %}
-    <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Online Presence</h2>
-        <div class="flex flex-wrap gap-3">
-            {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-sm">LinkedIn</a>{% endif %}
-            {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" target="_blank" class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm">Portfolio</a>{% endif %}
-        </div>
-    </div>
-    {% endif %}
-
     <!-- Documents -->
     {% if profile.documents.exists %}
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
@@ -141,14 +82,12 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ app.job_advert.job_function|default:"—" }} • Applied {{ app.submitted_at|date:"M d, Y" }}</p>
                 </div>
                 <div>
-                    {% if app.status == 'SHORTLISTED' %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Shortlisted</span>
-                    {% elif app.status == 'UNDER_REVIEW' %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Under Review</span>
-                    {% elif app.status == 'REJECTED' %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Rejected</span>
+                    {% if app.status == 'UPLOADED_TO_ERP' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Uploaded to ERP</span>
+                    {% elif app.status == 'UPLOAD_FAILED' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Upload Failed</span>
                     {% else %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">Submitted</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">Pending Upload</span>
                     {% endif %}
                 </div>
             </div>

@@ -14,6 +14,7 @@ urlpatterns = [
     path('<int:pk>/reopen/', views.JobAdvertReopenView.as_view(), name='advert-reopen'),
     path('<int:pk>/applications/', views.JobApplicationsListView.as_view(), name='job-applications'),
     path('<int:pk>/push-d365/', views.JobPushAllToD365View.as_view(), name='push-d365'),
+    path('<int:pk>/applications/<int:application_id>/push-d365/', views.JobPushSingleToD365View.as_view(), name='push-single-d365'),
     path('skills/', views.SkillListView.as_view(), name='skill-list'),
     path('skills/create/', views.SkillCreateView.as_view(), name='skill-create'),
     # Education Levels

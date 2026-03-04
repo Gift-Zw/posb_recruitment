@@ -66,14 +66,12 @@
                 <div class="flex flex-col gap-4">
                     <!-- Status Badge -->
                     <div class="flex items-center gap-3">
-                        {% if application.status == 'SUBMITTED' %}
-                        <span class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">Submitted</span>
-                        {% elif application.status == 'UNDER_REVIEW' %}
-                        <span class="px-3 py-1.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold uppercase rounded-md border border-yellow-200 dark:border-yellow-800">Under Review</span>
-                        {% elif application.status == 'SHORTLISTED' %}
-                        <span class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">Shortlisted</span>
-                        {% elif application.status == 'REJECTED' %}
-                        <span class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-semibold uppercase rounded-md border border-red-200 dark:border-red-800">Rejected</span>
+                        {% if application.status == 'PENDING_UPLOAD' %}
+                        <span class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">Pending Upload</span>
+                        {% elif application.status == 'UPLOADED_TO_ERP' %}
+                        <span class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">Uploaded to ERP</span>
+                        {% elif application.status == 'UPLOAD_FAILED' %}
+                        <span class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-semibold uppercase rounded-md border border-red-200 dark:border-red-800">Upload Failed</span>
                         {% endif %}
                         <span class="text-xs text-[#8a7360] dark:text-gray-400">Submitted {{ application.submitted_at|date:"M d, Y" }}</span>
                     </div>
@@ -256,25 +254,20 @@
                 <div class="space-y-4">
                     <div>
                         <p class="text-xs text-[#8a7360] dark:text-gray-400 mb-1">Current Status</p>
-                        {% if application.status == 'SUBMITTED' %}
+                        {% if application.status == 'PENDING_UPLOAD' %}
                         <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">send</span>
-                            Submitted
+                            <span class="material-symbols-outlined text-base">schedule</span>
+                            Pending Upload
                         </span>
-                        {% elif application.status == 'UNDER_REVIEW' %}
-                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">visibility</span>
-                            Under Review
-                        </span>
-                        {% elif application.status == 'SHORTLISTED' %}
+                        {% elif application.status == 'UPLOADED_TO_ERP' %}
                         <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold rounded-md">
                             <span class="material-symbols-outlined text-base">check_circle</span>
-                            Shortlisted
+                            Uploaded to ERP
                         </span>
-                        {% elif application.status == 'REJECTED' %}
+                        {% elif application.status == 'UPLOAD_FAILED' %}
                         <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">cancel</span>
-                            Rejected
+                            <span class="material-symbols-outlined text-base">error</span>
+                            Upload Failed
                         </span>
                         {% endif %}
                     </div>

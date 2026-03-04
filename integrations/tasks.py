@@ -133,3 +133,23 @@ def push_all_applications_for_job_task(job_advert_id, triggered_by_id=None):
             module="integrations.tasks", function="push_all_applications_for_job_task"
         )
         return None
+
+
+def enqueue_push_all_applications_for_job_task(job_advert_id, triggered_by_id=None):
+    """Fire-and-forget bulk push for a job advert."""
+    try:
+        worker = threading.Thread(
+            target=push_all_applications_for_job_task,
+            args=(job_advert_id, triggered_by_id),
+            daemon=True,
+            name=f"d365-bulk-push-{job_advert_id}",
+        )
+        worker.start()
+        return True
+    except Exception as e:
+        log_system_event(
+            level="ERROR", source="INTEGRATION",
+            message=f"Failed to enqueue D365 bulk push for job {job_advert_id}: {str(e)}",
+            module="integrations.tasks", function="enqueue_push_all_applications_for_job_task"
+        )
+        return False

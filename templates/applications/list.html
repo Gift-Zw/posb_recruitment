@@ -87,8 +87,8 @@
                     <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-base">visibility</span>
                 </div>
                 <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ under_review }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Under Review</p>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ pending_upload }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Pending Upload</p>
                 </div>
             </div>
         </div>
@@ -98,8 +98,8 @@
                     <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-base">check_circle</span>
                 </div>
                 <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ shortlisted }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Shortlisted</p>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ uploaded_to_erp }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded to ERP</p>
                 </div>
             </div>
         </div>
@@ -109,8 +109,8 @@
                     <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-base">cancel</span>
                 </div>
                 <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ rejected }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Rejected</p>
+                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ upload_failed }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Upload Failed</p>
                 </div>
             </div>
         </div>
@@ -130,25 +130,20 @@
                                     {{ application.job_advert.job_title }}
                                 </a>
                             </h3>
-                            {% if application.status == 'SHORTLISTED' %}
+                            {% if application.status == 'UPLOADED_TO_ERP' %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                 <span class="material-symbols-outlined text-xs mr-1">check_circle</span>
-                                Shortlisted
+                                Uploaded to ERP
                             </span>
-                            {% elif application.status == 'UNDER_REVIEW' %}
+                            {% elif application.status == 'PENDING_UPLOAD' %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                <span class="material-symbols-outlined text-xs mr-1">visibility</span>
-                                Under Review
-                            </span>
-                            {% elif application.status == 'REJECTED' %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                <span class="material-symbols-outlined text-xs mr-1">cancel</span>
-                                Rejected
+                                <span class="material-symbols-outlined text-xs mr-1">schedule</span>
+                                Pending Upload
                             </span>
                             {% else %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
-                                <span class="material-symbols-outlined text-xs mr-1">schedule</span>
-                                Submitted
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                <span class="material-symbols-outlined text-xs mr-1">error</span>
+                                Upload Failed
                             </span>
                             {% endif %}
                         </div>
@@ -162,17 +157,7 @@
                                 <span class="material-symbols-outlined text-sm">event</span>
                                 <span>Applied {{ application.submitted_at|date:"M d, Y" }}</span>
                             </div>
-                            {% if application.ai_score %}
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">psychology</span>
-                                <span>AI Score: {{ application.ai_score|floatformat:1 }}/100</span>
-                            </div>
-                            {% endif %}
                         </div>
-
-                        {% if application.ai_explanation %}
-                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ application.ai_explanation|truncatewords:30 }}</p>
-                        {% endif %}
                     </div>
 
                     <div class="flex items-center gap-2">

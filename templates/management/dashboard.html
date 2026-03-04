@@ -158,21 +158,17 @@
                             </div>
                         </div>
                         <div class="flex flex-col items-end gap-2">
-                            {% if application.status == 'SUBMITTED' %}
+                            {% if application.status == 'PENDING_UPLOAD' %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                Submitted
+                                Pending Upload
                             </span>
-                            {% elif application.status == 'UNDER_REVIEW' %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                                Under Review
-                            </span>
-                            {% elif application.status == 'SHORTLISTED' %}
+                            {% elif application.status == 'UPLOADED_TO_ERP' %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                                Shortlisted
+                                Uploaded to ERP
                             </span>
                             {% else %}
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                Rejected
+                                Upload Failed
                             </span>
                             {% endif %}
                             <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>

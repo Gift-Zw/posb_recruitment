@@ -45,7 +45,7 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
         
         # Filter by status
         status = self.request.GET.get('status')
-        if status in ['SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED', 'REJECTED']:
+        if status in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
             queryset = queryset.filter(status=status)
         
         # Filter by job
@@ -75,10 +75,9 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
         # Statistics
         all_applications = Application.objects.all()
         context['total_applications'] = all_applications.count()
-        context['submitted_count'] = all_applications.filter(status='SUBMITTED').count()
-        context['under_review_count'] = all_applications.filter(status='UNDER_REVIEW').count()
-        context['shortlisted_count'] = all_applications.filter(status='SHORTLISTED').count()
-        context['rejected_count'] = all_applications.filter(status='REJECTED').count()
+        context['pending_upload_count'] = all_applications.filter(status='PENDING_UPLOAD').count()
+        context['uploaded_to_erp_count'] = all_applications.filter(status='UPLOADED_TO_ERP').count()
+        context['upload_failed_count'] = all_applications.filter(status='UPLOAD_FAILED').count()
         
         # Job list for filter
         context['jobs'] = JobAdvert.objects.all().order_by('-created_at')
@@ -116,7 +115,7 @@ class ApplicantProfileManagementView(HRStaffRequiredMixin, DetailView):
     context_object_name = "profile"
 
     def get_queryset(self):
-        return ApplicantProfile.objects.select_related("user").prefetch_related("skills", "documents")
+        return ApplicantProfile.objects.select_related("user").prefetch_related("documents")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -136,7 +135,7 @@ class UpdateApplicationStatusView(HRStaffRequiredMixin, View):
         application = get_object_or_404(Application, pk=kwargs['pk'])
         new_status = request.POST.get('status')
         
-        if new_status not in ['SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED', 'REJECTED']:
+        if new_status not in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
             messages.error(request, "Invalid status.")

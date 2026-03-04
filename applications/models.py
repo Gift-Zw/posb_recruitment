@@ -280,10 +280,9 @@ class Application(models.Model):
     Links to ApplicationData which stores immutable snapshot of applicant profile at submission time.
     """
     STATUS_CHOICES = [
-        ('SUBMITTED', 'Submitted'),
-        ('UNDER_REVIEW', 'Under Review'),
-        ('SHORTLISTED', 'Shortlisted'),
-        ('REJECTED', 'Rejected'),
+        ('PENDING_UPLOAD', 'Pending Upload'),
+        ('UPLOADED_TO_ERP', 'Uploaded to ERP'),
+        ('UPLOAD_FAILED', 'Upload Failed'),
     ]
 
     D365_PUSH_STATUS_CHOICES = [
@@ -309,30 +308,9 @@ class Application(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='SUBMITTED'
+        default='PENDING_UPLOAD'
     )
     
-    # AI Shortlisting
-    ai_score = models.FloatField(
-        null=True,
-        blank=True,
-        help_text='AI-generated score (0-100) for shortlisting'
-    )
-    ai_ranking = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text='Ranking position after AI shortlisting'
-    )
-    ai_explanation = models.TextField(
-        blank=True,
-        help_text='AI explanation for the score/ranking'
-    )
-    ai_shortlisted_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text='Timestamp when AI shortlisting was performed'
-    )
-
     # D365 Push tracking
     d365_push_status = models.CharField(
         max_length=20,
@@ -375,7 +353,6 @@ class Application(models.Model):
         indexes = [
             models.Index(fields=['applicant', 'status']),
             models.Index(fields=['job_advert', 'status']),
-            models.Index(fields=['status', 'ai_ranking']),
             models.Index(fields=['submitted_at']),
         ]
     

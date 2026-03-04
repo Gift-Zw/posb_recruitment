@@ -36,9 +36,9 @@ class ApplicationListView(LoginRequiredMixin, ListView):
         
         # Calculate statistics
         context['total_applications'] = applications.count()
-        context['under_review'] = applications.filter(status='UNDER_REVIEW').count()
-        context['shortlisted'] = applications.filter(status='SHORTLISTED').count()
-        context['rejected'] = applications.filter(status='REJECTED').count()
+        context['pending_upload'] = applications.filter(status='PENDING_UPLOAD').count()
+        context['uploaded_to_erp'] = applications.filter(status='UPLOADED_TO_ERP').count()
+        context['upload_failed'] = applications.filter(status='UPLOAD_FAILED').count()
         
         return context
 

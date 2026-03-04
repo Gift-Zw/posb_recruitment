@@ -14,16 +14,16 @@ class ApplicantProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ['applicant', 'job_advert', 'status', 'ai_score', 'ai_ranking', 'submitted_at']
+    list_display = ['applicant', 'job_advert', 'status', 'd365_push_status', 'submitted_at']
     list_filter = ['status', 'submitted_at', 'job_advert__job_function']
     search_fields = ['applicant__email', 'job_advert__job_title']
-    readonly_fields = ['submitted_at', 'updated_at', 'ai_shortlisted_at']
+    readonly_fields = ['submitted_at', 'updated_at']
     fieldsets = (
         ('Application Details', {
             'fields': ('applicant', 'job_advert', 'status')
         }),
-        ('AI Shortlisting', {
-            'fields': ('ai_score', 'ai_ranking', 'ai_explanation', 'ai_shortlisted_at')
+        ('D365 Push Tracking', {
+            'fields': ('d365_push_status', 'd365_applicant_id', 'd365_applicant_rec_id', 'd365_application_rec_id', 'd365_push_error', 'd365_pushed_at', 'd365_push_attempts')
         }),
         ('Timestamps', {
             'fields': ('submitted_at', 'updated_at')

@@ -31,21 +31,17 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Applied for: <a href="{% url 'management:jobs_management:advert-detail' pk=application.job_advert.pk %}" class="text-primary hover:underline">{{ application.job_advert.job_title }}</a></p>
             </div>
             <div>
-                {% if application.status == 'SUBMITTED' %}
+                {% if application.status == 'PENDING_UPLOAD' %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                    Submitted
+                    Pending Upload
                 </span>
-                {% elif application.status == 'UNDER_REVIEW' %}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                    Under Review
-                </span>
-                {% elif application.status == 'SHORTLISTED' %}
+                {% elif application.status == 'UPLOADED_TO_ERP' %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                    Shortlisted
+                    Uploaded to ERP
                 </span>
                 {% else %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                    Rejected
+                    Upload Failed
                 </span>
                 {% endif %}
             </div>
@@ -57,18 +53,14 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Submitted</p>
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.submitted_at|date:"M d, Y H:i" }}</p>
             </div>
-            {% if application.ai_score %}
             <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">AI Score</p>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.ai_score|floatformat:1 }}/100</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">ERP Push State</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.get_d365_push_status_display }}</p>
             </div>
-            {% endif %}
-            {% if application.ai_ranking %}
             <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">AI Ranking</p>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">#{{ application.ai_ranking }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Push Error</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.d365_push_error|default:"—" }}</p>
             </div>
-            {% endif %}
             <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Updated</p>
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.updated_at|date:"M d, Y H:i" }}</p>
@@ -81,10 +73,9 @@
             <form method="post" action="{% url 'management:applications_management:update-status' pk=application.pk %}" class="flex items-center gap-3">
                 {% csrf_token %}
                 <select name="status" class="flex-1 max-w-xs rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
-                    <option value="SUBMITTED" {% if application.status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
-                    <option value="UNDER_REVIEW" {% if application.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
-                    <option value="SHORTLISTED" {% if application.status == 'SHORTLISTED' %}selected{% endif %}>Shortlisted</option>
-                    <option value="REJECTED" {% if application.status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                    <option value="PENDING_UPLOAD" {% if application.status == 'PENDING_UPLOAD' %}selected{% endif %}>Pending Upload</option>
+                    <option value="UPLOADED_TO_ERP" {% if application.status == 'UPLOADED_TO_ERP' %}selected{% endif %}>Uploaded to ERP</option>
+                    <option value="UPLOAD_FAILED" {% if application.status == 'UPLOAD_FAILED' %}selected{% endif %}>Upload Failed</option>
                 </select>
                 <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
                     Update Status
@@ -132,13 +123,6 @@
             </div>
             {% endif %}
 
-            <!-- AI Explanation -->
-            {% if application.ai_explanation %}
-            <div>
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">AI Shortlisting Explanation</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ application.ai_explanation }}</p>
-            </div>
-            {% endif %}
         </div>
         {% endwith %}
     </div>

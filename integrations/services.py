@@ -102,13 +102,15 @@ class Dynamics365ApplicantService:
 
         if not hasattr(application, "application_data"):
             application.d365_push_status = "FAILED"
+            application.status = "UPLOAD_FAILED"
             application.d365_push_error = "No application data snapshot found"
-            application.save(update_fields=["d365_push_status", "d365_push_error"])
+            application.save(update_fields=["d365_push_status", "status", "d365_push_error"])
             return application
 
         application.d365_push_status = "PENDING"
+        application.status = "PENDING_UPLOAD"
         application.d365_push_attempts += 1
-        application.save(update_fields=["d365_push_status", "d365_push_attempts"])
+        application.save(update_fields=["d365_push_status", "status", "d365_push_attempts"])
 
         try:
             access_token = Dynamics365ApplicantService.get_access_token()
@@ -140,6 +142,7 @@ class Dynamics365ApplicantService:
                 application.d365_push_status = "DUPLICATE"
             else:
                 application.d365_push_status = "PUSHED"
+            application.status = "UPLOADED_TO_ERP"
 
             application.d365_pushed_at = timezone.now()
             application.d365_push_error = ""
@@ -178,8 +181,9 @@ class Dynamics365ApplicantService:
                     pass
 
             application.d365_push_status = "FAILED"
+            application.status = "UPLOAD_FAILED"
             application.d365_push_error = error_msg
-            application.save(update_fields=["d365_push_status", "d365_push_error"])
+            application.save(update_fields=["d365_push_status", "status", "d365_push_error"])
 
             log_system_event(
                 level="ERROR", source="INTEGRATION",
@@ -190,8 +194,9 @@ class Dynamics365ApplicantService:
 
         except Exception as e:
             application.d365_push_status = "FAILED"
+            application.status = "UPLOAD_FAILED"
             application.d365_push_error = str(e)[:500]
-            application.save(update_fields=["d365_push_status", "d365_push_error"])
+            application.save(update_fields=["d365_push_status", "status", "d365_push_error"])
 
             log_system_event(
                 level="ERROR", source="INTEGRATION",
@@ -209,9 +214,9 @@ class Dynamics365ApplicantService:
         """
         applications = Application.objects.filter(
             job_advert_id=job_advert_id,
-            status="SUBMITTED",
+            status__in=["PENDING_UPLOAD", "UPLOAD_FAILED"],
         ).exclude(
-            d365_push_status="PUSHED"
+            d365_push_status__in=["PUSHED", "DUPLICATE"]
         ).order_by("submitted_at")
 
         total = applications.count()

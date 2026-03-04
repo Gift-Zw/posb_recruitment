@@ -33,11 +33,8 @@ def submit_application(applicant, job_advert, profile_form, application_form):
         applicant=applicant,
         job_advert=job_advert,
         defaults={
-            "status": "SUBMITTED",
+            "status": "PENDING_UPLOAD",
             "submitted_at": timezone.now(),
-            "ai_score": None,
-            "ai_ranking": None,
-            "ai_explanation": "",
             "d365_push_status": "NOT_PUSHED",
         },
     )

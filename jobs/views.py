@@ -279,7 +279,7 @@ class JobAdvertListView(HRStaffRequiredMixin, ListView):
         
         queryset = JobAdvert.objects.prefetch_related("applications").annotate(
             application_count=Count('applications'),
-            shortlisted_count=Count('applications', filter=Q(applications__status='SHORTLISTED'))
+            uploaded_count=Count('applications', filter=Q(applications__status='UPLOADED_TO_ERP'))
         ).order_by("-created_at")
         
         # Filter by status
@@ -441,7 +441,7 @@ class JobApplicationsListView(HRStaffRequiredMixin, ListView):
         
         # Filter by status
         status = self.request.GET.get('status')
-        if status in ['SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED', 'REJECTED']:
+        if status in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
             queryset = queryset.filter(status=status)
         
         # Search by applicant name or email
@@ -464,10 +464,10 @@ class JobApplicationsListView(HRStaffRequiredMixin, ListView):
         applications = Application.objects.filter(job_advert=job)
         context['total_applications'] = applications.count()
         
-        # D365 push stats
-        context['d365_pushed'] = applications.filter(d365_push_status='PUSHED').count()
-        context['d365_failed'] = applications.filter(d365_push_status='FAILED').count()
-        context['d365_not_pushed'] = applications.filter(d365_push_status='NOT_PUSHED').count()
+        # ERP upload status stats
+        context['pending_upload_count'] = applications.filter(status='PENDING_UPLOAD').count()
+        context['uploaded_to_erp_count'] = applications.filter(status='UPLOADED_TO_ERP').count()
+        context['upload_failed_count'] = applications.filter(status='UPLOAD_FAILED').count()
         
         context['status_filter'] = self.request.GET.get('status', '')
         context['search_query'] = self.request.GET.get('search', '')
@@ -482,15 +482,32 @@ class JobPushAllToD365View(HRStaffRequiredMixin, DetailView):
     
     def post(self, request, *args, **kwargs):
         job = self.get_object()
-        from integrations.tasks import push_all_applications_for_job_task
-        summary = push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
-        if summary:
+        from integrations.tasks import enqueue_push_all_applications_for_job_task
+        queued = enqueue_push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
+        if queued:
+            messages.success(request, "Bulk upload to ERP has started in the background.")
+        else:
+            messages.error(request, "Could not start bulk ERP upload. Check system logs for details.")
+        return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+
+class JobPushSingleToD365View(HRStaffRequiredMixin, View):
+    """Push one application to D365 (manual trigger)."""
+
+    def post(self, request, pk, application_id):
+        job = get_object_or_404(JobAdvert, pk=pk)
+        from applications.models import Application
+        application = get_object_or_404(Application, id=application_id, job_advert=job)
+
+        from integrations.tasks import enqueue_push_application_to_d365_task
+        queued = enqueue_push_application_to_d365_task(application.id)
+        if queued:
             messages.success(
                 request,
-                f"D365 push complete: {summary['pushed']} pushed, {summary['duplicates']} duplicates, {summary['failed']} failed out of {summary['total']}."
+                f"Upload started for {application.applicant.get_full_name() or application.applicant.email}."
             )
         else:
-            messages.error(request, "D365 push failed. Check system logs for details.")
+            messages.error(request, "Could not start application upload. Check system logs for details.")
         return redirect("management:jobs_management:job-applications", pk=job.pk)
 
 

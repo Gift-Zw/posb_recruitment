@@ -9,9 +9,9 @@
 <div class="flex items-center gap-3">
     <form method="post" action="{% url 'management:jobs_management:push-d365' pk=job.pk %}" class="inline">
         {% csrf_token %}
-        <button type="submit" onclick="return confirm('Push all unpushed applications to D365?')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+        <button type="submit" onclick="return confirm('Start background bulk upload for this job?')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
             <span class="material-symbols-outlined text-lg">cloud_upload</span>
-            <span>Push All to D365</span>
+            <span>Bulk Upload to ERP</span>
         </button>
     </form>
     <a href="{% url 'management:jobs_management:advert-detail' pk=job.pk %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
@@ -40,19 +40,19 @@
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-green-600 text-lg">cloud_done</span>
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            <span class="font-semibold text-green-700 dark:text-green-300">{{ d365_pushed }}</span> Pushed
+                            <span class="font-semibold text-green-700 dark:text-green-300">{{ uploaded_to_erp_count }}</span> Uploaded
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-red-600 text-lg">cloud_off</span>
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            <span class="font-semibold text-red-700 dark:text-red-300">{{ d365_failed }}</span> Failed
+                            <span class="font-semibold text-red-700 dark:text-red-300">{{ upload_failed_count }}</span> Failed
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-gray-500 text-lg">pending</span>
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">{{ d365_not_pushed }}</span> Not Pushed
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">{{ pending_upload_count }}</span> Pending
                         </span>
                     </div>
                 </div>
@@ -80,10 +80,9 @@
             <div class="md:w-48">
                 <select name="status" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
                     <option value="">All Status</option>
-                    <option value="SUBMITTED" {% if status_filter == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
-                    <option value="UNDER_REVIEW" {% if status_filter == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
-                    <option value="SHORTLISTED" {% if status_filter == 'SHORTLISTED' %}selected{% endif %}>Shortlisted</option>
-                    <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                    <option value="PENDING_UPLOAD" {% if status_filter == 'PENDING_UPLOAD' %}selected{% endif %}>Pending Upload</option>
+                    <option value="UPLOADED_TO_ERP" {% if status_filter == 'UPLOADED_TO_ERP' %}selected{% endif %}>Uploaded to ERP</option>
+                    <option value="UPLOAD_FAILED" {% if status_filter == 'UPLOAD_FAILED' %}selected{% endif %}>Upload Failed</option>
                 </select>
             </div>
             <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
@@ -109,7 +108,7 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Gender</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">D365 Status</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ERP Upload Status</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -140,33 +139,36 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            {% if application.d365_push_status == 'PUSHED' %}
+                            {% if application.status == 'UPLOADED_TO_ERP' %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" title="{{ application.d365_pushed_at|date:'M d, Y H:i' }}">
-                                <span class="material-symbols-outlined text-sm">cloud_done</span> Pushed
+                                <span class="material-symbols-outlined text-sm">cloud_done</span> Uploaded to ERP
                             </span>
-                            {% elif application.d365_push_status == 'DUPLICATE' %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300" title="Duplicate found in D365">
-                                <span class="material-symbols-outlined text-sm">content_copy</span> Duplicate
-                            </span>
-                            {% elif application.d365_push_status == 'FAILED' %}
+                            {% elif application.status == 'UPLOAD_FAILED' %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300" title="{{ application.d365_push_error }}">
                                 <span class="material-symbols-outlined text-sm">error</span> Failed
                             </span>
-                            {% elif application.d365_push_status == 'PENDING' %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                <span class="material-symbols-outlined text-sm">hourglass_top</span> Pending
-                            </span>
                             {% else %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">
-                                <span class="material-symbols-outlined text-sm">cloud_off</span> Not Pushed
+                                <span class="material-symbols-outlined text-sm">hourglass_top</span> Pending Upload
                             </span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
+                            <div class="flex items-center gap-2">
+                                {% if application.status != 'UPLOADED_TO_ERP' %}
+                                <form method="post" action="{% url 'management:jobs_management:push-single-d365' pk=job.pk application_id=application.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs" title="Upload to ERP">
+                                        <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                                        Upload
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
                                 <span class="material-symbols-outlined text-lg">visibility</span>
                                 View
-                            </a>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}

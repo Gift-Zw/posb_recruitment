@@ -14,16 +14,16 @@
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_applications }}</p>
         </div>
         <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Submitted</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ submitted_count }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pending Upload</p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ pending_upload_count }}</p>
         </div>
         <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Under Review</p>
-            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ under_review_count }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Uploaded to ERP</p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ uploaded_to_erp_count }}</p>
         </div>
         <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Shortlisted</p>
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ shortlisted_count }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Upload Failed</p>
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ upload_failed_count }}</p>
         </div>
     </div>
 
@@ -36,10 +36,9 @@
             <div class="md:w-48">
                 <select name="status" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4">
                     <option value="">All Status</option>
-                    <option value="SUBMITTED" {% if status_filter == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
-                    <option value="UNDER_REVIEW" {% if status_filter == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
-                    <option value="SHORTLISTED" {% if status_filter == 'SHORTLISTED' %}selected{% endif %}>Shortlisted</option>
-                    <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                    <option value="PENDING_UPLOAD" {% if status_filter == 'PENDING_UPLOAD' %}selected{% endif %}>Pending Upload</option>
+                    <option value="UPLOADED_TO_ERP" {% if status_filter == 'UPLOADED_TO_ERP' %}selected{% endif %}>Uploaded to ERP</option>
+                    <option value="UPLOAD_FAILED" {% if status_filter == 'UPLOAD_FAILED' %}selected{% endif %}>Upload Failed</option>
                 </select>
             </div>
             <div class="md:w-64">
@@ -71,7 +70,7 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applicant</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Position</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">AI Score</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ERP Status</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Submitted</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -88,26 +87,22 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ application.job_advert.job_function|default:"—" }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            {% if application.status == 'SUBMITTED' %}
+                            {% if application.status == 'PENDING_UPLOAD' %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                Submitted
+                                Pending Upload
                             </span>
-                            {% elif application.status == 'UNDER_REVIEW' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                                Under Review
-                            </span>
-                            {% elif application.status == 'SHORTLISTED' %}
+                            {% elif application.status == 'UPLOADED_TO_ERP' %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                                Shortlisted
+                                Uploaded to ERP
                             </span>
                             {% else %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                Rejected
+                                Upload Failed
                             </span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {% if application.ai_score %}{{ application.ai_score|floatformat:1 }}{% else %}—{% endif %}
+                            {{ application.get_d365_push_status_display|default:"—" }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ application.submitted_at|date:"M d, Y" }}
