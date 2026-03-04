@@ -4,6 +4,7 @@ Pushes applicant data to D365 Finance & Operations HCM via the SubmitApplicant c
 """
 import logging
 import requests
+from urllib.parse import urlsplit
 from django.conf import settings
 from django.utils import timezone
 from applications.models import Application
@@ -25,7 +26,16 @@ class Dynamics365ApplicantService:
         tenant_id = settings.DYNAMICS_365_TENANT_ID
         client_id = settings.DYNAMICS_365_CLIENT_ID
         client_secret = settings.DYNAMICS_365_CLIENT_SECRET
-        resource = settings.DYNAMICS_365_API_URL
+        submit_endpoint = settings.DYNAMICS_365_API_URL.strip()
+        resource_override = getattr(settings, "DYNAMICS_365_RESOURCE_URL", "").strip()
+
+        # Azure AD v1 token endpoint expects the D365 environment base URL as resource,
+        # not the full custom service endpoint URL.
+        if resource_override:
+            resource = resource_override
+        else:
+            parsed = urlsplit(submit_endpoint)
+            resource = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else ""
 
         if not all([tenant_id, client_id, client_secret, resource]):
             raise ValueError("D365 credentials not configured. Check environment variables.")
