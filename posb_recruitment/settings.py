@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'applications.middleware.UploadSizeLimitMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -183,8 +184,10 @@ OTP_MAX_ATTEMPTS = env.int('OTP_MAX_ATTEMPTS', default=3)
 OTP_LENGTH = env.int('OTP_LENGTH', default=6)
 
 # File Upload Settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_UPLOAD_FILE_SIZE_MB = env.int('MAX_UPLOAD_FILE_SIZE_MB', default=10)
+MAX_UPLOAD_FILE_SIZE_BYTES = MAX_UPLOAD_FILE_SIZE_MB * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_FILE_SIZE_BYTES
+DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_FILE_SIZE_BYTES
 ALLOWED_FILE_EXTENSIONS = ['.pdf', '.doc', '.docx']
 
 # Dynamics 365 ERP Integration
