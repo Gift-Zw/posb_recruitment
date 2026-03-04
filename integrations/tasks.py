@@ -2,6 +2,7 @@
 D365 integration tasks (synchronous — Celery disabled).
 To re-enable async processing, convert these to Celery tasks with @shared_task.
 """
+import threading
 from django.utils import timezone
 from system_logs.services import log_system_event
 
@@ -87,6 +88,29 @@ def push_application_to_d365_task(application_id):
             message=f"D365 push task failed for application {application_id}: {str(e)}",
             module="integrations.tasks", function="push_application_to_d365_task"
         )
+
+
+def enqueue_push_application_to_d365_task(application_id):
+    """
+    Fire-and-forget wrapper so application submission returns immediately.
+    Uses a daemon thread while Celery is disabled.
+    """
+    try:
+        worker = threading.Thread(
+            target=push_application_to_d365_task,
+            args=(application_id,),
+            daemon=True,
+            name=f"d365-push-{application_id}",
+        )
+        worker.start()
+        return True
+    except Exception as e:
+        log_system_event(
+            level="ERROR", source="INTEGRATION",
+            message=f"Failed to enqueue D365 push for application {application_id}: {str(e)}",
+            module="integrations.tasks", function="enqueue_push_application_to_d365_task"
+        )
+        return False
 
 
 def push_all_applications_for_job_task(job_advert_id, triggered_by_id=None):

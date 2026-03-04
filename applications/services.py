@@ -5,6 +5,7 @@ import base64
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from applications.models import ApplicantProfile, Application, ApplicationDocument, ApplicationData
 from notifications.tasks import send_application_submitted_email_task
 from audit.services import log_audit_event
@@ -72,9 +73,11 @@ def submit_application(applicant, job_advert, profile_form, application_form):
     )
     send_application_submitted_email_task(application.id)
 
-    # Queue D365 push as background task
-    from integrations.tasks import push_application_to_d365_task
-    push_application_to_d365_task(application.id)
+    # Optional auto-push to D365 on submission (async fire-and-forget).
+    # If disabled, HR can push manually from management screens.
+    if settings.D365_PUSH_ON_SUBMISSION:
+        from integrations.tasks import enqueue_push_application_to_d365_task
+        enqueue_push_application_to_d365_task(application.id)
 
     return application
 
