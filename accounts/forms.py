@@ -165,10 +165,9 @@ class ApplicantProfileForm(forms.ModelForm):
     """Form for updating ApplicantProfile details on the profile page."""
     class Meta:
         model = ApplicantProfile
-        exclude = ['user', 'skills', 'education', 'experience']
+        exclude = ['user']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'availability_date': forms.DateInput(attrs={'type': 'date'}),
             'professional_summary': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Write a brief professional summary about yourself, your skills, and career goals...'}),
             'cover_letter': forms.Textarea(attrs={'rows': 4}),
             'gender': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
@@ -176,8 +175,6 @@ class ApplicantProfileForm(forms.ModelForm):
             'education_level': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
             'citizenship': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
             'country': forms.Select(attrs={'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4'}),
-            'linkedin_url': forms.URLInput(attrs={'placeholder': 'https://linkedin.com/in/yourprofile'}),
-            'portfolio_url': forms.URLInput(attrs={'placeholder': 'https://yourportfolio.com'}),
         }
 
     def __init__(self, *args, **kwargs):

@@ -9,7 +9,6 @@ from .models import ApplicantProfile, Application, ApplicationDocument, Applican
 class ApplicantProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'phone_number', 'citizenship', 'country', 'created_at']
     search_fields = ['user__email', 'user__first_name', 'user__last_name']
-    filter_horizontal = ['skills']
     readonly_fields = ['created_at', 'updated_at']
 
 
@@ -46,10 +45,8 @@ class ApplicationDataAdmin(admin.ModelAdmin):
             'fields': ('first_name', 'last_name', 'middle_name', 'email', 'phone_number',
                        'date_of_birth', 'gender', 'citizenship', 'marital_status',
                        'street_address', 'city', 'zip_code', 'country',
-                       'current_job_title', 'education_level', 'cover_letter')
-        }),
-        ('Portal Fields', {
-            'fields': ('nationality', 'skills', 'education', 'experience')
+                       'current_job_title', 'education_level', 'external_application_id',
+                       'cover_letter', 'file_name', 'file_bytes')
         }),
         ('Timestamps', {
             'fields': ('created_at',)

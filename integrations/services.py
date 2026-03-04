@@ -74,7 +74,10 @@ class Dynamics365ApplicantService:
                 "Country": app_data.country or "",
                 "CurrentJobTitle": app_data.current_job_title or "",
                 "EducationLevelDescription": app_data.education_level or "",
+                "ExternalApplicationId": app_data.external_application_id or "",
                 "CoverLetter": app_data.cover_letter or "",
+                "FileName": app_data.file_name if app_data.file_name else None,
+                "FileBytes": app_data.file_bytes if app_data.file_bytes else None,
             }
         }
         return payload

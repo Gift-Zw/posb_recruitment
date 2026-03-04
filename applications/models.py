@@ -78,29 +78,9 @@ class ApplicantProfile(models.Model):
         help_text='Highest education level (must match D365 HcmEducationLevel)'
     )
     
-    # Education & Experience (detailed JSON for portal use)
-    education = models.JSONField(default=list, blank=True)
-    experience = models.JSONField(default=list, blank=True)
-    
-    # Skills
-    skills = models.ManyToManyField(
-        'jobs.Skill',
-        related_name='applicant_profiles',
-        blank=True
-    )
-    
     # Additional Information
     professional_summary = models.TextField(blank=True)
     cover_letter = models.TextField(blank=True)
-    
-    # Online Presence
-    linkedin_url = models.URLField(blank=True)
-    portfolio_url = models.URLField(blank=True, help_text='Portfolio / Personal website URL')
-    
-    availability_date = models.DateField(null=True, blank=True)
-    current_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    expected_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    notice_period = models.CharField(max_length=50, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -139,10 +119,6 @@ class ApplicantProfile(models.Model):
         
         total_fields += 1
         if self.education_level:
-            filled_fields += 1
-        
-        total_fields += 1
-        if self.skills.exists():
             filled_fields += 1
         
         total_fields += 1
@@ -279,14 +255,11 @@ class ApplicationData(models.Model):
     country = models.CharField(max_length=10, blank=True, help_text='ISO-2 or ISO-3 country code')  # Country
     current_job_title = models.CharField(max_length=255, blank=True)  # CurrentJobTitle
     education_level = models.CharField(max_length=255, blank=True, help_text='Must match D365 HcmEducationLevel')  # EducationLevelDescription
+    external_application_id = models.CharField(max_length=100, blank=True)  # ExternalApplicationId
     cover_letter = models.TextField(blank=True)  # CoverLetter
+    file_name = models.CharField(max_length=255, blank=True, null=True)  # FileName
+    file_bytes = models.TextField(blank=True, null=True)  # FileBytes (Base64)
 
-    # Extra fields (not in D365 contract but useful for portal)
-    nationality = models.CharField(max_length=100, blank=True)
-    education = models.JSONField(default=list, help_text='Detailed education entries')
-    experience = models.JSONField(default=list, help_text='Detailed work experience entries')
-    skills = models.TextField(blank=True, help_text='Skills separated by semicolons (;)')
-    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -301,12 +274,6 @@ class ApplicationData(models.Model):
     def __str__(self):
         return f'Application Data for {self.application}'
     
-    def get_skills_list(self):
-        if not self.skills:
-            return []
-        return [s.strip() for s in self.skills.split(';') if s.strip()]
-
-
 class Application(models.Model):
     """
     Job application model.

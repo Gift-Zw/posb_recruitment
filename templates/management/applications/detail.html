@@ -101,62 +101,25 @@
         {% with data=application.application_data %}
         <div class="space-y-6">
             <!-- Personal Information -->
-            {% if application.applicant.first_name or application.applicant.last_name or data.phone_number or data.email %}
+            {% if data.first_name or data.last_name or data.phone_number or data.email %}
             <div>
                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Personal Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {% if application.applicant.first_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">First Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ application.applicant.first_name }}</p></div>{% endif %}
-                    {% if application.applicant.last_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ application.applicant.last_name }}</p></div>{% endif %}
+                    {% if data.first_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">First Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.first_name }}</p></div>{% endif %}
+                    {% if data.last_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.last_name }}</p></div>{% endif %}
+                    {% if data.middle_name %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Middle Name</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.middle_name }}</p></div>{% endif %}
                     {% if data.phone_number %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phone Number</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.phone_number }}</p></div>{% endif %}
                     {% if data.email %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.email }}</p></div>{% endif %}
-                    {% if data.address %}<div class="md:col-span-2"><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Address</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.address }}</p></div>{% endif %}
+                    {% if data.street_address %}<div class="md:col-span-2"><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Street Address</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.street_address }}</p></div>{% endif %}
+                    {% if data.city %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">City</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.city }}</p></div>{% endif %}
+                    {% if data.zip_code %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Zip Code</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.zip_code }}</p></div>{% endif %}
+                    {% if data.country %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Country (ISO)</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.country }}</p></div>{% endif %}
+                    {% if data.citizenship %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Citizenship (ISO-3)</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.citizenship }}</p></div>{% endif %}
                     {% if data.date_of_birth %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Date of Birth</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.date_of_birth|date:"M d, Y" }}</p></div>{% endif %}
-                    {% if data.nationality %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Nationality</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.nationality }}</p></div>{% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Skills -->
-            {% if data.skills %}
-            <div>
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Skills</h3>
-                <div class="flex flex-wrap gap-2">
-                    {% for skill in data.get_skills_list %}
-                    <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">{{ skill }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Education -->
-            {% if data.education %}
-            <div>
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Education</h3>
-                <div class="space-y-4">
-                    {% for edu in data.education %}
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 dark:text-white">{{ edu.degree }} in {{ edu.field }}</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ edu.institution }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ edu.start_year }} - {{ edu.end_year|default:"Present" }}</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Work Experience -->
-            {% if data.experience %}
-            <div>
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Work Experience</h3>
-                <div class="space-y-4">
-                    {% for exp in data.experience %}
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 dark:text-white">{{ exp.position }}</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ exp.company }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ exp.start_date }} - {{ exp.end_date|default:"Present" }}</p>
-                        {% if exp.responsibilities %}<p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ exp.responsibilities }}</p>{% endif %}
-                    </div>
-                    {% endfor %}
+                    {% if data.gender %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Gender</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.gender }}</p></div>{% endif %}
+                    {% if data.marital_status %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Marital Status</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.marital_status }}</p></div>{% endif %}
+                    {% if data.current_job_title %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Job Title</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.current_job_title }}</p></div>{% endif %}
+                    {% if data.education_level %}<div><p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Education Level</p><p class="text-sm font-medium text-gray-900 dark:text-white">{{ data.education_level }}</p></div>{% endif %}
                 </div>
             </div>
             {% endif %}

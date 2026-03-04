@@ -11,15 +11,6 @@ FIELD_CLASS = 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gr
 class ApplicantProfileForm(forms.ModelForm):
     """Collect applicant profile data aligned with D365 Applicant Import fields."""
 
-    skills_text = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': FIELD_CLASS,
-            'placeholder': 'e.g., Python; JavaScript; Project Management'
-        }),
-        help_text="Enter your skills separated by semicolons (;)",
-    )
-
     class Meta:
         model = ApplicantProfile
         fields = [
@@ -30,8 +21,6 @@ class ApplicantProfileForm(forms.ModelForm):
             "state_province", "postal_code", "country",
             "current_job_title", "education_level",
             "professional_summary", "cover_letter",
-            "linkedin_url", "portfolio_url",
-            "availability_date", "current_salary", "expected_salary", "notice_period",
         ]
         widgets = {
             "phone_number": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': '+263 77 123 4567'}),
@@ -59,12 +48,6 @@ class ApplicantProfileForm(forms.ModelForm):
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
                 'rows': 6, 'placeholder': 'Write a cover letter explaining why you are interested in this position...'
             }),
-            "linkedin_url": forms.URLInput(attrs={'class': FIELD_CLASS, 'placeholder': 'https://linkedin.com/in/yourprofile'}),
-            "portfolio_url": forms.URLInput(attrs={'class': FIELD_CLASS, 'placeholder': 'https://yourportfolio.com'}),
-            "availability_date": forms.DateInput(attrs={'type': 'date', 'class': FIELD_CLASS}),
-            "current_salary": forms.NumberInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Current salary (optional)'}),
-            "expected_salary": forms.NumberInput(attrs={'class': FIELD_CLASS, 'placeholder': 'Expected salary (optional)'}),
-            "notice_period": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'e.g., 2 weeks, 1 month'}),
         }
 
     def __init__(self, *args, **kwargs):

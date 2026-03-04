@@ -99,8 +99,6 @@ class ApplyView(LoginRequiredMixin, TemplateView):
         initial_profile = {}
         if profile:
             email = profile.email if profile.email else request.user.email
-            skills_list = [skill.name for skill in profile.skills.all()]
-            skills_text = "; ".join(skills_list) if skills_list else ""
             
             initial_profile = {
                 "phone_number": profile.phone_number,
@@ -121,14 +119,7 @@ class ApplyView(LoginRequiredMixin, TemplateView):
                 "postal_code": profile.postal_code,
                 "country": profile.country_id,
                 "professional_summary": profile.professional_summary,
-                "skills_text": skills_text,
                 "cover_letter": profile.cover_letter,
-                "linkedin_url": profile.linkedin_url,
-                "portfolio_url": profile.portfolio_url,
-                "availability_date": profile.availability_date,
-                "current_salary": profile.current_salary,
-                "expected_salary": profile.expected_salary,
-                "notice_period": profile.notice_period,
             }
         else:
             initial_profile = {
@@ -165,22 +156,10 @@ class ApplyView(LoginRequiredMixin, TemplateView):
 
         if profile_form.is_valid() and application_form.is_valid():
             try:
-                # Handle skills_text - convert semicolon-separated string to Skill objects
-                skills_text = profile_form.cleaned_data.get('skills_text', '').strip()
-                skill_objects = []
-                if skills_text:
-                    from jobs.models import Skill
-                    skill_names = [s.strip() for s in skills_text.split(';') if s.strip()]
-                    # Get or create skills
-                    for skill_name in skill_names:
-                        skill, _ = Skill.objects.get_or_create(name=skill_name)
-                        skill_objects.append(skill)
-                
-                # Save profile with skills
+                # Save profile data from the application form.
                 profile = profile_form.save(commit=False)
                 profile.user = request.user
                 profile.save()
-                profile.skills.set(skill_objects)
                 
                 # Now submit application (it will use the already-saved profile)
                 submit_application(request.user, job, profile_form, application_form)

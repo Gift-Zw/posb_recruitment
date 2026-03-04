@@ -1,6 +1,7 @@
 """
 Application services for server-rendered flows.
 """
+import base64
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -40,15 +41,27 @@ def submit_application(applicant, job_advert, profile_form, application_form):
         },
     )
 
-    _create_application_data(application, profile, applicant)
+    _create_application_data(
+        application,
+        profile,
+        applicant,
+        cover_letter=application_form.cleaned_data.get("cover_letter", ""),
+    )
 
     cv_file = application_form.cleaned_data["cv_file"]
+    cv_base64 = base64.b64encode(cv_file.read()).decode("ascii")
+    cv_file.seek(0)
+
     ApplicationDocument.objects.create(
         application=application,
         document_type="CV",
         file=cv_file,
         file_name=cv_file.name,
         file_size=cv_file.size,
+    )
+    ApplicationData.objects.filter(application=application).update(
+        file_name=cv_file.name,
+        file_bytes=cv_base64,
     )
 
     log_audit_event(
@@ -66,10 +79,8 @@ def submit_application(applicant, job_advert, profile_form, application_form):
     return application
 
 
-def _create_application_data(application, profile, applicant):
+def _create_application_data(application, profile, applicant, cover_letter=""):
     """Create immutable ApplicationData snapshot aligned with D365 Applicant Import fields."""
-    skills_list = list(profile.skills.values_list("name", flat=True))
-    skills_text = "; ".join(skills_list) if skills_list else ""
     email = profile.email if profile.email else applicant.email
 
     street_parts = [profile.address_line_1, profile.address_line_2]
@@ -93,10 +104,7 @@ def _create_application_data(application, profile, applicant):
             "country": profile.country.iso2 if profile.country else "",
             "current_job_title": profile.current_job_title or "",
             "education_level": profile.education_level.name if profile.education_level else "",
-            "cover_letter": profile.cover_letter or "",
-            "nationality": profile.citizenship.name if profile.citizenship else "",
-            "education": profile.education if profile.education else [],
-            "experience": profile.experience if profile.experience else [],
-            "skills": skills_text,
+            "external_application_id": f"EXT-{application.id:06d}",
+            "cover_letter": cover_letter or profile.cover_letter or "",
         }
     )

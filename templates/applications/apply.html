@@ -240,23 +240,6 @@
             </div>
         </div>
 
-        <!-- Skills Section -->
-        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm max-w-full overflow-x-hidden">
-            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                <span class="material-symbols-outlined text-primary text-xl">psychology</span>
-                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Skills</h2>
-            </div>
-            
-            <div class="flex flex-col gap-1.5">
-                <label for="{{ profile_form.skills_text.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Your Skills</label>
-                {{ profile_form.skills_text }}
-                {% if profile_form.skills_text.errors %}
-                    <p class="text-xs text-red-500">{{ profile_form.skills_text.errors.0 }}</p>
-                {% endif %}
-                <p class="text-xs text-[#8a7360] dark:text-gray-400">Enter your skills separated by semicolons (;). Example: Python; JavaScript; Project Management; Communication</p>
-            </div>
-        </div>
-
         <!-- Application Documents Section -->
         <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 max-w-full overflow-x-hidden animate-slide-up [animation-delay:100ms] opacity-0 group">
             <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
@@ -283,45 +266,6 @@
                         <p class="text-xs text-red-500">{{ application_form.cover_letter.errors.0 }}</p>
                     {% endif %}
                     <p class="text-xs text-[#8a7360] dark:text-gray-400">Write a cover letter explaining why you're interested in this position.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Information Section -->
-        <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 max-w-full overflow-x-hidden animate-slide-up [animation-delay:200ms] opacity-0 group">
-            <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#e6e0db] dark:border-[#3d2e24]">
-                <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform duration-300">info</span>
-                <h2 class="text-lg font-bold text-[#181411] dark:text-white">Additional Information</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                <div class="flex flex-col gap-1.5 min-w-0">
-                    <label for="{{ profile_form.availability_date.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Availability Date</label>
-                    {{ profile_form.availability_date }}
-                    {% if profile_form.availability_date.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.availability_date.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                <div class="flex flex-col gap-1.5 min-w-0">
-                    <label for="{{ profile_form.current_salary.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Current Salary</label>
-                    {{ profile_form.current_salary }}
-                    {% if profile_form.current_salary.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.current_salary.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                <div class="flex flex-col gap-1.5 min-w-0">
-                    <label for="{{ profile_form.expected_salary.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Expected Salary</label>
-                    {{ profile_form.expected_salary }}
-                    {% if profile_form.expected_salary.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.expected_salary.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                <div class="flex flex-col gap-1.5 min-w-0">
-                    <label for="{{ profile_form.notice_period.id_for_label }}" class="text-xs font-semibold text-[#181411] dark:text-white">Notice Period</label>
-                    {{ profile_form.notice_period }}
-                    {% if profile_form.notice_period.errors %}
-                        <p class="text-xs text-red-500">{{ profile_form.notice_period.errors.0 }}</p>
-                    {% endif %}
                 </div>
             </div>
         </div>

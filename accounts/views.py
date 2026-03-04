@@ -248,6 +248,9 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         active_tab = self.request.GET.get('tab', 'personal')
+        allowed_tabs = {'personal', 'documents', 'password'}
+        if active_tab not in allowed_tabs:
+            active_tab = 'personal'
         
         # Get or create applicant profile if user is an applicant
         applicant_profile = None
@@ -263,26 +266,17 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         if applicant_profile:
             context['applicant_profile'] = applicant_profile
             context['applicant_form'] = ApplicantProfileForm(instance=applicant_profile, prefix='applicant')
-            # Get all skills and countries for selectors
-            from jobs.models import Skill, Country
-            context['all_skills'] = Skill.objects.all().order_by('name')
+            # Get countries for selectors
+            from jobs.models import Country
             context['all_countries'] = Country.objects.filter(is_active=True).order_by('sort_order', 'name')
-            # Serialize JSON fields for JavaScript
-            import json
-            context['education_json'] = json.dumps(applicant_profile.education or [])
-            context['experience_json'] = json.dumps(applicant_profile.experience or [])
             
             # Calculate profile completion percentage
             completion = 0
-            total_fields = 5  # personal, contact, education, experience, documents
+            total_fields = 3  # personal, contact, documents
             if user.first_name and user.last_name and applicant_profile.phone_number:
                 completion += 1  # Personal info
             if applicant_profile.address_line_1 and applicant_profile.city and applicant_profile.country_id:
                 completion += 1  # Contact
-            if applicant_profile.education and len(applicant_profile.education) > 0:
-                completion += 1  # Education
-            if applicant_profile.experience and len(applicant_profile.experience) > 0:
-                completion += 1  # Experience
             # Documents - check if user has uploaded any documents
             from applications.models import ApplicantProfileDocument
             if ApplicantProfileDocument.objects.filter(applicant_profile=applicant_profile).exists():
@@ -299,10 +293,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             context['profile_completion_message'] = self._get_completion_message(completion, total_fields)
         else:
             context['applicant_form'] = None
-            context['all_skills'] = []
-            import json
-            context['education_json'] = '[]'
-            context['experience_json'] = '[]'
             context['uploaded_documents'] = []
             from applications.forms import DocumentUploadForm
             context['document_form'] = DocumentUploadForm()
@@ -320,10 +310,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         elif completion == 1:
             return "Add your contact information to continue"
         elif completion == 2:
-            return "Add your education details to continue"
-        elif completion == 3:
-            return "Complete your work experience to reach 100%"
-        elif completion == 4:
             return "Upload your documents to complete your profile"
         return "Complete your profile to reach 100%"
 
@@ -343,11 +329,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                     applicant_form = ApplicantProfileForm(request.POST, instance=applicant_profile, prefix='applicant')
                     if applicant_form.is_valid():
                         profile = applicant_form.save(commit=False)
-                        # Handle skills separately (ManyToMany field)
-                        if 'applicant-skills' in request.POST:
-                            skill_ids = [int(id) for id in request.POST.getlist('applicant-skills') if id]
-                            from jobs.models import Skill
-                            profile.skills.set(Skill.objects.filter(id__in=skill_ids))
                         profile.save()
                         messages.success(request, "Profile information updated successfully.")
                         log_audit_event(
@@ -386,10 +367,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                     applicant_form = ApplicantProfileForm(request.POST, instance=applicant_profile, prefix='applicant')
                     if applicant_form.is_valid():
                         profile = applicant_form.save(commit=False)
-                        if 'applicant-skills' in request.POST:
-                            skill_ids = [int(id) for id in request.POST.getlist('applicant-skills') if id]
-                            from jobs.models import Skill
-                            profile.skills.set(Skill.objects.filter(id__in=skill_ids))
                         profile.save()
                         messages.success(request, "Profile information updated successfully.")
         
@@ -414,11 +391,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             form = ApplicantProfileForm(request.POST, instance=applicant_profile, prefix='applicant')
             if form.is_valid():
                 profile = form.save(commit=False)
-                # Handle skills separately (ManyToMany field)
-                if 'applicant-skills' in request.POST:
-                    skill_ids = [int(id) for id in request.POST.getlist('applicant-skills') if id]
-                    from jobs.models import Skill
-                    profile.skills.set(Skill.objects.filter(id__in=skill_ids))
                 profile.save()
                 messages.success(request, "Profile information updated successfully.")
                 log_audit_event(
@@ -431,33 +403,6 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                 # Determine redirect tab based on which form was submitted
                 redirect_tab = active_tab if active_tab else 'personal'
                 return redirect(f"{reverse_lazy('applicant-profile')}?tab={redirect_tab}")
-        
-        # Handle JSON field updates (education, experience, certifications, etc.)
-        elif 'education_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                education_data = json.loads(request.POST.get('education_json', '[]'))
-                applicant_profile.education = education_data
-                applicant_profile.save()
-                messages.success(request, "Education information updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=education")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid education data format.")
-        
-        elif 'experience_submit' in request.POST and user.is_applicant():
-            from applications.models import ApplicantProfile
-            import json
-            applicant_profile, _ = ApplicantProfile.objects.get_or_create(user=user)
-            try:
-                experience_data = json.loads(request.POST.get('experience_json', '[]'))
-                applicant_profile.experience = experience_data
-                applicant_profile.save()
-                messages.success(request, "Work experience updated successfully.")
-                return redirect(f"{reverse_lazy('applicant-profile')}?tab=experience")
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid experience data format.")
         
         elif 'document_upload' in request.POST and user.is_applicant():
             from applications.models import ApplicantProfile
