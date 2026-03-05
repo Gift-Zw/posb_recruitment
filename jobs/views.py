@@ -1,6 +1,7 @@
 """
 Server-rendered views for jobs app.
 """
+from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.mail import send_mail
@@ -124,19 +125,13 @@ class JobListView(ListView):
         queryset = JobAdvert.objects.filter(status="OPEN").order_by("-created_at")
         queryset = queryset.filter(Q(end_date__isnull=True) | Q(end_date__gt=now))
         
-        # Search by title, function, or description
+        # Search by title or description
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
                 Q(job_title__icontains=search) |
-                Q(job_function__icontains=search) |
                 Q(job_description__icontains=search)
             )
-        
-        # Filter by job function (multiple allowed)
-        functions = self.request.GET.getlist('job_function')
-        if functions:
-            queryset = queryset.filter(job_function__in=functions)
         
         # Filter by location/city (multiple allowed)
         locations = self.request.GET.getlist('location')
@@ -148,17 +143,6 @@ class JobListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
-        
-        # Get job functions with open job counts
-        context['job_functions'] = (
-            JobAdvert.objects.filter(status='OPEN')
-            .filter(Q(end_date__isnull=True) | Q(end_date__gt=now))
-            .exclude(job_function='')
-            .values('job_function')
-            .annotate(job_count=Count('id'))
-            .order_by('job_function')
-        )
-        context['selected_job_functions'] = self.request.GET.getlist('job_function')
         
         # Get distinct locations from open jobs with counts
         location_counts = (
@@ -293,7 +277,7 @@ class JobAdvertListView(HRStaffRequiredMixin, ListView):
             queryset = queryset.filter(
                 Q(job_title__icontains=search) |
                 Q(job_id__icontains=search) |
-                Q(job_function__icontains=search)
+                Q(location__icontains=search)
             )
         
         return queryset
@@ -386,6 +370,42 @@ class JobAdvertReopenView(HRStaffRequiredMixin, DetailView):
             metadata={"job_id": job.job_id, "recruiting_id": job.recruiting_id},
             request=request
         )
+        return redirect("management:jobs_management:advert-detail", pk=job.pk)
+
+
+class JobAdvertExtendDateView(HRStaffRequiredMixin, DetailView):
+    """Extend a job advert deadline by N days."""
+
+    model = JobAdvert
+
+    def post(self, request, *args, **kwargs):
+        job = self.get_object()
+        days_raw = request.POST.get("days", "7")
+        try:
+            days = int(days_raw)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid extension period.")
+            return redirect("management:jobs_management:advert-detail", pk=job.pk)
+
+        if days <= 0 or days > 365:
+            messages.error(request, "Extension days must be between 1 and 365.")
+            return redirect("management:jobs_management:advert-detail", pk=job.pk)
+
+        base = job.end_date if job.end_date and job.end_date > timezone.now() else timezone.now()
+        job.end_date = base + timedelta(days=days)
+        if job.status == "CLOSED":
+            job.status = "OPEN"
+        job.save(update_fields=["end_date", "status", "updated_at"])
+
+        log_audit_event(
+            actor=request.user,
+            action="EXTEND_DEADLINE",
+            action_description=f"Extended deadline for {job.job_title} by {days} day(s)",
+            entity=job,
+            metadata={"days": days, "new_end_date": job.end_date.isoformat()},
+            request=request,
+        )
+        messages.success(request, f"Deadline extended by {days} day(s).")
         return redirect("management:jobs_management:advert-detail", pk=job.pk)
 
 

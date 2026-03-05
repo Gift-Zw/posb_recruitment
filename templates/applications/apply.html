@@ -66,10 +66,6 @@
             <div class="flex-1">
                 <h1 class="text-xl font-bold text-[#181411] dark:text-white mb-2">Apply for: {{ job.job_title }}</h1>
                 <div class="flex flex-wrap gap-3 text-xs text-[#8a7360] dark:text-gray-400">
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-primary text-base">corporate_fare</span>
-                        {{ job.job_function|default:"—" }}
-                    </span>
                     {% if job.location %}
                     <span class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-primary text-base">location_on</span>

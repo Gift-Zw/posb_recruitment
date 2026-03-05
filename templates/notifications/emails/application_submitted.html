@@ -135,7 +135,6 @@
             <div class="job-details">
                 <h3>Position Applied For:</h3>
                 <p><strong>{{ application.job_advert.job_title }}</strong></p>
-                <p>Category: {{ application.job_advert.job_function|default:"—" }}</p>
                 <p>Application ID: #{{ application.id }}</p>
                 <p>Submitted: {{ application.submitted_at|date:"F d, Y g:i A" }}</p>
             </div>

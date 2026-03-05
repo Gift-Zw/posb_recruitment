@@ -34,7 +34,6 @@ FIELD_SPECS = {
     "yearsOfExperience": {"required": False},
     "location": {"max": 255, "required": False},
     "jobType": {"max": 255, "required": False},
-    "jobFunction": {"max": 255, "required": False},
     "endDate": {"required": False},
 }
 
@@ -501,7 +500,6 @@ def create_vacancy(cleaned):
             years_of_experience=cleaned.get("yearsOfExperience"),
             location=cleaned.get("location", ""),
             job_type=cleaned.get("jobType", ""),
-            job_function=cleaned.get("jobFunction", ""),
             end_date=end_date,
             status=status
         )
@@ -536,8 +534,6 @@ def update_vacancy(job_advert, cleaned):
                 attr = "job_tasks"
             elif field_name == "jobType":
                 attr = "job_type"
-            elif field_name == "jobFunction":
-                attr = "job_function"
             setattr(job_advert, attr, value)
 
         job_advert.save()

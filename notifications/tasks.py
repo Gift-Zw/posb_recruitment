@@ -2,6 +2,7 @@
 Email notification tasks (synchronous - Celery removed).
 These functions run synchronously. To re-enable async processing, convert back to Celery tasks.
 """
+import threading
 from .services import EmailService
 from accounts.models import OTP
 from applications.models import Application
@@ -65,6 +66,28 @@ def send_application_submitted_email_task(application_id):
             function='send_application_submitted_email_task'
         )
         # Don't raise - application is saved, email failure shouldn't block
+
+
+def enqueue_send_application_submitted_email_task(application_id):
+    """Fire-and-forget wrapper for application submitted email."""
+    try:
+        worker = threading.Thread(
+            target=send_application_submitted_email_task,
+            args=(application_id,),
+            daemon=True,
+            name=f"email-application-submitted-{application_id}",
+        )
+        worker.start()
+        return True
+    except Exception as e:
+        log_system_event(
+            level='ERROR',
+            source='SYSTEM',
+            message=f'Failed to enqueue application submitted email: {str(e)}',
+            module='notifications.tasks',
+            function='enqueue_send_application_submitted_email_task'
+        )
+        return False
     except Exception as e:
         log_system_event(
             level='ERROR',

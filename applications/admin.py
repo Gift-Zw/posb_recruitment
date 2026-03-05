@@ -15,7 +15,7 @@ class ApplicantProfileAdmin(admin.ModelAdmin):
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     list_display = ['applicant', 'job_advert', 'status', 'd365_push_status', 'submitted_at']
-    list_filter = ['status', 'submitted_at', 'job_advert__job_function']
+    list_filter = ['status', 'submitted_at']
     search_fields = ['applicant__email', 'job_advert__job_title']
     readonly_fields = ['submitted_at', 'updated_at']
     fieldsets = (

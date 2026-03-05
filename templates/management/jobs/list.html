@@ -42,12 +42,10 @@
                 <thead>
                     <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Title</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Function</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Job Type</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applications</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Deadline</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -60,7 +58,6 @@
                                 {{ job.job_title }}
                             </a>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ job.job_function|default:"—" }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ job.location|default:"—" }}
                         </td>
@@ -83,13 +80,6 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ job.uploaded_count }} uploaded to ERP</div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {% if job.end_date %}
-                            {{ job.end_date|date:"M d, Y" }}
-                            {% else %}
-                            <span class="text-gray-400">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {{ job.created_at|date:"M d, Y" }}
                         </td>
                         <td class="px-6 py-4">
@@ -101,7 +91,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="px-6 py-12 text-center">
+                        <td colspan="7" class="px-6 py-12 text-center">
                             <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">work_off</span>
                             <p class="text-gray-500 dark:text-gray-400">No job adverts found</p>
                             <p class="text-xs text-gray-400 mt-2">Job adverts are created automatically from D365 integration</p>

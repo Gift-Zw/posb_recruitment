@@ -29,7 +29,7 @@ class JobAdvertListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobAdvert
         fields = [
-            'id', 'recruiting_id', 'job_id', 'job_title', 'job_function',
+            'id', 'recruiting_id', 'job_id', 'job_title',
             'job_description', 'location', 'job_type', 'end_date',
             'status', 'is_open', 'created_at'
         ]
@@ -46,7 +46,7 @@ class JobAdvertDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'recruiting_id', 'job_id', 'job_title', 'job_description',
             'skills', 'certificates', 'education', 'job_tasks', 'responsibilities',
-            'years_of_experience', 'location', 'job_type', 'job_function',
+            'years_of_experience', 'location', 'job_type',
             'end_date', 'status', 'is_open', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

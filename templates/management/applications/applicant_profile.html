@@ -79,7 +79,7 @@
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <div>
                     <a href="{% url 'management:applications_management:detail' pk=app.pk %}" class="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors">{{ app.job_advert.job_title }}</a>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ app.job_advert.job_function|default:"—" }} • Applied {{ app.submitted_at|date:"M d, Y" }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applied {{ app.submitted_at|date:"M d, Y" }}</p>
                 </div>
                 <div>
                     {% if app.status == 'UPLOADED_TO_ERP' %}

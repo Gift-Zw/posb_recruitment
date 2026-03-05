@@ -7,6 +7,10 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-3">
+    <button type="button" onclick="openExtendModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors font-medium text-sm">
+        <span class="material-symbols-outlined text-lg">event_repeat</span>
+        <span>Extend Date</span>
+    </button>
     {% if job.status == 'OPEN' %}
     <button type="button" onclick="openCloseModal()" class="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">close</span>
@@ -32,7 +36,6 @@
         <div class="flex items-start justify-between mb-6">
             <div class="flex-1">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ job.job_title }}</h1>
-                <p class="text-gray-600 dark:text-gray-400">{{ job.job_function|default:"—" }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Recruiting ID: {{ job.recruiting_id }} | Job ID: {{ job.job_id }}</p>
                 <div class="mt-4 flex items-center gap-4">
                     <div class="flex items-center gap-2">
@@ -102,12 +105,6 @@
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.job_type }}</p>
                 </div>
                 {% endif %}
-                {% if job.job_function %}
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Job Function</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.job_function }}</p>
-                </div>
-                {% endif %}
                 {% if job.years_of_experience %}
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Years of Experience</p>
@@ -131,12 +128,6 @@
             {% endif %}
 
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                {% if job.end_date %}
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Application Deadline</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.end_date|date:"M d, Y H:i" }}</p>
-                </div>
-                {% endif %}
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Created At</p>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ job.created_at|date:"M d, Y" }}</p>
@@ -234,6 +225,33 @@
     </div>
 </div>
 
+<!-- Extend Date Modal -->
+<div id="extendModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="extend-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onclick="closeExtendModal()"></div>
+        <div class="inline-block align-bottom bg-white dark:bg-[#2d221a] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-[#e6e0db] dark:border-[#3d3128]">
+            <div class="px-6 py-5">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">event_repeat</span>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 dark:text-white mb-2" id="extend-modal-title">Extend Job Deadline</h3>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
+                    Add extra days to this advert's deadline.
+                </p>
+                <form method="post" action="{% url 'management:jobs_management:advert-extend-date' pk=job.pk %}">
+                    {% csrf_token %}
+                    <label for="extend-days" class="text-sm font-semibold text-gray-900 dark:text-white block mb-2">Number of days</label>
+                    <input id="extend-days" name="days" type="number" min="1" max="365" value="7" class="w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4 mb-4">
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeExtendModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">Cancel</button>
+                        <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">Extend</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Close Job Confirmation Modal -->
 <div id="closeModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -312,6 +330,16 @@
 </div>
 
 <script>
+    function openExtendModal() {
+        document.getElementById('extendModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeExtendModal() {
+        document.getElementById('extendModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
     // Close Job Modal Functions
     function openCloseModal() {
         document.getElementById('closeModal').classList.remove('hidden');
@@ -337,6 +365,7 @@
     // Close modals on Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
+            closeExtendModal();
             closeCloseModal();
             closeReopenModal();
         }

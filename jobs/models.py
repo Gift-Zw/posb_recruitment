@@ -87,7 +87,6 @@ class JobAdvert(models.Model):
     )
     location = models.CharField(max_length=255, blank=True)
     job_type = models.CharField(max_length=255, blank=True)
-    job_function = models.CharField(max_length=255, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
@@ -105,7 +104,6 @@ class JobAdvert(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['status', 'end_date']),
-            models.Index(fields=['job_function']),
             models.Index(fields=['created_at']),
         ]
 

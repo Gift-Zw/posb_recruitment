@@ -158,7 +158,6 @@
             <div class="job-details">
                 <h3>Position:</h3>
                 <p><strong>{{ application.job_advert.job_title }}</strong></p>
-                <p>Category: {{ application.job_advert.job_function|default:"—" }}</p>
                 {% if application.ai_score %}
                 <p>Your Score: {{ application.ai_score|floatformat:1 }}/100</p>
                 {% endif %}

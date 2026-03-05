@@ -1,13 +1,12 @@
 """
 Application services for server-rendered flows.
 """
-import base64
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from applications.models import ApplicantProfile, Application, ApplicationDocument, ApplicationData
-from notifications.tasks import send_application_submitted_email_task
+from notifications.tasks import enqueue_send_application_submitted_email_task
 from audit.services import log_audit_event
 
 
@@ -47,9 +46,6 @@ def submit_application(applicant, job_advert, profile_form, application_form):
     )
 
     cv_file = application_form.cleaned_data["cv_file"]
-    cv_base64 = base64.b64encode(cv_file.read()).decode("ascii")
-    cv_file.seek(0)
-
     ApplicationDocument.objects.create(
         application=application,
         document_type="CV",
@@ -57,9 +53,10 @@ def submit_application(applicant, job_advert, profile_form, application_form):
         file_name=cv_file.name,
         file_size=cv_file.size,
     )
+    # Persist file metadata immediately. FileBytes is intentionally deferred to background
+    # D365 push flow to avoid request-time base64 conversion overhead.
     ApplicationData.objects.filter(application=application).update(
         file_name=cv_file.name,
-        file_bytes=cv_base64,
     )
 
     log_audit_event(
@@ -68,7 +65,7 @@ def submit_application(applicant, job_advert, profile_form, application_form):
         action_description=f"Application submitted for {job_advert.job_title}",
         entity=application,
     )
-    send_application_submitted_email_task(application.id)
+    enqueue_send_application_submitted_email_task(application.id)
 
     # Optional auto-push to D365 on submission (async fire-and-forget).
     # If disabled, HR can push manually from management screens.

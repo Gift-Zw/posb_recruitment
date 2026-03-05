@@ -146,27 +146,8 @@
                     
                     <!-- Collapsible Filter Content -->
                     <div id="filter-content" class="hidden lg:block mt-5 lg:mt-0">
-                        <!-- Job Function Filter -->
-                        <div class="mb-5">
-                            <div class="flex items-center gap-2 mb-3 text-primary">
-                                <span class="material-symbols-outlined text-lg">category</span>
-                                <span class="text-xs font-bold uppercase tracking-wider">Job Function</span>
-                            </div>
-                            <div class="space-y-1.5 max-h-60 overflow-y-auto pr-2">
-                                {% for func in job_functions %}
-                                <label class="flex items-center gap-2.5 py-2 px-2.5 rounded-lg cursor-pointer group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
-                                    <input name="job_function" value="{{ func.job_function }}" class="h-3.5 w-3.5 rounded border-2 border-[#e6e0db] dark:border-[#3d2e24] bg-transparent text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all" type="checkbox" {% if func.job_function in selected_job_functions %}checked{% endif %}/>
-                                    <span class="flex-1 text-[#181411] dark:text-gray-200 text-xs font-medium group-hover:text-primary transition-colors">{{ func.job_function }}</span>
-                                    <span class="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{{ func.job_count }}</span>
-                                </label>
-                                {% empty %}
-                                <p class="text-xs text-[#8a7360] dark:text-gray-400 py-3 text-center">No job functions with open jobs</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        
                         <!-- Location Filter -->
-                        <div class="mb-5 pt-5 border-t border-[#e6e0db] dark:border-[#3d2e24]">
+                        <div class="mb-5">
                             <div class="flex items-center gap-2 mb-3 text-primary">
                                 <span class="material-symbols-outlined text-lg">location_on</span>
                                 <span class="text-xs font-bold uppercase tracking-wider">Location</span>
@@ -230,7 +211,6 @@
                         <select class="bg-transparent border-none font-semibold text-[#181411] dark:text-white focus:ring-0 cursor-pointer text-xs">
                             <option>Newest first</option>
                             <option>Oldest first</option>
-                            <option>Deadline (Soonest)</option>
                         </select>
                     </div>
                 </div>
@@ -248,9 +228,6 @@
                                         <span class="material-symbols-outlined text-xs">check_circle</span>
                                         <span>Already Applied</span>
                                     </span>
-                                    {% endif %}
-                                    {% if job.job_function %}
-                                    <span class="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-semibold uppercase rounded-md border border-primary/20">{{ job.job_function }}</span>
                                     {% endif %}
                                     {% if job.job_type %}
                                     <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.job_type }}</span>
@@ -279,12 +256,6 @@
                                     <div class="flex items-center gap-1.5 text-[#8a7360] dark:text-gray-400">
                                         <span class="material-symbols-outlined text-primary text-base">school</span>
                                         <span>{{ job.education|truncatewords:5 }}</span>
-                                    </div>
-                                    {% endif %}
-                                    {% if job.end_date %}
-                                    <div class="flex items-center gap-1.5 text-red-500 dark:text-red-400 font-semibold">
-                                        <span class="material-symbols-outlined text-base">schedule</span>
-                                        <span>Deadline: {{ job.end_date|date:"M d, Y" }}</span>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -447,11 +418,6 @@
             if (searchInput && searchInput.value) {
                 params.append('search', searchInput.value);
             }
-            
-            // Get all checked job functions
-            document.querySelectorAll('input[name="job_function"]:checked').forEach(cb => {
-                params.append('job_function', cb.value);
-            });
             
             // Get all checked locations
             document.querySelectorAll('input[name="location"]:checked').forEach(cb => {

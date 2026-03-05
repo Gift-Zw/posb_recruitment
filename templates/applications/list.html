@@ -60,7 +60,7 @@
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div class="flex flex-col gap-1">
             <h1 class="text-2xl font-bold text-[#181411] dark:text-white">My Applications</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Track the status of your job applications</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">View your submitted job applications</p>
         </div>
         <a href="{% url 'jobs:list' %}" class="flex items-center justify-center gap-2 rounded-lg min-h-[44px] w-full sm:w-auto px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white text-sm font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
             <span class="material-symbols-outlined text-base">search</span>
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Statistics Summary -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 gap-4 mb-6">
         <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
             <div class="flex items-center gap-2.5 mb-2">
                 <div class="size-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
@@ -78,39 +78,6 @@
                 <div>
                     <p class="text-lg font-bold text-[#181411] dark:text-white">{{ total_applications }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
-            <div class="flex items-center gap-2.5 mb-2">
-                <div class="size-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-base">visibility</span>
-                </div>
-                <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ pending_upload }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Pending Upload</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
-            <div class="flex items-center gap-2.5 mb-2">
-                <div class="size-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-base">check_circle</span>
-                </div>
-                <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ uploaded_to_erp }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Uploaded to ERP</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-[#1c140d] p-4 rounded-xl shadow-sm border border-[#e6e0db] dark:border-[#3d2e24]">
-            <div class="flex items-center gap-2.5 mb-2">
-                <div class="size-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-base">cancel</span>
-                </div>
-                <div>
-                    <p class="text-lg font-bold text-[#181411] dark:text-white">{{ upload_failed }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Upload Failed</p>
                 </div>
             </div>
         </div>
@@ -130,29 +97,9 @@
                                     {{ application.job_advert.job_title }}
                                 </a>
                             </h3>
-                            {% if application.status == 'UPLOADED_TO_ERP' %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                                <span class="material-symbols-outlined text-xs mr-1">check_circle</span>
-                                Uploaded to ERP
-                            </span>
-                            {% elif application.status == 'PENDING_UPLOAD' %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                <span class="material-symbols-outlined text-xs mr-1">schedule</span>
-                                Pending Upload
-                            </span>
-                            {% else %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                <span class="material-symbols-outlined text-xs mr-1">error</span>
-                                Upload Failed
-                            </span>
-                            {% endif %}
                         </div>
                         
                         <div class="flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-2">
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">business</span>
-                                <span>{{ application.job_advert.job_function|default:"—" }}</span>
-                            </div>
                             <div class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm">event</span>
                                 <span>Applied {{ application.submitted_at|date:"M d, Y" }}</span>
@@ -190,15 +137,6 @@
     </div>
     {% endif %}
 </main>
-
-<!-- Footer -->
-<footer class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark py-4 mt-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <p>© 2026 POSB Bank. All rights reserved.</p>
-        </div>
-    </div>
-    </footer>
 </div>
 
 {% block extra_js %}

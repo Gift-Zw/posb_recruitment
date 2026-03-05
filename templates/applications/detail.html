@@ -64,15 +64,8 @@
             <!-- Application Header Card -->
             <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm">
                 <div class="flex flex-col gap-4">
-                    <!-- Status Badge -->
+                    <!-- Submission Meta -->
                     <div class="flex items-center gap-3">
-                        {% if application.status == 'PENDING_UPLOAD' %}
-                        <span class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase rounded-md border border-blue-200 dark:border-blue-800">Pending Upload</span>
-                        {% elif application.status == 'UPLOADED_TO_ERP' %}
-                        <span class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">Uploaded to ERP</span>
-                        {% elif application.status == 'UPLOAD_FAILED' %}
-                        <span class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-semibold uppercase rounded-md border border-red-200 dark:border-red-800">Upload Failed</span>
-                        {% endif %}
                         <span class="text-xs text-[#8a7360] dark:text-gray-400">Submitted {{ application.submitted_at|date:"M d, Y" }}</span>
                     </div>
                     
@@ -91,12 +84,6 @@
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-base">location_on</span>
                             <span>{{ application.job_advert.location }}</span>
-                        </div>
-                        {% endif %}
-                        {% if application.job_advert.job_function %}
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-primary text-base">corporate_fare</span>
-                            <span>{{ application.job_advert.job_function }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -248,29 +235,10 @@
 
         <!-- Right Column: Sidebar -->
         <div class="lg:col-span-4 space-y-6">
-            <!-- Application Status Card -->
+            <!-- Application Info Card -->
             <div class="bg-white dark:bg-[#1c140d] p-4 sm:p-6 rounded-xl border border-[#e6e0db] dark:border-[#3d2e24] shadow-sm sticky top-24">
-                <h3 class="text-base font-bold text-[#181411] dark:text-white mb-4">Application Status</h3>
+                <h3 class="text-base font-bold text-[#181411] dark:text-white mb-4">Application Info</h3>
                 <div class="space-y-4">
-                    <div>
-                        <p class="text-xs text-[#8a7360] dark:text-gray-400 mb-1">Current Status</p>
-                        {% if application.status == 'PENDING_UPLOAD' %}
-                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">schedule</span>
-                            Pending Upload
-                        </span>
-                        {% elif application.status == 'UPLOADED_TO_ERP' %}
-                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">check_circle</span>
-                            Uploaded to ERP
-                        </span>
-                        {% elif application.status == 'UPLOAD_FAILED' %}
-                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-semibold rounded-md">
-                            <span class="material-symbols-outlined text-base">error</span>
-                            Upload Failed
-                        </span>
-                        {% endif %}
-                    </div>
                     <div class="pt-3 border-t border-[#e6e0db] dark:border-[#3d2e24]">
                         <p class="text-xs text-[#8a7360] dark:text-gray-400 mb-1">Submitted On</p>
                         <p class="text-sm font-medium text-[#181411] dark:text-white">{{ application.submitted_at|date:"F d, Y" }}</p>
@@ -305,15 +273,6 @@
                         <div>
                             <p class="text-xs text-[#8a7360] dark:text-gray-400">Location</p>
                             <p class="text-sm font-medium text-[#181411] dark:text-white">{{ application.job_advert.location }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if application.job_advert.job_function %}
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-primary text-lg">corporate_fare</span>
-                        <div>
-                            <p class="text-xs text-[#8a7360] dark:text-gray-400">Job Function</p>
-                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ application.job_advert.job_function }}</p>
                         </div>
                     </div>
                     {% endif %}

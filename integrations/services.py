@@ -3,6 +3,7 @@ D365 Applicant Import API integration service.
 Pushes applicant data to D365 Finance & Operations HCM via the SubmitApplicant custom service.
 """
 import logging
+import base64
 import requests
 from urllib.parse import urlsplit
 from django.conf import settings
@@ -93,6 +94,48 @@ class Dynamics365ApplicantService:
         return payload
 
     @staticmethod
+    def ensure_file_payload(application):
+        """
+        Ensure ApplicationData has FileName/FileBytes for D365 payload.
+        Base64 conversion is done lazily here (background push path) to keep submit fast.
+        """
+        app_data = application.application_data
+        if app_data.file_name and app_data.file_bytes:
+            return
+
+        from applications.models import ApplicationDocument
+
+        cv_document = (
+            ApplicationDocument.objects
+            .filter(application=application, document_type="CV")
+            .order_by("-uploaded_at")
+            .first()
+        )
+        if not cv_document:
+            return
+
+        with cv_document.file.open("rb") as file_obj:
+            encoded = base64.b64encode(file_obj.read()).decode("ascii")
+
+        app_data.file_name = app_data.file_name or cv_document.file_name
+        app_data.file_bytes = encoded
+        app_data.save(update_fields=["file_name", "file_bytes"])
+
+    @staticmethod
+    def is_duplicate_response_text(response_text):
+        """Best-effort detection for duplicate-record responses from D365."""
+        if not response_text:
+            return False
+        text = str(response_text).lower()
+        duplicate_markers = (
+            "duplicatekeyexception",
+            "record already exists",
+            "the record already exists",
+            "already exists",
+        )
+        return any(marker in text for marker in duplicate_markers)
+
+    @staticmethod
     def push_application(application_id, triggered_by=None):
         """
         Push a single application to D365.
@@ -124,6 +167,7 @@ class Dynamics365ApplicantService:
 
         try:
             access_token = Dynamics365ApplicantService.get_access_token()
+            Dynamics365ApplicantService.ensure_file_payload(application)
             payload = Dynamics365ApplicantService.build_applicant_payload(application)
 
             api_url = settings.DYNAMICS_365_API_URL.strip()
@@ -135,7 +179,8 @@ class Dynamics365ApplicantService:
                 "Content-Type": "application/json",
             }
 
-            response = requests.post(api_url, json=payload, headers=headers, timeout=60)
+            timeout_seconds = getattr(settings, "DYNAMICS_365_HTTP_TIMEOUT_SECONDS", 120)
+            response = requests.post(api_url, json=payload, headers=headers, timeout=timeout_seconds)
             response.raise_for_status()
 
             result = response.json()
@@ -186,11 +231,24 @@ class Dynamics365ApplicantService:
 
         except requests.exceptions.RequestException as e:
             error_msg = str(e)
+            response_text = ""
             if hasattr(e, "response") and e.response is not None:
                 try:
                     error_msg = f"{e.response.status_code}: {e.response.text[:500]}"
+                    response_text = e.response.text
                 except Exception:
                     pass
+
+            # If D365 says record already exists, treat as successful duplicate.
+            # This commonly happens when the first attempt timed out client-side
+            # but actually completed server-side.
+            if Dynamics365ApplicantService.is_duplicate_response_text(response_text):
+                application.d365_push_status = "DUPLICATE"
+                application.status = "UPLOADED_TO_ERP"
+                application.d365_pushed_at = timezone.now()
+                application.d365_push_error = ""
+                application.save(update_fields=["d365_push_status", "status", "d365_pushed_at", "d365_push_error"])
+                return application
 
             application.d365_push_status = "FAILED"
             application.status = "UPLOAD_FAILED"

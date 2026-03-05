@@ -55,10 +55,6 @@
         <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
         <a class="text-[#8a7360] dark:text-white/60 text-sm font-medium hover:text-primary transition-colors" href="{% url 'jobs:list' %}">Jobs</a>
         <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
-        {% if job.job_function %}
-        <span class="text-[#181411] dark:text-white text-sm font-semibold">{{ job.job_function }}</span>
-        <span class="text-[#8a7360] dark:text-white/40 material-symbols-outlined text-xs">chevron_right</span>
-        {% endif %}
         <span class="text-[#181411] dark:text-white text-sm font-semibold line-clamp-1">{{ job.job_title }}</span>
     </nav>
 
@@ -70,9 +66,6 @@
                 <div class="flex flex-col gap-4">
                     <!-- Badges -->
                     <div class="flex flex-wrap gap-2">
-                        {% if job.job_function %}
-                        <span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold uppercase rounded-md border border-primary/20">{{ job.job_function }}</span>
-                        {% endif %}
                         {% if job.job_type %}
                         <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold uppercase rounded-md border border-green-200 dark:border-green-800">{{ job.job_type }}</span>
                         {% endif %}
@@ -96,12 +89,6 @@
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-base">location_on</span>
                             <span>{{ job.location }}</span>
-                        </div>
-                        {% endif %}
-                        {% if job.job_function %}
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-primary text-base">corporate_fare</span>
-                            <span>{{ job.job_function }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -237,7 +224,6 @@
                         <h3 class="text-base font-bold text-green-800 dark:text-green-300">You've Already Applied!</h3>
                     </div>
                     <p class="text-xs text-green-700 dark:text-green-400 mb-1">Your application was submitted on <strong>{{ existing_application.submitted_at|date:"F d, Y" }}</strong></p>
-                    <p class="text-xs text-green-700 dark:text-green-400 mb-4">Current status: <strong>{{ existing_application.get_status_display }}</strong></p>
                     <a href="{% url 'applications:detail' existing_application.pk %}" class="inline-flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold text-sm shadow-md shadow-green-200 dark:shadow-green-900/30 hover:shadow-lg transition-all">
                         <span>View My Application</span>
                         <span class="material-symbols-outlined text-lg">visibility</span>
@@ -287,15 +273,6 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if job.job_function %}
-                    <div class="flex items-start gap-2.5">
-                        <span class="material-symbols-outlined text-primary text-lg mt-0.5">corporate_fare</span>
-                        <div>
-                            <p class="text-xs font-semibold text-[#8a7360] dark:text-gray-400 uppercase tracking-wide mb-0.5">Job Function</p>
-                            <p class="text-sm font-medium text-[#181411] dark:text-white">{{ job.job_function }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
                     {% if job.years_of_experience %}
                     <div class="flex items-start gap-2.5">
                         <span class="material-symbols-outlined text-primary text-lg mt-0.5">work_history</span>
@@ -306,20 +283,6 @@
                     </div>
                     {% endif %}
                 </div>
-            </div>
-
-            <!-- Deadline Card -->
-            <div class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-4 sm:p-5 rounded-xl border-2 border-red-200 dark:border-red-800 shadow-sm">
-                <div class="flex items-center gap-2.5 mb-3">
-                    <span class="material-symbols-outlined text-red-500 dark:text-red-400 text-xl">schedule</span>
-                    <h3 class="text-sm font-bold text-[#181411] dark:text-white">Application Deadline</h3>
-                </div>
-                {% if job.end_date %}
-                <p class="text-base font-bold text-red-600 dark:text-red-400 mb-1">{{ job.end_date|date:"F d, Y" }}</p>
-                {% else %}
-                <p class="text-base font-bold text-red-600 dark:text-red-400 mb-1">No deadline set</p>
-                {% endif %}
-                <p class="text-xs text-[#8a7360] dark:text-gray-400">Apply before the deadline</p>
             </div>
 
             <!-- Back to Jobs -->

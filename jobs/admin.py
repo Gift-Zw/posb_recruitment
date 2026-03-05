@@ -28,13 +28,13 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(JobAdvert)
 class JobAdvertAdmin(admin.ModelAdmin):
-    list_display = ['job_title', 'job_id', 'recruiting_id', 'job_function', 'status', 'end_date', 'created_at']
-    list_filter = ['status', 'job_function', 'created_at', 'end_date']
+    list_display = ['job_title', 'job_id', 'recruiting_id', 'status', 'end_date', 'created_at']
+    list_filter = ['status', 'created_at', 'end_date']
     search_fields = ['job_title', 'job_id', 'recruiting_id', 'job_description']
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('D365 Information', {
-            'fields': ('recruiting_id', 'job_id', 'job_title', 'job_function', 'status')
+            'fields': ('recruiting_id', 'job_id', 'job_title', 'status')
         }),
         ('Job Details', {
             'fields': ('job_description', 'responsibilities', 'job_tasks', 'skills', 'education', 'certificates')
