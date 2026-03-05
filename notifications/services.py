@@ -185,7 +185,7 @@ class EmailService:
                 subject=f'Congratulations! You have been shortlisted - {application.job_advert.job_title}',
                 message=f'Congratulations! Your application for {application.job_advert.job_title} has been shortlisted. We will contact you soon.',
                 related_application=application,
-                metadata={'application_id': application.id, 'ai_score': application.ai_score}
+                metadata={'application_id': application.id}
             )
             
             # Build portal URL

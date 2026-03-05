@@ -55,7 +55,7 @@
             font-size: 16px;
         }
         .success-box {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #f68322 0%, #d96e14 100%);
             color: #ffffff;
             padding: 25px;
             border-radius: 12px;
@@ -129,7 +129,7 @@
             
             <div class="success-box">
                 <h3>✓ Application Received</h3>
-                <p>We have successfully received your application and it is now under review.</p>
+                <p>We have successfully received your application.</p>
             </div>
             
             <div class="job-details">
@@ -139,7 +139,7 @@
                 <p>Submitted: {{ application.submitted_at|date:"F d, Y g:i A" }}</p>
             </div>
             
-            <p>Our HR team will review your application and get back to you soon. You can check the status of your application by logging into your account.</p>
+            <p>Our HR team will review your application and get back to you soon. You can view your submitted applications by logging into your account.</p>
             
             <div style="text-align: center; margin: 30px 0;">
                 <a href="{{ portal_url }}" class="button">View My Applications</a>

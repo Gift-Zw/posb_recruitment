@@ -22,7 +22,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .header {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #f68322 0%, #d96e14 100%);
             padding: 40px 30px;
             text-align: center;
         }
@@ -55,7 +55,7 @@
             font-size: 16px;
         }
         .celebration-box {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            background: linear-gradient(135deg, #f68322 0%, #d96e14 100%);
             color: #ffffff;
             padding: 30px;
             border-radius: 12px;
@@ -74,7 +74,7 @@
         }
         .job-details {
             background-color: #f8f7f5;
-            border-left: 4px solid #48bb78;
+            border-left: 4px solid #f68322;
             padding: 20px;
             margin: 25px 0;
             border-radius: 6px;
@@ -91,8 +91,8 @@
             font-size: 14px;
         }
         .next-steps {
-            background-color: #e6fffa;
-            border-left: 4px solid #48bb78;
+            background-color: #fff5eb;
+            border-left: 4px solid #f68322;
             padding: 20px;
             margin: 25px 0;
             border-radius: 6px;
@@ -158,9 +158,6 @@
             <div class="job-details">
                 <h3>Position:</h3>
                 <p><strong>{{ application.job_advert.job_title }}</strong></p>
-                {% if application.ai_score %}
-                <p>Your Score: {{ application.ai_score|floatformat:1 }}/100</p>
-                {% endif %}
             </div>
             
             <div class="next-steps">
