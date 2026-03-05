@@ -20,7 +20,7 @@ class ApplicantProfileForm(forms.ModelForm):
             "address_line_1", "address_line_2", "city",
             "state_province", "postal_code", "country",
             "current_job_title", "education_level",
-            "professional_summary", "cover_letter",
+            "cover_letter",
         ]
         widgets = {
             "phone_number": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': '+263 77 123 4567'}),
@@ -40,10 +40,6 @@ class ApplicantProfileForm(forms.ModelForm):
             "country": forms.Select(attrs={'class': FIELD_CLASS}),
             "current_job_title": forms.TextInput(attrs={'class': FIELD_CLASS, 'placeholder': 'e.g., Software Developer'}),
             "education_level": forms.Select(attrs={'class': FIELD_CLASS}),
-            "professional_summary": forms.Textarea(attrs={
-                'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
-                'rows': 5, 'placeholder': 'Tell us about yourself...'
-            }),
             "cover_letter": forms.Textarea(attrs={
                 'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary p-3 text-sm',
                 'rows': 6, 'placeholder': 'Write a cover letter explaining why you are interested in this position...'

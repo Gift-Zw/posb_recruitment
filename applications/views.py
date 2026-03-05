@@ -118,7 +118,6 @@ class ApplyView(LoginRequiredMixin, TemplateView):
                 "state_province": profile.state_province,
                 "postal_code": profile.postal_code,
                 "country": profile.country_id,
-                "professional_summary": profile.professional_summary,
                 "cover_letter": profile.cover_letter,
             }
         else:

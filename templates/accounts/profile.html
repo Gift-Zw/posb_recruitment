@@ -189,8 +189,6 @@
                                 <option value="">Select Gender</option>
                                 <option value="MALE" {% if applicant_profile.gender == 'MALE' %}selected{% endif %}>Male</option>
                                 <option value="FEMALE" {% if applicant_profile.gender == 'FEMALE' %}selected{% endif %}>Female</option>
-                                <option value="OTHER" {% if applicant_profile.gender == 'OTHER' %}selected{% endif %}>Other</option>
-                                <option value="PREFER_NOT_TO_SAY" {% if applicant_profile.gender == 'PREFER_NOT_TO_SAY' %}selected{% endif %}>Prefer not to say</option>
                             </select>
                             {% if applicant_form.gender.errors %}<p class="text-xs text-red-500 mt-0.5">{{ applicant_form.gender.errors.0 }}</p>{% endif %}
                         </div>

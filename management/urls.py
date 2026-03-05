@@ -28,6 +28,4 @@ urlpatterns = [
     # Shortlisting management routes
     path('shortlisting/', include('shortlisting.management_urls')),
     
-    # Integrations management routes
-    path('integrations/', include('integrations.management_urls')),
 ]
