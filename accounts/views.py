@@ -27,6 +27,7 @@ from .forms import (
     PasswordChangeForm,
     PasswordResetRequestForm,
     PasswordResetConfirmForm,
+    FirstLoginPasswordResetForm,
 )
 from .services import UserService, OTPService
 from audit.services import log_audit_event
@@ -158,6 +159,14 @@ class LoginView(FormView):
         
         # User is verified, proceed with login
         login(self.request, user)
+
+        if user.force_password_reset:
+            messages.warning(
+                self.request,
+                "You must reset your password before continuing."
+            )
+            return redirect("first-login-password-reset")
+
         log_audit_event(
             actor=user,
             action="LOGIN",
@@ -199,6 +208,14 @@ class ManagementLoginView(FormView):
         
         # Log in the user
         login(self.request, user)
+
+        if user.force_password_reset:
+            messages.warning(
+                self.request,
+                "You must reset your password before accessing the recruitment portal."
+            )
+            return redirect("first-login-password-reset")
+
         log_audit_event(
             actor=user,
             action="MANAGEMENT_LOGIN",
@@ -374,7 +391,8 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             form = PasswordChangeForm(user=user, data=request.POST, prefix='password')
             if form.is_valid():
                 user.set_password(form.cleaned_data['new_password1'])
-                user.save()
+                user.force_password_reset = False
+                user.save(update_fields=['password', 'force_password_reset'])
                 update_session_auth_hash(request, user)  # Keep user logged in
                 messages.success(request, "Password changed successfully.")
                 log_audit_event(
@@ -592,6 +610,7 @@ class PasswordResetConfirmView(FormView):
         """Set new password and log the event."""
         new_password = form.cleaned_data['new_password1']
         self.user.set_password(new_password)
+        self.user.force_password_reset = False
         self.user.save()
         
         # Log audit event
@@ -612,3 +631,40 @@ class PasswordResetConfirmView(FormView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.user
         return context
+
+
+class FirstLoginPasswordResetView(LoginRequiredMixin, FormView):
+    """Force a password reset for newly created accounts."""
+
+    template_name = "accounts/first_login_password_reset.html"
+    form_class = FirstLoginPasswordResetForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.force_password_reset:
+            if request.user.is_employee() or request.user.is_superuser:
+                return redirect("management:dashboard")
+            return redirect("jobs:list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = self.request.user
+        user.set_password(form.cleaned_data['new_password1'])
+        user.force_password_reset = False
+        user.save(update_fields=['password', 'force_password_reset'])
+        update_session_auth_hash(self.request, user)
+
+        log_audit_event(
+            actor=user,
+            action="PASSWORD_CHANGED",
+            action_description="User changed temporary password after first login",
+            request=self.request,
+        )
+
+        messages.success(
+            self.request,
+            "Password updated successfully. You now have full access."
+        )
+
+        if user.is_employee() or user.is_superuser:
+            return redirect("management:dashboard")
+        return redirect("jobs:list")

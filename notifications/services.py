@@ -95,6 +95,70 @@ class EmailService:
                 function='send_otp_email'
             )
             # Don't raise - OTP is already generated, email failure shouldn't block user
+
+    @staticmethod
+    def send_employee_credentials_email(user, temporary_password):
+        """Send onboarding credentials email to a new employee."""
+        try:
+            notification = EmailNotification.objects.create(
+                recipient=user,
+                notification_type='EMPLOYEE_CREDENTIALS',
+                subject='Your POSB Recruitment Portal Account Credentials',
+                message=(
+                    f'Your account has been created. '
+                    f'Email: {user.email}, Temporary Password: {temporary_password}'
+                ),
+                metadata={'user_id': user.id, 'email': user.email}
+            )
+
+            login_url = f"{settings.SITE_URL or 'http://localhost:8000'}{reverse('management:login')}"
+            html_message = render_to_string('notifications/emails/employee_credentials.html', {
+                'user': user,
+                'temporary_password': temporary_password,
+                'login_url': login_url,
+            })
+
+            send_mail(
+                subject=notification.subject,
+                message=notification.message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                html_message=html_message,
+                fail_silently=False
+            )
+            notification.mark_as_sent()
+
+            log_audit_event(
+                actor=user,
+                action='EMAIL_SENT',
+                action_description=f'Employee credentials email sent to {user.email}',
+                entity=notification,
+                metadata={'notification_type': 'EMPLOYEE_CREDENTIALS'}
+            )
+            return notification
+
+        except (TimeoutError, ConnectionError, OSError) as e:
+            if 'notification' in locals():
+                notification.mark_as_failed(str(e))
+            log_system_event(
+                level='ERROR',
+                source='SYSTEM',
+                message=f'Network error sending employee credentials email: {str(e)}',
+                module='notifications.services',
+                function='send_employee_credentials_email',
+                related_user=user
+            )
+        except Exception as e:
+            if 'notification' in locals():
+                notification.mark_as_failed(str(e))
+            log_system_event(
+                level='ERROR',
+                source='SYSTEM',
+                message=f'Failed to send employee credentials email: {str(e)}',
+                module='notifications.services',
+                function='send_employee_credentials_email',
+                related_user=user
+            )
     
     @staticmethod
     def send_application_submitted_email(application):

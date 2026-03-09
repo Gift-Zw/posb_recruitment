@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 from .models import EmployeeProfile
 from .forms import UserCreateForm, UserUpdateForm
 from audit.services import log_audit_event
+from notifications.tasks import send_employee_credentials_email_task
 
 User = get_user_model()
 
@@ -139,12 +140,14 @@ class UserManagementCreateView(HRStaffRequiredMixin, CreateView):
     success_url = reverse_lazy("management:users_management:employees")
 
     def form_valid(self, form):
+        temporary_password = form.cleaned_data['password']
         user = form.save(commit=False)
         user.user_type = 'EMPLOYEE'  # All users created here are employees
         user.is_verified = True  # Employees bypass OTP
         user.is_staff = True  # Employees have staff access
+        user.force_password_reset = True  # Must change temporary password at first login
         user.is_active = form.cleaned_data.get('is_active', True)
-        user.set_password(form.cleaned_data['password'])
+        user.set_password(temporary_password)
         user.save()
         
         # Create employee profile if EC number or phone provided
@@ -169,8 +172,12 @@ class UserManagementCreateView(HRStaffRequiredMixin, CreateView):
             entity=user,
             request=self.request,
         )
-        
-        messages.success(self.request, f"Employee account created successfully for {user.email}.")
+
+        send_employee_credentials_email_task(user.id, temporary_password)
+        messages.success(
+            self.request,
+            f"Employee account created for {user.email}. Credentials were sent by email and password reset is required on first login."
+        )
         return super().form_valid(form)
 
 
@@ -195,6 +202,7 @@ class UserManagementUpdateView(HRStaffRequiredMixin, UpdateView):
         password = form.cleaned_data.get('password')
         if password:
             user.set_password(password)
+            user.force_password_reset = True
         
         user.save()
         

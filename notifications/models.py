@@ -18,6 +18,7 @@ class EmailNotification(models.Model):
         ('REJECTED', 'Rejected'),
         ('ACCOUNT_VERIFIED', 'Account Verified'),
         ('PASSWORD_RESET', 'Password Reset'),
+        ('EMPLOYEE_CREDENTIALS', 'Employee Credentials'),
     ]
     
     STATUS_CHOICES = [

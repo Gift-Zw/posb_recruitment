@@ -4,7 +4,7 @@ These functions run synchronously. To re-enable async processing, convert back t
 """
 import threading
 from .services import EmailService
-from accounts.models import OTP
+from accounts.models import OTP, User
 from applications.models import Application
 from system_logs.services import log_system_event
 
@@ -41,6 +41,37 @@ def send_otp_email_task(otp_id):
             function='send_otp_email_task'
         )
         # Don't raise - OTP is generated, email failure shouldn't block user
+
+
+def send_employee_credentials_email_task(user_id, temporary_password):
+    """Send new employee credentials email."""
+    try:
+        user = User.objects.get(id=user_id)
+        EmailService.send_employee_credentials_email(user, temporary_password)
+    except User.DoesNotExist:
+        log_system_event(
+            level='ERROR',
+            source='SYSTEM',
+            message=f'User not found for employee credentials email: {user_id}',
+            module='notifications.tasks',
+            function='send_employee_credentials_email_task'
+        )
+    except (TimeoutError, ConnectionError, OSError) as e:
+        log_system_event(
+            level='ERROR',
+            source='SYSTEM',
+            message=f'Network error sending employee credentials email: {str(e)}',
+            module='notifications.tasks',
+            function='send_employee_credentials_email_task'
+        )
+    except Exception as e:
+        log_system_event(
+            level='ERROR',
+            source='SYSTEM',
+            message=f'Failed to send employee credentials email: {str(e)}',
+            module='notifications.tasks',
+            function='send_employee_credentials_email_task'
+        )
 
 
 def send_application_submitted_email_task(application_id):

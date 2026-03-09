@@ -60,6 +60,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text='Designates whether this user has verified their email via OTP.'
     )
+    force_password_reset = models.BooleanField(
+        default=False,
+        help_text='Require user to change password before accessing the portal.'
+    )
     
     # Timestamps
     date_joined = models.DateTimeField(default=timezone.now)

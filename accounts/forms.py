@@ -250,6 +250,33 @@ class PasswordResetConfirmForm(forms.Form):
         return cleaned
 
 
+class FirstLoginPasswordResetForm(forms.Form):
+    """Form for mandatory password change at first login."""
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full h-14 px-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary transition-all',
+            'placeholder': 'Enter new password'
+        }),
+        min_length=8,
+        help_text="Minimum 8 characters."
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full h-14 px-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary transition-all',
+            'placeholder': 'Confirm new password'
+        }),
+        min_length=8,
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("new_password1") != cleaned.get("new_password2"):
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned
+
+
 class UserCreateForm(forms.ModelForm):
     """Form for creating new employee/staff user."""
     
@@ -259,7 +286,7 @@ class UserCreateForm(forms.ModelForm):
             'class': 'w-full rounded-lg border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary h-11 px-4',
         }),
         min_length=8,
-        help_text="Minimum 8 characters."
+        help_text="Minimum 8 characters. This temporary password will be emailed to the employee."
     )
     password2 = forms.CharField(
         label="Confirm Password",

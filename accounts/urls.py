@@ -12,6 +12,7 @@ from .views import (
     PasswordResetRequestView,
     PasswordResetEmailSentView,
     PasswordResetConfirmView,
+    FirstLoginPasswordResetView,
 )
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     path('password/reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
     path('password/reset/email-sent/', PasswordResetEmailSentView.as_view(), name='password-reset-email-sent'),
     path('password/reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('password/first-login/', FirstLoginPasswordResetView.as_view(), name='first-login-password-reset'),
 ]

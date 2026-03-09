@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'applications.middleware.UploadSizeLimitMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.ForcePasswordResetMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'audit.middleware.AuditMiddleware',  # Custom audit middleware
