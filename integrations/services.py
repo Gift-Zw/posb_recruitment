@@ -160,6 +160,13 @@ class Dynamics365ApplicantService:
             application.save(update_fields=["d365_push_status", "status", "d365_push_error"])
             return application
 
+        if application.review_status != "APPROVED":
+            application.d365_push_status = "FAILED"
+            application.status = "UPLOAD_FAILED"
+            application.d365_push_error = "Application must be approved before D365 push."
+            application.save(update_fields=["d365_push_status", "status", "d365_push_error"])
+            return application
+
         application.d365_push_status = "PENDING"
         application.status = "PENDING_UPLOAD"
         application.d365_push_attempts += 1
@@ -284,6 +291,7 @@ class Dynamics365ApplicantService:
         """
         applications = Application.objects.filter(
             job_advert_id=job_advert_id,
+            review_status="APPROVED",
             status__in=["PENDING_UPLOAD", "UPLOAD_FAILED"],
         ).exclude(
             d365_push_status__in=["PUSHED", "DUPLICATE"]

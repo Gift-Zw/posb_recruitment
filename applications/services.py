@@ -67,9 +67,9 @@ def submit_application(applicant, job_advert, profile_form, application_form):
     )
     enqueue_send_application_submitted_email_task(application.id)
 
-    # Optional auto-push to D365 on submission (async fire-and-forget).
-    # If disabled, HR can push manually from management screens.
-    if settings.D365_PUSH_ON_SUBMISSION:
+    # Optional auto-push to D365 on submission (async fire-and-forget),
+    # but only once HR has approved the application.
+    if settings.D365_PUSH_ON_SUBMISSION and application.review_status == "APPROVED":
         from integrations.tasks import enqueue_push_application_to_d365_task
         enqueue_push_application_to_d365_task(application.id)
 

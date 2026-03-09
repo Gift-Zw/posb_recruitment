@@ -284,6 +284,11 @@ class Application(models.Model):
         ('UPLOADED_TO_ERP', 'Uploaded to ERP'),
         ('UPLOAD_FAILED', 'Upload Failed'),
     ]
+    REVIEW_STATUS_CHOICES = [
+        ('PENDING_REVIEW', 'Pending Review'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
 
     D365_PUSH_STATUS_CHOICES = [
         ('NOT_PUSHED', 'Not Pushed'),
@@ -309,6 +314,23 @@ class Application(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='PENDING_UPLOAD'
+    )
+    review_status = models.CharField(
+        max_length=20,
+        choices=REVIEW_STATUS_CHOICES,
+        default='PENDING_REVIEW',
+    )
+    reviewed_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_applications',
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When HR approved or rejected the application'
     )
     
     # D365 Push tracking
@@ -353,6 +375,7 @@ class Application(models.Model):
         indexes = [
             models.Index(fields=['applicant', 'status']),
             models.Index(fields=['job_advert', 'status']),
+            models.Index(fields=['job_advert', 'review_status']),
             models.Index(fields=['submitted_at']),
         ]
     

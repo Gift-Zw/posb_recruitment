@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.views.generic import ListView, DetailView, View
 from jobs.models import JobAdvert
 from applications.models import Application, ApplicantProfile
@@ -58,12 +59,16 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = Application.objects.select_related("applicant", "job_advert").order_by('-submitted_at')
-        return apply_application_filters(
+        queryset = apply_application_filters(
             queryset,
             status=self.request.GET.get('status'),
             job_id=self.request.GET.get('job_id'),
             search=self.request.GET.get('search'),
         )
+        review_status = self.request.GET.get('review_status')
+        if review_status in ['PENDING_REVIEW', 'APPROVED', 'REJECTED']:
+            queryset = queryset.filter(review_status=review_status)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,6 +82,10 @@ class ApplicationManagementListView(HRStaffRequiredMixin, ListView):
         context['pending_upload_count'] = all_applications.filter(status='PENDING_UPLOAD').count()
         context['uploaded_to_erp_count'] = all_applications.filter(status='UPLOADED_TO_ERP').count()
         context['upload_failed_count'] = all_applications.filter(status='UPLOAD_FAILED').count()
+        context['pending_review_count'] = all_applications.filter(review_status='PENDING_REVIEW').count()
+        context['approved_count'] = all_applications.filter(review_status='APPROVED').count()
+        context['rejected_count'] = all_applications.filter(review_status='REJECTED').count()
+        context['review_status_filter'] = self.request.GET.get('review_status', '')
         
         # Job list for filter
         context['jobs'] = JobAdvert.objects.all().order_by('-created_at')
@@ -140,6 +149,12 @@ class UploadSingleApplicationView(HRStaffRequiredMixin, View):
                 return redirect(next_url)
             return redirect('management:applications_management:detail', pk=application.pk)
 
+        if application.review_status != "APPROVED":
+            messages.error(request, "Only approved applications can be pushed to D365.")
+            if next_url:
+                return redirect(next_url)
+            return redirect('management:applications_management:detail', pk=application.pk)
+
         from integrations.tasks import enqueue_push_application_to_d365_task
         queued = enqueue_push_application_to_d365_task(application.id)
         if queued:
@@ -163,11 +178,16 @@ class UploadBulkApplicationsView(HRStaffRequiredMixin, View):
             job_id=request.POST.get("job_id"),
             search=request.POST.get("search"),
         )
+        review_status = request.POST.get("review_status")
+        if review_status in ['PENDING_REVIEW', 'APPROVED', 'REJECTED']:
+            queryset = queryset.filter(review_status=review_status)
+        else:
+            queryset = queryset.filter(review_status="APPROVED")
         queryset = queryset.filter(status__in=["PENDING_UPLOAD", "UPLOAD_FAILED"])
 
         job_ids = list(queryset.values_list("job_advert_id", flat=True).distinct())
         if not job_ids:
-            messages.info(request, "No pending or failed applications found for bulk upload.")
+            messages.info(request, "No approved pending/failed applications found for bulk upload.")
             return redirect('management:applications_management:list')
 
         from integrations.tasks import enqueue_push_all_applications_for_job_task
@@ -182,3 +202,50 @@ class UploadBulkApplicationsView(HRStaffRequiredMixin, View):
             messages.error(request, "Could not start any bulk uploads. Check system logs.")
 
         return redirect('management:applications_management:list')
+
+
+class ReviewSingleApplicationView(HRStaffRequiredMixin, View):
+    """Approve or reject a single application from application detail view."""
+
+    def post(self, request, *args, **kwargs):
+        application = get_object_or_404(Application, pk=kwargs['pk'])
+        action = request.POST.get("action")
+        next_url = request.POST.get("next")
+
+        if action not in {"approve", "reject"}:
+            messages.error(request, "Invalid review action.")
+            if next_url:
+                return redirect(next_url)
+            return redirect('management:applications_management:detail', pk=application.pk)
+        if application.status == "UPLOADED_TO_ERP":
+            messages.info(request, "This application is already uploaded to D365 and cannot be re-reviewed.")
+            if next_url:
+                return redirect(next_url)
+            return redirect('management:applications_management:detail', pk=application.pk)
+
+        application.reviewed_by = request.user
+        application.reviewed_at = timezone.now()
+
+        if action == "approve":
+            application.review_status = "APPROVED"
+            application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+            from integrations.tasks import enqueue_push_application_to_d365_task
+            enqueue_push_application_to_d365_task(application.id)
+            messages.success(request, "Application approved and queued for D365 push.")
+        else:
+            application.review_status = "REJECTED"
+            application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+            messages.success(request, "Application rejected.")
+
+        log_audit_event(
+            actor=request.user,
+            action="APPLICATION_UPDATED",
+            action_description=f"Application {application.id} marked as {application.review_status}",
+            entity=application,
+            metadata={"review_status": application.review_status},
+            request=request,
+        )
+
+        if next_url:
+            return redirect(next_url)
+        return redirect('management:applications_management:detail', pk=application.pk)

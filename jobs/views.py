@@ -463,6 +463,10 @@ class JobApplicationsListView(HRStaffRequiredMixin, ListView):
         status = self.request.GET.get('status')
         if status in ['PENDING_UPLOAD', 'UPLOADED_TO_ERP', 'UPLOAD_FAILED']:
             queryset = queryset.filter(status=status)
+
+        review_status = self.request.GET.get('review_status')
+        if review_status in ['PENDING_REVIEW', 'APPROVED', 'REJECTED']:
+            queryset = queryset.filter(review_status=review_status)
         
         # Search by applicant name or email
         search = self.request.GET.get('search')
@@ -488,8 +492,12 @@ class JobApplicationsListView(HRStaffRequiredMixin, ListView):
         context['pending_upload_count'] = applications.filter(status='PENDING_UPLOAD').count()
         context['uploaded_to_erp_count'] = applications.filter(status='UPLOADED_TO_ERP').count()
         context['upload_failed_count'] = applications.filter(status='UPLOAD_FAILED').count()
+        context['pending_review_count'] = applications.filter(review_status='PENDING_REVIEW').count()
+        context['approved_count'] = applications.filter(review_status='APPROVED').count()
+        context['rejected_count'] = applications.filter(review_status='REJECTED').count()
         
         context['status_filter'] = self.request.GET.get('status', '')
+        context['review_status_filter'] = self.request.GET.get('review_status', '')
         context['search_query'] = self.request.GET.get('search', '')
         
         return context
@@ -505,7 +513,7 @@ class JobPushAllToD365View(HRStaffRequiredMixin, DetailView):
         from integrations.tasks import enqueue_push_all_applications_for_job_task
         queued = enqueue_push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
         if queued:
-            messages.success(request, "Bulk upload to ERP has started in the background.")
+            messages.success(request, "Bulk upload to ERP has started in the background for approved applications.")
         else:
             messages.error(request, "Could not start bulk ERP upload. Check system logs for details.")
         return redirect("management:jobs_management:job-applications", pk=job.pk)
@@ -519,6 +527,10 @@ class JobPushSingleToD365View(HRStaffRequiredMixin, View):
         from applications.models import Application
         application = get_object_or_404(Application, id=application_id, job_advert=job)
 
+        if application.review_status != "APPROVED":
+            messages.error(request, "Only approved applications can be pushed to D365.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+
         from integrations.tasks import enqueue_push_application_to_d365_task
         queued = enqueue_push_application_to_d365_task(application.id)
         if queued:
@@ -528,6 +540,124 @@ class JobPushSingleToD365View(HRStaffRequiredMixin, View):
             )
         else:
             messages.error(request, "Could not start application upload. Check system logs for details.")
+        return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+
+class JobReviewSingleApplicationView(HRStaffRequiredMixin, View):
+    """Approve or reject a single application from the job applications page."""
+
+    def post(self, request, pk, application_id):
+        job = get_object_or_404(JobAdvert, pk=pk)
+        from applications.models import Application
+        application = get_object_or_404(Application, id=application_id, job_advert=job)
+        action = request.POST.get("action")
+
+        if action not in {"approve", "reject"}:
+            messages.error(request, "Invalid review action.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+        if application.status == "UPLOADED_TO_ERP":
+            messages.info(request, "This application is already uploaded to D365 and cannot be re-reviewed.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+        now = timezone.now()
+        if action == "approve":
+            application.review_status = "APPROVED"
+            application.reviewed_by = request.user
+            application.reviewed_at = now
+            application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+
+            from integrations.tasks import enqueue_push_application_to_d365_task
+            enqueue_push_application_to_d365_task(application.id)
+
+            log_audit_event(
+                actor=request.user,
+                action="APPLICATION_UPDATED",
+                action_description=f"Application approved for {application.applicant.email}",
+                entity=application,
+                metadata={"review_status": "APPROVED"},
+                request=request,
+            )
+            messages.success(request, "Application approved and queued for D365 push.")
+        else:
+            application.review_status = "REJECTED"
+            application.reviewed_by = request.user
+            application.reviewed_at = now
+            application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+
+            log_audit_event(
+                actor=request.user,
+                action="APPLICATION_UPDATED",
+                action_description=f"Application rejected for {application.applicant.email}",
+                entity=application,
+                metadata={"review_status": "REJECTED"},
+                request=request,
+            )
+            messages.success(request, "Application rejected.")
+
+        return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+
+class JobReviewBulkApplicationsView(HRStaffRequiredMixin, View):
+    """Bulk approve or reject applications for a specific job advert."""
+
+    def post(self, request, pk):
+        job = get_object_or_404(JobAdvert, pk=pk)
+        from applications.models import Application
+
+        action = request.POST.get("action")
+        selected_ids = request.POST.getlist("application_ids")
+        if action not in {"approve", "reject"}:
+            messages.error(request, "Invalid bulk review action.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+        if not selected_ids:
+            messages.info(request, "Select at least one application.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+
+        queryset = Application.objects.filter(job_advert=job, id__in=selected_ids).select_related("applicant")
+        queryset = queryset.exclude(status="UPLOADED_TO_ERP")
+        if not queryset.exists():
+            messages.info(request, "No eligible applications selected for bulk review.")
+            return redirect("management:jobs_management:job-applications", pk=job.pk)
+        now = timezone.now()
+        updated = 0
+
+        if action == "approve":
+            from integrations.tasks import enqueue_push_application_to_d365_task
+            for application in queryset:
+                application.review_status = "APPROVED"
+                application.reviewed_by = request.user
+                application.reviewed_at = now
+                application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+                enqueue_push_application_to_d365_task(application.id)
+                updated += 1
+
+            log_audit_event(
+                actor=request.user,
+                action="APPLICATION_UPDATED",
+                action_description=f"Bulk approved {updated} applications for {job.job_title}",
+                entity=job,
+                metadata={"review_status": "APPROVED", "application_ids": list(queryset.values_list("id", flat=True))},
+                request=request,
+            )
+            messages.success(request, f"Approved {updated} application(s) and queued them for D365 push.")
+        else:
+            for application in queryset:
+                application.review_status = "REJECTED"
+                application.reviewed_by = request.user
+                application.reviewed_at = now
+                application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
+                updated += 1
+
+            log_audit_event(
+                actor=request.user,
+                action="APPLICATION_UPDATED",
+                action_description=f"Bulk rejected {updated} applications for {job.job_title}",
+                entity=job,
+                metadata={"review_status": "REJECTED", "application_ids": list(queryset.values_list("id", flat=True))},
+                request=request,
+            )
+            messages.success(request, f"Rejected {updated} application(s).")
+
         return redirect("management:jobs_management:job-applications", pk=job.pk)
 
 

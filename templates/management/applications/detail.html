@@ -7,11 +7,29 @@
 
 {% block header_actions %}
 <div class="flex items-center gap-3">
+    <form method="post" action="{% url 'management:applications_management:review-single' pk=application.pk %}" class="inline">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="approve">
+        <input type="hidden" name="next" value="{% url 'management:applications_management:detail' pk=application.pk %}">
+        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+            <span class="material-symbols-outlined text-lg">task_alt</span>
+            <span>Approve</span>
+        </button>
+    </form>
+    <form method="post" action="{% url 'management:applications_management:review-single' pk=application.pk %}" class="inline">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reject">
+        <input type="hidden" name="next" value="{% url 'management:applications_management:detail' pk=application.pk %}">
+        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm">
+            <span class="material-symbols-outlined text-lg">cancel</span>
+            <span>Reject</span>
+        </button>
+    </form>
     {% if application.status != 'UPLOADED_TO_ERP' %}
     <form method="post" action="{% url 'management:applications_management:upload-single' pk=application.pk %}" class="inline">
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'management:applications_management:detail' pk=application.pk %}">
-        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm" {% if application.review_status != 'APPROVED' %}disabled title="Only approved applications can be uploaded"{% endif %}>
             <span class="material-symbols-outlined text-lg">cloud_upload</span>
             <span>Upload to D365</span>
         </button>
@@ -62,6 +80,18 @@
             <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Submitted</p>
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.submitted_at|date:"M d, Y H:i" }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Review Status</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ application.get_review_status_display }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Reviewed By</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{% if application.reviewed_by %}{{ application.reviewed_by.get_full_name|default:application.reviewed_by.email }}{% else %}—{% endif %}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Reviewed At</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{% if application.reviewed_at %}{{ application.reviewed_at|date:"M d, Y H:i" }}{% else %}—{% endif %}</p>
             </div>
             <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">ERP Push State</p>
