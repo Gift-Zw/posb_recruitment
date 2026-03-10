@@ -35,9 +35,9 @@
         </button>
     </form>
     {% endif %}
-    <a href="{% url 'management:applications_management:list' %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
+    <a href="{% url 'management:jobs_management:job-applications' pk=application.job_advert.pk %}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">arrow_back</span>
-        <span>Back to List</span>
+        <span>Back to Job Applications</span>
     </a>
     {% if current_profile %}
     <a href="{% url 'management:applications_management:applicant-profile' pk=current_profile.pk %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
@@ -165,7 +165,7 @@
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Documents</h2>
         <!-- Inline Document Viewer (PDF) -->
-        <div id="doc-viewer" class="hidden mb-6">
+        <div id="doc-viewer" class="mb-6">
             <div class="flex items-center justify-between gap-3 mb-3">
                 <div class="min-w-0">
                     <p id="doc-viewer-title" class="text-sm font-semibold text-gray-900 dark:text-white truncate">Document Preview</p>
@@ -205,23 +205,19 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    {% if '.pdf' in doc.file.url|lower %}
-                    <button
-                        type="button"
-                        onclick="openDocPreview('{{ doc.file.url }}', '{{ doc.file_name|escapejs }}')"
-                        class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs"
-                        title="Preview PDF"
-                    >
-                        <span class="material-symbols-outlined text-sm">visibility</span>
-                        Preview
-                    </button>
-                    {% endif %}
                     <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-xs" title="Open in new tab">
                         <span class="material-symbols-outlined text-sm">open_in_new</span>
                         Open
                     </a>
                 </div>
             </div>
+            {% if forloop.first %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    openDocPreview('{{ doc.file.url }}', '{{ doc.file_name|escapejs }}');
+                });
+            </script>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
