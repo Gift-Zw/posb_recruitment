@@ -74,6 +74,28 @@ def send_employee_credentials_email_task(user_id, temporary_password):
         )
 
 
+def enqueue_send_employee_credentials_email_task(user_id, temporary_password):
+    """Fire-and-forget wrapper for employee credentials email."""
+    try:
+        worker = threading.Thread(
+            target=send_employee_credentials_email_task,
+            args=(user_id, temporary_password),
+            daemon=True,
+            name=f"email-employee-credentials-{user_id}",
+        )
+        worker.start()
+        return True
+    except Exception as e:
+        log_system_event(
+            level='ERROR',
+            source='SYSTEM',
+            message=f'Failed to enqueue employee credentials email: {str(e)}',
+            module='notifications.tasks',
+            function='enqueue_send_employee_credentials_email_task'
+        )
+        return False
+
+
 def send_application_submitted_email_task(application_id):
     """Send application submitted email (synchronous)."""
     try:

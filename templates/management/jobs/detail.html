@@ -11,12 +11,7 @@
         <span class="material-symbols-outlined text-lg">event_repeat</span>
         <span>Extend Date</span>
     </button>
-    {% if job.status == 'OPEN' %}
-    <button type="button" onclick="openCloseModal()" class="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors font-medium text-sm">
-        <span class="material-symbols-outlined text-lg">close</span>
-        <span>Close Job</span>
-    </button>
-    {% else %}
+    {% if job.status != 'OPEN' %}
     <button type="button" onclick="openReopenModal()" class="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors font-medium text-sm">
         <span class="material-symbols-outlined text-lg">check_circle</span>
         <span>Reopen Job</span>
@@ -252,49 +247,6 @@
     </div>
 </div>
 
-<!-- Close Job Confirmation Modal -->
-<div id="closeModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onclick="closeCloseModal()"></div>
-
-        <!-- Modal panel -->
-        <div class="inline-block align-bottom bg-white dark:bg-[#2d221a] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-[#e6e0db] dark:border-[#3d3128]">
-            <div class="px-6 py-5">
-                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full">
-                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">warning</span>
-                </div>
-                <h3 class="text-xl font-bold text-center text-gray-900 dark:text-white mb-2" id="modal-title">
-                    Close Job Advert
-                </h3>
-                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
-                    Are you sure you want to close <strong>{{ job.job_title }}</strong>? This will prevent new applications from being submitted.
-                </p>
-                <form method="post" action="{% url 'management:jobs_management:advert-close' pk=job.pk %}" id="closeForm">
-                    {% csrf_token %}
-                    <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <label class="flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" name="push_to_d365" value="1" class="mt-0.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" checked>
-                            <div>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-white">Push all applications to D365</span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Send all unpushed applications to Dynamics 365 when closing. This eliminates first-applied bias by submitting everyone at once.</p>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeCloseModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-sm">
-                            Cancel
-                        </button>
-                        <button type="submit" class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm">
-                            Yes, Close Job
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Reopen Job Confirmation Modal -->
 <div id="reopenModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -340,17 +292,6 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Close Job Modal Functions
-    function openCloseModal() {
-        document.getElementById('closeModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeCloseModal() {
-        document.getElementById('closeModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
     // Reopen Job Modal Functions
     function openReopenModal() {
         document.getElementById('reopenModal').classList.remove('hidden');
@@ -366,7 +307,6 @@
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeExtendModal();
-            closeCloseModal();
             closeReopenModal();
         }
     });

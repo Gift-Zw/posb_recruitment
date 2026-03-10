@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from .models import EmployeeProfile
 from .forms import UserCreateForm, UserUpdateForm
 from audit.services import log_audit_event
-from notifications.tasks import send_employee_credentials_email_task
+from notifications.tasks import enqueue_send_employee_credentials_email_task
 
 User = get_user_model()
 
@@ -173,7 +173,7 @@ class UserManagementCreateView(HRStaffRequiredMixin, CreateView):
             request=self.request,
         )
 
-        send_employee_credentials_email_task(user.id, temporary_password)
+        enqueue_send_employee_credentials_email_task(user.id, temporary_password)
         messages.success(
             self.request,
             f"Employee account created for {user.email}. Credentials were sent by email and password reset is required on first login."

@@ -315,43 +315,6 @@ class JobAdvertDetailView(HRStaffRequiredMixin, DetailView):
         return context
 
 
-class JobAdvertCloseView(HRStaffRequiredMixin, DetailView):
-    """Close a job advert and optionally push all applications to D365."""
-    
-    model = JobAdvert
-    
-    def post(self, request, *args, **kwargs):
-        job = self.get_object()
-        push_to_d365 = request.POST.get("push_to_d365") == "1"
-        
-        job.status = 'CLOSED'
-        job.save()
-        
-        log_audit_event(
-            actor=request.user,
-            action="CLOSE",
-            action_description=f"Job advert closed: {job.job_title}",
-            entity=job,
-            metadata={"job_id": job.job_id, "recruiting_id": job.recruiting_id, "push_to_d365": push_to_d365},
-            request=request
-        )
-        
-        if push_to_d365:
-            from integrations.tasks import push_all_applications_for_job_task
-            summary = push_all_applications_for_job_task(job.id, triggered_by_id=request.user.id)
-            if summary:
-                messages.success(
-                    request,
-                    f"Job advert '{job.job_title}' closed. D365 push: {summary['pushed']} pushed, {summary['duplicates']} duplicates, {summary['failed']} failed out of {summary['total']}."
-                )
-            else:
-                messages.warning(request, f"Job advert '{job.job_title}' closed. D365 push encountered an error — check system logs.")
-        else:
-            messages.success(request, f"Job advert '{job.job_title}' has been closed.")
-        
-        return redirect("management:jobs_management:advert-detail", pk=job.pk)
-
-
 class JobAdvertReopenView(HRStaffRequiredMixin, DetailView):
     """Reopen a closed job advert manually (HR only)."""
     
@@ -555,8 +518,8 @@ class JobReviewSingleApplicationView(HRStaffRequiredMixin, View):
         if action not in {"approve", "reject"}:
             messages.error(request, "Invalid review action.")
             return redirect("management:jobs_management:job-applications", pk=job.pk)
-        if application.status == "UPLOADED_TO_ERP":
-            messages.info(request, "This application is already uploaded to D365 and cannot be re-reviewed.")
+        if application.review_status != "PENDING_REVIEW":
+            messages.info(request, "This application has already been reviewed.")
             return redirect("management:jobs_management:job-applications", pk=job.pk)
 
         now = timezone.now()
@@ -566,8 +529,13 @@ class JobReviewSingleApplicationView(HRStaffRequiredMixin, View):
             application.reviewed_at = now
             application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
 
-            from integrations.tasks import enqueue_push_application_to_d365_task
-            enqueue_push_application_to_d365_task(application.id)
+            # Only push if it hasn't already been uploaded/pushed.
+            if application.status != "UPLOADED_TO_ERP" and application.d365_push_status not in {"PUSHED", "PENDING"}:
+                from integrations.tasks import enqueue_push_application_to_d365_task
+                enqueue_push_application_to_d365_task(application.id)
+                messages.success(request, "Application approved and queued for D365 push.")
+            else:
+                messages.success(request, "Application approved.")
 
             log_audit_event(
                 actor=request.user,
@@ -577,7 +545,6 @@ class JobReviewSingleApplicationView(HRStaffRequiredMixin, View):
                 metadata={"review_status": "APPROVED"},
                 request=request,
             )
-            messages.success(request, "Application approved and queued for D365 push.")
         else:
             application.review_status = "REJECTED"
             application.reviewed_by = request.user
@@ -613,8 +580,9 @@ class JobReviewBulkApplicationsView(HRStaffRequiredMixin, View):
             messages.info(request, "Select at least one application.")
             return redirect("management:jobs_management:job-applications", pk=job.pk)
 
-        queryset = Application.objects.filter(job_advert=job, id__in=selected_ids).select_related("applicant")
-        queryset = queryset.exclude(status="UPLOADED_TO_ERP")
+        queryset = Application.objects.filter(
+            job_advert=job, id__in=selected_ids, review_status="PENDING_REVIEW"
+        ).select_related("applicant")
         if not queryset.exists():
             messages.info(request, "No eligible applications selected for bulk review.")
             return redirect("management:jobs_management:job-applications", pk=job.pk)
@@ -623,12 +591,15 @@ class JobReviewBulkApplicationsView(HRStaffRequiredMixin, View):
 
         if action == "approve":
             from integrations.tasks import enqueue_push_application_to_d365_task
+            queued = 0
             for application in queryset:
                 application.review_status = "APPROVED"
                 application.reviewed_by = request.user
                 application.reviewed_at = now
                 application.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "updated_at"])
-                enqueue_push_application_to_d365_task(application.id)
+                if application.status != "UPLOADED_TO_ERP" and application.d365_push_status not in {"PUSHED", "PENDING"}:
+                    enqueue_push_application_to_d365_task(application.id)
+                    queued += 1
                 updated += 1
 
             log_audit_event(
@@ -639,7 +610,10 @@ class JobReviewBulkApplicationsView(HRStaffRequiredMixin, View):
                 metadata={"review_status": "APPROVED", "application_ids": list(queryset.values_list("id", flat=True))},
                 request=request,
             )
-            messages.success(request, f"Approved {updated} application(s) and queued them for D365 push.")
+            if queued:
+                messages.success(request, f"Approved {updated} application(s). Queued {queued} for D365 push.")
+            else:
+                messages.success(request, f"Approved {updated} application(s).")
         else:
             for application in queryset:
                 application.review_status = "REJECTED"

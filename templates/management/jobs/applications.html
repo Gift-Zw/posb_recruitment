@@ -221,14 +221,14 @@
                             <div class="flex items-center gap-2">
                                 <form method="post" action="{% url 'management:jobs_management:review-single' pk=job.pk application_id=application.pk %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" name="action" value="approve" class="inline-flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-xs" title="Approve">
+                                    <button type="submit" name="action" value="approve" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-xs" title="Approve">
                                         <span class="material-symbols-outlined text-sm">task_alt</span>
                                         Approve
                                     </button>
                                 </form>
                                 <form method="post" action="{% url 'management:jobs_management:review-single' pk=job.pk application_id=application.pk %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" name="action" value="reject" class="inline-flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-xs" title="Reject">
+                                    <button type="submit" name="action" value="reject" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-xs" title="Reject">
                                         <span class="material-symbols-outlined text-sm">cancel</span>
                                         Reject
                                     </button>
@@ -236,15 +236,15 @@
                                 {% if application.status != 'UPLOADED_TO_ERP' and application.review_status == 'APPROVED' %}
                                 <form method="post" action="{% url 'management:jobs_management:push-single-d365' pk=job.pk application_id=application.pk %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs" title="Upload to ERP">
+                                    <button type="submit" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs" title="Upload to ERP">
                                         <span class="material-symbols-outlined text-sm">cloud_upload</span>
                                         Upload
                                     </button>
                                 </form>
                                 {% endif %}
-                                <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm" title="View Details">
-                                <span class="material-symbols-outlined text-lg">visibility</span>
-                                View
+                                <a href="{% url 'management:applications_management:detail' pk=application.pk %}" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs" title="View Details">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                                Details
                                 </a>
                             </div>
                         </td>
