@@ -164,36 +164,6 @@
     {% if application.documents.exists %}
     <div class="bg-white dark:bg-[#2d221a] rounded-xl border border-[#e6e0db] dark:border-[#3d3128] shadow-sm p-8">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Documents</h2>
-        <!-- Inline Document Viewer (PDF) -->
-        <div id="doc-viewer" class="mb-6">
-            <div class="flex items-center justify-between gap-3 mb-3">
-                <div class="min-w-0">
-                    <p id="doc-viewer-title" class="text-sm font-semibold text-gray-900 dark:text-white truncate">Document Preview</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">PDF preview. Other formats open in a new tab.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="toggleDocViewerFullScreen()" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-xs">
-                        <span class="material-symbols-outlined text-sm">fullscreen</span>
-                        Full screen
-                    </button>
-                    <button type="button" onclick="closeDocViewer()" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-xs">
-                        <span class="material-symbols-outlined text-sm">close</span>
-                        Close
-                    </button>
-                </div>
-            </div>
-            <div id="doc-viewer-frame-wrap" class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/30">
-                <iframe
-                    id="doc-viewer-frame"
-                    title="Document Preview"
-                    class="w-full h-[70vh]"
-                    src=""
-                    allow="fullscreen"
-                    allowfullscreen
-                ></iframe>
-            </div>
-        </div>
-
         <div class="space-y-3">
             {% for doc in application.documents.all %}
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
@@ -205,52 +175,19 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-xs" title="Open in new tab">
-                        <span class="material-symbols-outlined text-sm">open_in_new</span>
-                        Open
+                    <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-xs" title="Preview in new tab">
+                        <span class="material-symbols-outlined text-sm">visibility</span>
+                        Preview
+                    </a>
+                    <a href="{{ doc.file.url }}" download class="inline-flex items-center justify-center gap-1 h-9 px-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium text-xs" title="Download">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        Download
                     </a>
                 </div>
             </div>
-            {% if forloop.first %}
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    openDocPreview('{{ doc.file.url }}', '{{ doc.file_name|escapejs }}');
-                });
-            </script>
-            {% endif %}
             {% endfor %}
         </div>
     </div>
     {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    function openDocPreview(url, title) {
-        const viewer = document.getElementById('doc-viewer');
-        const frame = document.getElementById('doc-viewer-frame');
-        const titleEl = document.getElementById('doc-viewer-title');
-        viewer.classList.remove('hidden');
-        titleEl.textContent = title || 'Document Preview';
-        frame.src = url;
-        viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function closeDocViewer() {
-        const viewer = document.getElementById('doc-viewer');
-        const frame = document.getElementById('doc-viewer-frame');
-        frame.src = '';
-        viewer.classList.add('hidden');
-    }
-
-    function toggleDocViewerFullScreen() {
-        const wrap = document.getElementById('doc-viewer-frame-wrap');
-        if (!document.fullscreenElement) {
-            if (wrap.requestFullscreen) wrap.requestFullscreen();
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
-    }
-</script>
 {% endblock %}
